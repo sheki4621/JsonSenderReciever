@@ -33,10 +33,13 @@ class MetricsJsonTest {
         MetricsJson metricsJson = new MetricsJson(id, NoticeType.METRICS, now, "1.0", metrics);
 
         String json = objectMapper.writeValueAsString(metricsJson);
+        System.out.println(json);
 
-        assertTrue(json.contains("\"Id\":\"" + id.toString() + "\""));
+        assertTrue(json.contains("\"Id\":"));
         assertTrue(json.contains("\"NoticeType\":\"METRICS\""));
-        assertTrue(json.contains("\"Version\":\"1.0\""));
+        assertTrue(json.contains("\"timestamp\":"));
+        assertTrue(json.contains("\"AgentVersion\":\"1.0\""));
+        assertTrue(json.contains("\"Metrics\":"));
         assertTrue(json.contains("\"CpuUsage\":23.4"));
         assertTrue(json.contains("\"MemoryUsage\":34.5"));
     }

@@ -21,6 +21,6 @@ public abstract class NoticeBaseJson {
     @JsonProperty("timestamp")
     private ZonedDateTime timestamp;
 
-    @JsonProperty("Version")
-    private String version;
+    @JsonProperty("AgentVersion")
+    private String agentVersion;
 }
