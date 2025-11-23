@@ -57,4 +57,4 @@ bin/
 # Spring Boot
 help.md
 .mvn/wrapper/maven-wrapper.jar
-json/
+**/json/**
