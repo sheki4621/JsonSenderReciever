@@ -5,16 +5,19 @@ import org.springframework.stereotype.Component;
 
 import com.example.jsonsender.metrics.Metrics;
 import com.example.jsonsender.metrics.MetricsJson;
+import com.example.jsonsender.utils.collector.Collector;
 import com.example.jsonsender.utils.notice.NoticeType;
+import com.example.jsonsender.utils.IdUtils;
+import com.example.jsonsender.utils.TimeUtils;
 
 @Component
 public class Runner implements CommandLineRunner {
 
     private final TcpClient tcpClient;
-    private final com.example.jsonsender.utils.collector.Collector<com.example.jsonsender.metrics.Metrics> metricsCollector;
+    private final Collector<Metrics> metricsCollector;
 
     public Runner(TcpClient tcpClient,
-            com.example.jsonsender.utils.collector.Collector<com.example.jsonsender.metrics.Metrics> metricsCollector) {
+            Collector<Metrics> metricsCollector) {
         this.tcpClient = tcpClient;
         this.metricsCollector = metricsCollector;
     }
@@ -22,20 +25,20 @@ public class Runner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        com.example.jsonsender.metrics.Metrics metrics = metricsCollector.collect();
-        com.example.jsonsender.metrics.MetricsJson metricsJson = new com.example.jsonsender.metrics.MetricsJson(
-                com.example.jsonsender.utils.IdUtils.getId(),
+        Metrics metrics = metricsCollector.collect();
+        MetricsJson metricsJson = new MetricsJson(
+                IdUtils.getId(),
                 NoticeType.METRICS,
-                com.example.jsonsender.utils.TimeUtils.getNow("Asia/Tokyo"),
+                TimeUtils.getNow("Asia/Tokyo"),
                 "1.0",
                 metrics);
         tcpClient.sendJson("localhost", 9999, metricsJson);
 
-        com.example.jsonsender.metrics.Metrics metrics2 = metricsCollector.collect();
-        com.example.jsonsender.metrics.MetricsJson metricsJson2 = new com.example.jsonsender.metrics.MetricsJson(
-                com.example.jsonsender.utils.IdUtils.getId(),
+        Metrics metrics2 = metricsCollector.collect();
+        MetricsJson metricsJson2 = new MetricsJson(
+                IdUtils.getId(),
                 NoticeType.METRICS,
-                com.example.jsonsender.utils.TimeUtils.getNow("Asia/Tokyo"),
+                TimeUtils.getNow("Asia/Tokyo"),
                 "1.0",
                 metrics2);
         tcpClient.sendJson("localhost", 9999, metricsJson2);
