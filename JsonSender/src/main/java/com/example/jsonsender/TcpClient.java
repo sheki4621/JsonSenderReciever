@@ -26,9 +26,13 @@ public class TcpClient {
 
     public void sendJson(String host, int port, Object data) {
         if (!sendJsonInternal(host, port, data)) {
-            jsonFileManager.save(data);
+            if (appConfig.isFailedArchive()) {
+                jsonFileManager.save(data);
+            }
         } else {
-            jsonFileManager.resendAsync();
+            if (appConfig.isFailedArchive()) {
+                jsonFileManager.resendAsync();
+            }
         }
     }
 
@@ -51,7 +55,7 @@ public class TcpClient {
                     return true; // Success
                 }
             } catch (Exception e) {
-                logger.error("Error sending JSON (Attempt {}/{}): {}", i + 1, retryMax + 1, e.getMessage());
+                logger.warn("Error sending JSON (Attempt {}/{}): {}", i + 1, retryMax + 1, e.getMessage());
                 if (i < retryMax) {
                     try {
                         Thread.sleep(retryIntervalSec * 1000L);

@@ -43,4 +43,7 @@ public class AppConfig {
 
     @Value("${json.LotationDay}")
     private int jsonRotationDay;
+
+    @Value("${json.FailedArchive}")
+    private boolean failedArchive;
 }
