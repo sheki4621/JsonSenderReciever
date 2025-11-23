@@ -8,18 +8,18 @@ public class MetricsCollector implements Collector<Metrics> {
 
     @Override
     public Metrics collect() {
-        double cpuUsage = getCpuUsage();
-        double memoryUsage = getMemoryUsage();
+        Double cpuUsage = getCpuUsage();
+        Double memoryUsage = getMemoryUsage();
 
         return new Metrics(cpuUsage, memoryUsage);
     }
 
-    private double getCpuUsage() {
+    protected Double getCpuUsage() {
         // TODO: 提供されたら修正
         return 23.4;
     }
 
-    private double getMemoryUsage() {
+    protected Double getMemoryUsage() {
         // TODO: 提供されたら修正
         return 34.5;
     }
