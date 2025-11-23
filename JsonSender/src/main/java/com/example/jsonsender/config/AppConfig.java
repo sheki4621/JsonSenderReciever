@@ -37,4 +37,10 @@ public class AppConfig {
 
     @Value("${sender.Timeout}")
     private int timeout;
+
+    @Value("${json.OutputDir}")
+    private String jsonOutputDir;
+
+    @Value("${json.LotationDay}")
+    private int jsonRotationDay;
 }

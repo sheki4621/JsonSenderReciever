@@ -14,15 +14,29 @@ public class TcpClient {
     private static final Logger logger = LoggerFactory.getLogger(TcpClient.class);
     private final ObjectMapper objectMapper;
     private final com.example.jsonsender.config.AppConfig appConfig;
+    private final JsonFileManager jsonFileManager;
 
-    public TcpClient(com.example.jsonsender.config.AppConfig appConfig) {
+    public TcpClient(com.example.jsonsender.config.AppConfig appConfig, JsonFileManager jsonFileManager) {
         this.appConfig = appConfig;
+        this.jsonFileManager = jsonFileManager;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         this.objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     public void sendJson(String host, int port, Object data) {
+        if (!sendJsonInternal(host, port, data)) {
+            jsonFileManager.save(data);
+        } else {
+            jsonFileManager.resendAsync();
+        }
+    }
+
+    public boolean sendJsonDirectly(String host, int port, Object data) {
+        return sendJsonInternal(host, port, data);
+    }
+
+    private boolean sendJsonInternal(String host, int port, Object data) {
         int retryMax = appConfig.getRetryMax();
         int retryIntervalSec = appConfig.getRetryIntervalSec();
         int timeout = appConfig.getTimeout();
@@ -34,7 +48,7 @@ public class TcpClient {
                     String json = objectMapper.writeValueAsString(data);
                     logger.info("Sending JSON: {}", json);
                     out.println(json);
-                    return; // Success
+                    return true; // Success
                 }
             } catch (Exception e) {
                 logger.error("Error sending JSON (Attempt {}/{}): {}", i + 1, retryMax + 1, e.getMessage());
@@ -43,11 +57,12 @@ public class TcpClient {
                         Thread.sleep(retryIntervalSec * 1000L);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
-                        return;
+                        return false;
                     }
                 }
             }
         }
         logger.error("Failed to send JSON after {} attempts", retryMax + 1);
+        return false;
     }
 }
