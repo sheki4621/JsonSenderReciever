@@ -21,8 +21,6 @@ public class Runner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Wait a bit for the server to start if running simultaneously
-        Thread.sleep(2000);
 
         com.example.jsonsender.metrics.Metrics metrics = metricsCollector.collect();
         com.example.jsonsender.metrics.MetricsJson metricsJson = new com.example.jsonsender.metrics.MetricsJson(
