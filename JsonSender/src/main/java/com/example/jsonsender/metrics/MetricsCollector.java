@@ -1,7 +1,8 @@
 package com.example.jsonsender.metrics;
 
-import com.example.jsonsender.collector.Collector;
 import org.springframework.stereotype.Component;
+
+import com.example.jsonsender.utils.collector.Collector;
 
 @Component
 public class MetricsCollector implements Collector<Metrics> {

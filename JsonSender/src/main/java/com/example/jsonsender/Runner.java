@@ -5,16 +5,16 @@ import org.springframework.stereotype.Component;
 
 import com.example.jsonsender.metrics.Metrics;
 import com.example.jsonsender.metrics.MetricsJson;
-import com.example.jsonsender.notice.NoticeType;
+import com.example.jsonsender.utils.notice.NoticeType;
 
 @Component
 public class Runner implements CommandLineRunner {
 
     private final TcpClient tcpClient;
-    private final com.example.jsonsender.collector.Collector<com.example.jsonsender.metrics.Metrics> metricsCollector;
+    private final com.example.jsonsender.utils.collector.Collector<com.example.jsonsender.metrics.Metrics> metricsCollector;
 
     public Runner(TcpClient tcpClient,
-            com.example.jsonsender.collector.Collector<com.example.jsonsender.metrics.Metrics> metricsCollector) {
+            com.example.jsonsender.utils.collector.Collector<com.example.jsonsender.metrics.Metrics> metricsCollector) {
         this.tcpClient = tcpClient;
         this.metricsCollector = metricsCollector;
     }

@@ -2,7 +2,7 @@ package com.example.jsonsender;
 
 import com.example.jsonsender.metrics.Metrics;
 import com.example.jsonsender.metrics.MetricsJson;
-import com.example.jsonsender.notice.NoticeType;
+import com.example.jsonsender.utils.notice.NoticeType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

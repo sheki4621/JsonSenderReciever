@@ -1,11 +1,11 @@
 package com.example.jsonsender.metrics;
 
-import com.example.jsonsender.notice.NoticeType;
+import com.example.jsonsender.utils.notice.NoticeType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-public class MetricsJson extends com.example.jsonsender.BaseJson {
+public class MetricsJson extends com.example.jsonsender.utils.notice.NoticeBaseJson {
     @JsonProperty("Metrics")
     private Metrics metrics;
 

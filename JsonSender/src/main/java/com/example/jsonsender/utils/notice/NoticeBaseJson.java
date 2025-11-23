@@ -1,11 +1,10 @@
-package com.example.jsonsender;
+package com.example.jsonsender.utils.notice;
 
-import com.example.jsonsender.notice.NoticeType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-public abstract class BaseJson {
+public abstract class NoticeBaseJson {
     @JsonProperty("Id")
     private UUID id;
 
@@ -18,10 +17,10 @@ public abstract class BaseJson {
     @JsonProperty("Version")
     private String version;
 
-    public BaseJson() {
+    public NoticeBaseJson() {
     }
 
-    public BaseJson(UUID id, NoticeType noticeType, ZonedDateTime timestamp, String version) {
+    public NoticeBaseJson(UUID id, NoticeType noticeType, ZonedDateTime timestamp, String version) {
         this.id = id;
         this.noticeType = noticeType;
         this.timestamp = timestamp;
