@@ -11,9 +11,12 @@ import com.example.jsonsender.notice.NoticeType;
 public class Runner implements CommandLineRunner {
 
     private final TcpClient tcpClient;
+    private final com.example.jsonsender.collector.Collector<com.example.jsonsender.metrics.Metrics> metricsCollector;
 
-    public Runner(TcpClient tcpClient) {
+    public Runner(TcpClient tcpClient,
+            com.example.jsonsender.collector.Collector<com.example.jsonsender.metrics.Metrics> metricsCollector) {
         this.tcpClient = tcpClient;
+        this.metricsCollector = metricsCollector;
     }
 
     @Override
@@ -21,14 +24,22 @@ public class Runner implements CommandLineRunner {
         // Wait a bit for the server to start if running simultaneously
         Thread.sleep(2000);
 
-        Metrics metrics = new Metrics(23.4, 34.5);
-        MetricsJson metricsJson = new MetricsJson(com.example.jsonsender.utils.IdUtils.getId(), NoticeType.METRICS,
-                com.example.jsonsender.utils.TimeUtils.getNow("Asia/Tokyo"), "1.0", metrics);
+        com.example.jsonsender.metrics.Metrics metrics = metricsCollector.collect();
+        com.example.jsonsender.metrics.MetricsJson metricsJson = new com.example.jsonsender.metrics.MetricsJson(
+                com.example.jsonsender.utils.IdUtils.getId(),
+                NoticeType.METRICS,
+                com.example.jsonsender.utils.TimeUtils.getNow("Asia/Tokyo"),
+                "1.0",
+                metrics);
         tcpClient.sendJson("localhost", 9999, metricsJson);
 
-        Metrics metrics2 = new Metrics(null, null);
-        MetricsJson metricsJson2 = new MetricsJson(com.example.jsonsender.utils.IdUtils.getId(), NoticeType.METRICS,
-                com.example.jsonsender.utils.TimeUtils.getNow("Asia/Tokyo"), "1.0", metrics2);
+        com.example.jsonsender.metrics.Metrics metrics2 = metricsCollector.collect();
+        com.example.jsonsender.metrics.MetricsJson metricsJson2 = new com.example.jsonsender.metrics.MetricsJson(
+                com.example.jsonsender.utils.IdUtils.getId(),
+                NoticeType.METRICS,
+                com.example.jsonsender.utils.TimeUtils.getNow("Asia/Tokyo"),
+                "1.0",
+                metrics2);
         tcpClient.sendJson("localhost", 9999, metricsJson2);
     }
 }
