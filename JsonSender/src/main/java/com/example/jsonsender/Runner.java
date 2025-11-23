@@ -15,32 +15,39 @@ public class Runner implements CommandLineRunner {
 
     private final TcpClient tcpClient;
     private final Collector<Metrics> metricsCollector;
+    private final com.example.jsonsender.config.AppConfig appConfig;
 
     public Runner(TcpClient tcpClient,
-            Collector<Metrics> metricsCollector) {
+            Collector<Metrics> metricsCollector,
+            com.example.jsonsender.config.AppConfig appConfig) {
         this.tcpClient = tcpClient;
         this.metricsCollector = metricsCollector;
+        this.appConfig = appConfig;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        while (true) {
+            try {
+                Metrics metrics = metricsCollector.collect();
+                MetricsJson metricsJson = new MetricsJson(
+                        IdUtils.getId(),
+                        NoticeType.METRICS,
+                        TimeUtils.getNow(appConfig.getTimezone()),
+                        appConfig.getAgentVersion(),
+                        metrics);
 
-        Metrics metrics = metricsCollector.collect();
-        MetricsJson metricsJson = new MetricsJson(
-                IdUtils.getId(),
-                NoticeType.METRICS,
-                TimeUtils.getNow("Asia/Tokyo"),
-                "1.0",
-                metrics);
-        tcpClient.sendJson("localhost", 9999, metricsJson);
+                tcpClient.sendJson(appConfig.getDistHostname(), appConfig.getDistPort(), metricsJson);
 
-        Metrics metrics2 = metricsCollector.collect();
-        MetricsJson metricsJson2 = new MetricsJson(
-                IdUtils.getId(),
-                NoticeType.METRICS,
-                TimeUtils.getNow("Asia/Tokyo"),
-                "1.0",
-                metrics2);
-        tcpClient.sendJson("localhost", 9999, metricsJson2);
+                Thread.sleep(appConfig.getNoticeIntervalSec() * 1000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            } catch (Exception e) {
+                // Log error but continue loop
+                e.printStackTrace();
+                Thread.sleep(5000); // Wait a bit before retrying loop on error
+            }
+        }
     }
 }
