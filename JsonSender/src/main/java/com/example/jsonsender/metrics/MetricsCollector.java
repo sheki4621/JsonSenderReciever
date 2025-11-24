@@ -8,7 +8,7 @@ import com.example.jsonsender.utils.collector.Collector;
 public class MetricsCollector implements Collector<Metrics> {
 
     @Override
-    public Metrics collect() {
+    public Metrics collect() throws Exception {
         Double cpuUsage = getCpuUsage();
         Double memoryUsage = getMemoryUsage();
 

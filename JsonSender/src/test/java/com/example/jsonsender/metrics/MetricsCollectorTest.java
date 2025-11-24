@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MetricsCollectorTest {
 
     @Test
-    void testCollectWithNormalValues() {
+    void testCollectWithNormalValues() throws Exception {
         MetricsCollector collector = new MetricsCollector() {
             @Override
             protected Double getCpuUsage() {
@@ -27,7 +27,7 @@ class MetricsCollectorTest {
     }
 
     @Test
-    void testCollectWithNullValues() {
+    void testCollectWithNullValues() throws Exception {
         MetricsCollector collector = new MetricsCollector() {
             @Override
             protected Double getCpuUsage() {

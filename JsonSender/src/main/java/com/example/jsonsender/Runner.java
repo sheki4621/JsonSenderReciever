@@ -6,9 +6,13 @@ import org.springframework.stereotype.Component;
 import com.example.jsonsender.metrics.Metrics;
 import com.example.jsonsender.metrics.MetricsJson;
 import com.example.jsonsender.utils.collector.Collector;
+import com.example.jsonsender.utils.notice.FinJson;
+import com.example.jsonsender.utils.notice.InitJson;
 import com.example.jsonsender.utils.notice.NoticeType;
 import com.example.jsonsender.utils.IdUtils;
 import com.example.jsonsender.utils.TimeUtils;
+
+import jakarta.annotation.PreDestroy;
 
 @Component
 public class Runner implements CommandLineRunner {
@@ -27,6 +31,13 @@ public class Runner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // Send INIT notification
+        InitJson initNotice = new InitJson(
+                IdUtils.getId(),
+                TimeUtils.getNow(appConfig.getTimezone()),
+                appConfig.getAgentVersion());
+        tcpClient.sendJson(appConfig.getDistHostname(), appConfig.getDistPort(), initNotice);
+
         while (true) {
             try {
                 Metrics metrics = metricsCollector.collect();
@@ -49,5 +60,15 @@ public class Runner implements CommandLineRunner {
                 Thread.sleep(5000); // Wait a bit before retrying loop on error
             }
         }
+    }
+
+    @PreDestroy
+    public void onExit() {
+        // Send FIN notification
+        FinJson finNotice = new FinJson(
+                IdUtils.getId(),
+                TimeUtils.getNow(appConfig.getTimezone()),
+                appConfig.getAgentVersion());
+        tcpClient.sendJsonDirectly(appConfig.getDistHostname(), appConfig.getDistPort(), finNotice);
     }
 }
