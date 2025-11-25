@@ -12,10 +12,15 @@ import java.io.IOException;
 public class MetricsService {
 
     private final CsvRepository csvRepository;
+    private final ThresholdService thresholdService;
 
     public void processMetrics(MetricsJson metricsJson) {
         try {
+            // ResourceInfo.csvに出力
             csvRepository.saveResourceInfo(metricsJson);
+
+            // しきい値判定処理を実行
+            thresholdService.checkThreshold(metricsJson);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save metrics to CSV", e);
         }

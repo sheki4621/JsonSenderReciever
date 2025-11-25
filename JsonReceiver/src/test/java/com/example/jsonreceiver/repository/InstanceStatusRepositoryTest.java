@@ -47,7 +47,8 @@ public class InstanceStatusRepositoryTest {
                 InstanceStatusValue.UP,
                 true,
                 "1.0.0",
-                ZonedDateTime.now().toString());
+                ZonedDateTime.now().toString(),
+                "HIGH");
 
         // Act
         repository.save(status);
@@ -56,7 +57,7 @@ public class InstanceStatusRepositoryTest {
         assertTrue(Files.exists(csvFilePath), "CSV file should exist");
         List<String> lines = Files.readAllLines(csvFilePath);
         assertTrue(lines.size() >= 2, "CSV should have header and at least one data line");
-        assertEquals("Hostname,Status,IsInstalled,AgentVersion,Timestamp", lines.get(0));
+        assertEquals("Hostname,Status,IsInstalled,AgentVersion,Timestamp,InstanceType", lines.get(0));
         assertTrue(lines.get(1).startsWith("test-host,UP,true,1.0.0,"));
     }
 
@@ -68,13 +69,15 @@ public class InstanceStatusRepositoryTest {
                 InstanceStatusValue.UP,
                 true,
                 "1.0.0",
-                ZonedDateTime.now().toString());
+                ZonedDateTime.now().toString(),
+                null);
         InstanceStatus status2 = new InstanceStatus(
                 "host2",
                 InstanceStatusValue.DOWN,
                 false,
                 "1.1.0",
-                ZonedDateTime.now().toString());
+                ZonedDateTime.now().toString(),
+                "LOW");
         repository.save(status1);
         repository.save(status2);
 
@@ -106,7 +109,8 @@ public class InstanceStatusRepositoryTest {
                 InstanceStatusValue.INSTALLING,
                 false,
                 "1.0.0",
-                ZonedDateTime.now().toString());
+                ZonedDateTime.now().toString(),
+                null);
         repository.save(initialStatus);
 
         // Act - Update the same host
@@ -115,7 +119,8 @@ public class InstanceStatusRepositoryTest {
                 InstanceStatusValue.UP,
                 true,
                 "1.1.0",
-                ZonedDateTime.now().toString());
+                ZonedDateTime.now().toString(),
+                "HIGH");
         repository.save(updatedStatus);
 
         // Assert

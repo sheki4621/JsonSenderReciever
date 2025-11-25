@@ -154,18 +154,18 @@ public class InformationCollectionService {
         systemInfoList.add(new SystemInfo(
                 "192.168.1.10",
                 "server01.example.com",
-                "RHEL",
-                "HEL-PROD-01"));
+                "EL-A",
+                "HEL-XXX-01"));
         systemInfoList.add(new SystemInfo(
                 "192.168.1.20",
                 "server02.example.com",
-                "CentOS",
-                "HEL-PROD-02"));
+                "EL-B",
+                "HEL-YYY-02"));
         systemInfoList.add(new SystemInfo(
                 "192.168.1.30",
                 "server03.example.com",
-                "Ubuntu",
-                "HEL-DEV-01"));
+                "EL-C",
+                "HEL-ZZZ-01"));
 
         return systemInfoList;
     }

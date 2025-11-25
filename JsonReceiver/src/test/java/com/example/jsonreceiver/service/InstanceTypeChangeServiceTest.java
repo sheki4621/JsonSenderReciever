@@ -1,0 +1,154 @@
+package com.example.jsonreceiver.service;
+
+import com.example.jsonreceiver.dto.InstanceTypeInfo;
+import com.example.jsonreceiver.dto.SystemInfo;
+import com.example.jsonreceiver.repository.InstanceStatusRepository;
+import com.example.jsonreceiver.repository.InstanceTypeLinkRepository;
+import com.example.jsonreceiver.repository.InstanceTypeRepository;
+import com.example.jsonreceiver.repository.SystemInfoRepository;
+import com.example.jsonreceiver.dto.InstanceTypeLink;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.io.IOException;
+import java.util.Optional;
+
+import static org.mockito.Mockito.*;
+
+public class InstanceTypeChangeServiceTest {
+
+    @Mock
+    private InstanceStatusRepository instanceStatusRepository;
+
+    @Mock
+    private SystemInfoRepository systemInfoRepository;
+
+    @Mock
+    private InstanceTypeLinkRepository instanceTypeLinkRepository;
+
+    @Mock
+    private InstanceTypeRepository instanceTypeRepository;
+
+    private InstanceTypeChangeService service;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        service = new InstanceTypeChangeService(
+                instanceStatusRepository,
+                systemInfoRepository,
+                instanceTypeLinkRepository,
+                instanceTypeRepository);
+
+        // 設定値を注入
+        ReflectionTestUtils.setField(service, "checkIntervalSeconds", 5);
+        ReflectionTestUtils.setField(service, "maxRetryCount", 10);
+    }
+
+    @Test
+    public void testChangeInstanceType_HIGH() throws IOException {
+        // Arrange
+        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
+        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
+
+        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
+        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
+
+        // Act
+        service.changeInstanceType("test-host", "HIGH");
+
+        // スレッドが実行されるまで待機
+        try {
+            Thread.sleep(6000); // 5秒のcheck interval + 余裕
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        // Assert
+        verify(systemInfoRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository).findByElType("EL-A");
+        verify(instanceTypeRepository).findByInstanceTypeId("1");
+        verify(instanceStatusRepository, atLeastOnce()).updateInstanceType("test-host", "HIGH");
+    }
+
+    @Test
+    public void testChangeInstanceType_LOW() throws IOException {
+        // Arrange
+        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
+        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
+
+        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
+        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
+
+        // Act
+        service.changeInstanceType("test-host", "LOW");
+
+        // スレッドが実行されるまで待機
+        try {
+            Thread.sleep(2000); // 1秒の初回delay + 余裕
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        // Assert
+        verify(systemInfoRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository).findByElType("EL-A");
+        verify(instanceTypeRepository).findByInstanceTypeId("1");
+        verify(instanceStatusRepository, atLeastOnce()).updateInstanceType("test-host", "LOW");
+    }
+
+    @Test
+    public void testChangeInstanceType_SystemInfoNotFound() throws IOException {
+        // Arrange
+        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.empty());
+
+        // Act
+        service.changeInstanceType("test-host", "HIGH");
+
+        // Assert
+        verify(systemInfoRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository, never()).findByElType(anyString());
+        verify(instanceTypeRepository, never()).findByInstanceTypeId(anyString());
+    }
+
+    @Test
+    public void testChangeInstanceType_InstanceTypeLinkNotFound() throws IOException {
+        // Arrange
+        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
+        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
+        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.empty());
+
+        // Act
+        service.changeInstanceType("test-host", "HIGH");
+
+        // Assert
+        verify(systemInfoRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository).findByElType("EL-A");
+        verify(instanceTypeRepository, never()).findByInstanceTypeId(anyString());
+    }
+
+    @Test
+    public void testChangeInstanceType_InstanceTypeNotFound() throws IOException {
+        // Arrange
+        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
+        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
+        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.empty());
+
+        // Act
+        service.changeInstanceType("test-host", "HIGH");
+
+        // Assert
+        verify(systemInfoRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository).findByElType("EL-A");
+        verify(instanceTypeRepository).findByInstanceTypeId("1");
+    }
+}

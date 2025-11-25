@@ -11,7 +11,8 @@ import java.util.*;
 public class InstanceStatusRepository extends CsvRepositoryBase {
 
     private static final String FILE_NAME = "InstanceStatus.csv";
-    private static final String[] HEADERS = { "Hostname", "Status", "IsInstalled", "AgentVersion", "Timestamp" };
+    private static final String[] HEADERS = { "Hostname", "Status", "IsInstalled", "AgentVersion", "Timestamp",
+            "InstanceType" };
 
     /**
      * インスタンスステータスを保存する（上書き保存）
@@ -30,14 +31,15 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
             for (int i = 1; i < lines.size(); i++) {
                 String line = lines.get(i);
                 String[] parts = line.split(",", -1);
-                if (parts.length >= 5) {
+                if (parts.length >= 6) {
                     String hostname = parts[0];
                     InstanceStatus existingStatus = new InstanceStatus(
                             hostname,
                             InstanceStatusValue.valueOf(parts[1]),
                             Boolean.parseBoolean(parts[2]),
                             parts[3],
-                            parts[4]);
+                            parts[4],
+                            parts[5]);
                     statusMap.put(hostname, existingStatus);
                 }
             }
@@ -54,7 +56,8 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                     s.getStatus().name(),
                     s.getIsInstalled(),
                     s.getAgentVersion(),
-                    s.getTimestamp()
+                    s.getTimestamp(),
+                    s.getInstanceType() != null ? s.getInstanceType() : ""
             });
         }
 
@@ -79,17 +82,80 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
         for (int i = 1; i < lines.size(); i++) {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
-            if (parts.length >= 5 && parts[0].equals(hostname)) {
+            if (parts.length >= 6 && parts[0].equals(hostname)) {
                 InstanceStatus status = new InstanceStatus(
                         parts[0],
                         InstanceStatusValue.valueOf(parts[1]),
                         Boolean.parseBoolean(parts[2]),
                         parts[3],
-                        parts[4]);
+                        parts[4],
+                        parts[5]);
                 return Optional.of(status);
             }
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * ホスト名でInstanceTypeカラムを更新する
+     * 
+     * @param hostname     ホスト名
+     * @param instanceType インスタンスタイプ
+     * @throws IOException IO例外
+     */
+    public void updateInstanceType(String hostname, String instanceType) throws IOException {
+        List<String> lines = readFromCsv(FILE_NAME);
+
+        if (lines.isEmpty()) {
+            return;
+        }
+
+        Map<String, InstanceStatus> statusMap = new LinkedHashMap<>();
+
+        // 既存データを読み込む
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i);
+            String[] parts = line.split(",", -1);
+            if (parts.length >= 6) {
+                String hostnameInCsv = parts[0];
+                InstanceStatus existingStatus = new InstanceStatus(
+                        hostnameInCsv,
+                        InstanceStatusValue.valueOf(parts[1]),
+                        Boolean.parseBoolean(parts[2]),
+                        parts[3],
+                        parts[4],
+                        parts[5]);
+                statusMap.put(hostnameInCsv, existingStatus);
+            }
+        }
+
+        // 指定されたホスト名のInstanceTypeを更新
+        if (statusMap.containsKey(hostname)) {
+            InstanceStatus currentStatus = statusMap.get(hostname);
+            InstanceStatus updatedStatus = new InstanceStatus(
+                    currentStatus.getHostname(),
+                    currentStatus.getStatus(),
+                    currentStatus.getIsInstalled(),
+                    currentStatus.getAgentVersion(),
+                    currentStatus.getTimestamp(),
+                    instanceType);
+            statusMap.put(hostname, updatedStatus);
+
+            // 全データを上書き保存
+            List<Object[]> values = new ArrayList<>();
+            for (InstanceStatus s : statusMap.values()) {
+                values.add(new Object[] {
+                        s.getHostname(),
+                        s.getStatus().name(),
+                        s.getIsInstalled(),
+                        s.getAgentVersion(),
+                        s.getTimestamp(),
+                        s.getInstanceType() != null ? s.getInstanceType() : ""
+                });
+            }
+
+            overwriteToCsv(FILE_NAME, HEADERS, values);
+        }
     }
 }

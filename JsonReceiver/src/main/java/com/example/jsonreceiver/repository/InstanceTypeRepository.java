@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class InstanceTypeRepository extends CsvRepositoryBase {
@@ -37,6 +38,41 @@ public class InstanceTypeRepository extends CsvRepositoryBase {
             });
         }
         overwriteToCsv(FILE_NAME, HEADERS, values);
+    }
+
+    /**
+     * InstanceTypeIdでインスタンスタイプ情報を検索する
+     * 
+     * @param instanceTypeId インスタンスタイプID
+     * @return インスタンスタイプ情報（存在しない場合はOptional.empty()）
+     * @throws IOException IO例外
+     */
+    public Optional<InstanceTypeInfo> findByInstanceTypeId(String instanceTypeId) throws IOException {
+        List<String> lines = readFromCsv(FILE_NAME);
+
+        if (lines.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // ヘッダーをスキップして検索
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i);
+            String[] parts = line.split(",", -1);
+            if (parts.length >= 7 && parts[0].equals(instanceTypeId)) {
+                InstanceTypeInfo info = new InstanceTypeInfo(
+                        parts[0], // instanceTypeId
+                        parts[1], // highInstanceType
+                        Integer.parseInt(parts[2]), // highCpuCore
+                        parts[3], // lowInstanceType
+                        Integer.parseInt(parts[4]), // lowCpuCore
+                        parts[5], // veryLowInstanceType
+                        Integer.parseInt(parts[6]) // veryLowCpuCore
+                );
+                return Optional.of(info);
+            }
+        }
+
+        return Optional.empty();
     }
 
 }

@@ -35,13 +35,25 @@ public class InstanceStatusService {
             // Agentのインストール（rshを想定しているが空実装）
             installAgent(installJson.getInstanceName());
 
+            // 既存のInstanceTypeを取得
+            String existingInstanceType = null;
+            try {
+                Optional<InstanceStatus> existingOpt = repository.findByHostname(installJson.getInstanceName());
+                if (existingOpt.isPresent()) {
+                    existingInstanceType = existingOpt.get().getInstanceType();
+                }
+            } catch (IOException e) {
+                logger.warn("Failed to retrieve existing instance type, using null", e);
+            }
+
             // ステータスをINSTALLINGに変更
             InstanceStatus status = new InstanceStatus(
                     installJson.getInstanceName(),
                     InstanceStatusValue.INSTALLING,
                     false,
                     installJson.getAgentVersion(),
-                    installJson.getTimestamp().toString());
+                    installJson.getTimestamp().toString(),
+                    existingInstanceType);
 
             repository.save(status);
             logger.info("Saved INSTALLING status for instance: {}", installJson.getInstanceName());
@@ -64,13 +76,25 @@ public class InstanceStatusService {
             // Agentのアンインストール（rshを想定しているが空実装）
             uninstallAgent(uninstallJson.getInstanceName());
 
+            // 既存のInstanceTypeを取得
+            String existingInstanceType = null;
+            try {
+                Optional<InstanceStatus> existingOpt = repository.findByHostname(uninstallJson.getInstanceName());
+                if (existingOpt.isPresent()) {
+                    existingInstanceType = existingOpt.get().getInstanceType();
+                }
+            } catch (IOException e) {
+                logger.warn("Failed to retrieve existing instance type, using null", e);
+            }
+
             // ステータスをUNINSTALLINGに変更
             InstanceStatus status = new InstanceStatus(
                     uninstallJson.getInstanceName(),
                     InstanceStatusValue.UNINSTALLING,
                     false,
                     uninstallJson.getAgentVersion(),
-                    uninstallJson.getTimestamp().toString());
+                    uninstallJson.getTimestamp().toString(),
+                    existingInstanceType);
 
             repository.save(status);
             logger.info("Saved UNINSTALLING status for instance: {}", uninstallJson.getInstanceName());
@@ -95,6 +119,7 @@ public class InstanceStatusService {
             Optional<InstanceStatus> existingOpt = repository.findByHostname(upJson.getInstanceName());
 
             boolean isInstalled = true; // デフォルトはtrue
+            String existingInstanceType = null;
             if (existingOpt.isPresent()) {
                 InstanceStatus existing = existingOpt.get();
                 // INSTALLINGからUPの場合はIsInstalledをtrueに
@@ -104,6 +129,8 @@ public class InstanceStatusService {
                     // その他の場合は既存値を保持
                     isInstalled = existing.getIsInstalled();
                 }
+                // InstanceTypeを保持
+                existingInstanceType = existing.getInstanceType();
             }
 
             // ステータスをUPに変更
@@ -112,7 +139,8 @@ public class InstanceStatusService {
                     InstanceStatusValue.UP,
                     isInstalled,
                     upJson.getAgentVersion(),
-                    upJson.getTimestamp().toString());
+                    upJson.getTimestamp().toString(),
+                    existingInstanceType);
 
             repository.save(status);
             logger.info("Saved UP status for instance: {}", upJson.getInstanceName());
@@ -137,6 +165,7 @@ public class InstanceStatusService {
             Optional<InstanceStatus> existingOpt = repository.findByHostname(downJson.getInstanceName());
 
             boolean isInstalled = false; // デフォルトはfalse
+            String existingInstanceType = null;
             if (existingOpt.isPresent()) {
                 InstanceStatus existing = existingOpt.get();
                 // UNINSTALLINGからDOWNの場合はIsInstalledをfalseに
@@ -146,6 +175,8 @@ public class InstanceStatusService {
                     // その他の場合は既存値を保持
                     isInstalled = existing.getIsInstalled();
                 }
+                // InstanceTypeを保持
+                existingInstanceType = existing.getInstanceType();
             }
 
             // ステータスをDOWNに変更
@@ -154,7 +185,8 @@ public class InstanceStatusService {
                     InstanceStatusValue.DOWN,
                     isInstalled,
                     downJson.getAgentVersion(),
-                    downJson.getTimestamp().toString());
+                    downJson.getTimestamp().toString(),
+                    existingInstanceType);
 
             repository.save(status);
             logger.info("Saved DOWN status for instance: {}", downJson.getInstanceName());

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class SystemInfoRepository extends CsvRepositoryBase {
@@ -44,5 +45,37 @@ public class SystemInfoRepository extends CsvRepositoryBase {
             });
         }
         overwriteToCsv(FILE_NAME, HEADERS, values);
+    }
+
+    /**
+     * ホスト名でシステム情報を検索する
+     * 
+     * @param hostname ホスト名
+     * @return システム情報（存在しない場合はOptional.empty()）
+     * @throws IOException IO例外
+     */
+    public Optional<SystemInfo> findByHostname(String hostname) throws IOException {
+        List<String> lines = readFromCsv(FILE_NAME);
+
+        if (lines.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // ヘッダーをスキップして検索
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i);
+            String[] parts = line.split(",", -1);
+            if (parts.length >= 4 && parts[1].equals(hostname)) {
+                SystemInfo info = new SystemInfo(
+                        parts[0], // ipAddress
+                        parts[1], // hostname
+                        parts[2], // elType
+                        parts[3] // helName
+                );
+                return Optional.of(info);
+            }
+        }
+
+        return Optional.empty();
     }
 }

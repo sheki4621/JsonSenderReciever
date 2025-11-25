@@ -7,11 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstanceStatus {
+public class ResourceInfo {
     private String hostname;
-    private InstanceStatusValue status;
-    private Boolean isInstalled;
-    private String agentVersion;
     private String timestamp;
-    private String instanceType;
+    private Double cpuUsage;
+    private Double memoryUsage;
 }
