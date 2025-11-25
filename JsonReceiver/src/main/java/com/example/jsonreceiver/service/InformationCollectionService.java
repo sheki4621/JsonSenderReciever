@@ -130,15 +130,12 @@ public class InformationCollectionService {
      * @return インスタンスタイプ情報のリスト
      */
     private List<InstanceTypeInfo> fetchInstanceTypes() {
-        logger.debug("インスタンスタイプ一覧を取得中（サンプルデータ）");
+        logger.debug("インスタンスタイプ一覧を取得中(サンプルデータ)");
 
         // TODO: 将来的にシェルスクリプトを呼び出す処理に置き換える
         List<InstanceTypeInfo> instanceTypes = new ArrayList<>();
-        instanceTypes.add(new InstanceTypeInfo("1", "t2.micro"));
-        instanceTypes.add(new InstanceTypeInfo("2", "t2.small"));
-        instanceTypes.add(new InstanceTypeInfo("3", "t2.medium"));
-        instanceTypes.add(new InstanceTypeInfo("4", "t3.micro"));
-        instanceTypes.add(new InstanceTypeInfo("5", "t3.small"));
+        instanceTypes.add(new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
+        instanceTypes.add(new InstanceTypeInfo("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1));
 
         return instanceTypes;
     }

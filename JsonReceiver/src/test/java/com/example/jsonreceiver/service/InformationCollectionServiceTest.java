@@ -50,8 +50,8 @@ class InformationCollectionServiceTest {
         // サンプルデータの構造を確認
         InstanceTypeInfo first = result.get(0);
         assertNotNull(first);
-        assertNotNull(first.getInstanceType());
-        assertFalse(first.getInstanceType().isEmpty());
+        assertNotNull(first.getInstanceTypeId());
+        assertFalse(first.getInstanceTypeId().isEmpty());
 
         // CSV出力が呼ばれたことを確認
         verify(instanceTypeRepository, times(1)).saveAll(anyList());
@@ -86,7 +86,7 @@ class InformationCollectionServiceTest {
 
         // 期待されるサンプルデータが含まれることを確認
         assertTrue(result.stream()
-                .anyMatch(info -> "t2.micro".equals(info.getInstanceType())));
+                .anyMatch(info -> "t2.xlarge".equals(info.getHighInstanceType())));
 
         // CSV出力が呼ばれたことを確認
         verify(instanceTypeRepository, times(1)).saveAll(result);

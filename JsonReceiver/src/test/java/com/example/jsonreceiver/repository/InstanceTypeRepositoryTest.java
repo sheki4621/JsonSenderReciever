@@ -48,9 +48,11 @@ class InstanceTypeRepositoryTest {
     void testSaveAll_createsFileWithHeaders() throws IOException {
         // テストデータを作成
         List<InstanceTypeInfo> instanceTypes = Arrays.asList(
-                new InstanceTypeInfo("1", "t2.micro"),
-                new InstanceTypeInfo("2", "t2.small"),
-                new InstanceTypeInfo("3", "t3.micro")); // saveAllメソッドを呼び出し
+                new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1),
+                new InstanceTypeInfo("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1),
+                new InstanceTypeInfo("3", "m5.2xlarge", 8, "m5.large", 2, "m5.small", 1));
+
+        // saveAllメソッドを呼び出し
         repository.saveAll(instanceTypes);
 
         // ファイルが作成されたことを確認
@@ -62,29 +64,31 @@ class InstanceTypeRepositoryTest {
         assertFalse(lines.isEmpty());
 
         // ヘッダーが存在することを確認
-        assertEquals("Id,InstanceType", lines.get(0));
+        assertEquals(
+                "InstanceTypeId,HighInstanceType,HighCpuCore,LowInstanceType,LowCpuCore,VeryLowInstanceType,VeryLowCpuCore",
+                lines.get(0));
 
         // データ行数を確認（ヘッダー + 3行）
         assertEquals(4, lines.size());
 
         // データの内容を確認
-        assertTrue(lines.contains("1,t2.micro"));
-        assertTrue(lines.contains("2,t2.small"));
-        assertTrue(lines.contains("3,t3.micro"));
+        assertTrue(lines.contains("1,t2.xlarge,4,t2.medium,2,t2.micro,1"));
+        assertTrue(lines.contains("2,t3.xlarge,4,t3.medium,2,t3.micro,1"));
+        assertTrue(lines.contains("3,m5.2xlarge,8,m5.large,2,m5.small,1"));
     }
 
     @Test
     void testSaveAll_overwritesExistingFile() throws IOException {
         // 最初のデータセットを保存
         List<InstanceTypeInfo> firstSet = Arrays.asList(
-                new InstanceTypeInfo("1", "t2.micro"),
-                new InstanceTypeInfo("2", "t2.small"));
+                new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1),
+                new InstanceTypeInfo("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1));
         repository.saveAll(firstSet);
 
         // 2回目のデータセットを保存（上書き）
         List<InstanceTypeInfo> secondSet = Arrays.asList(
-                new InstanceTypeInfo("3", "t3.large"),
-                new InstanceTypeInfo("4", "t3.xlarge"));
+                new InstanceTypeInfo("3", "m5.2xlarge", 8, "m5.large", 2, "m5.small", 1),
+                new InstanceTypeInfo("4", "c5.4xlarge", 16, "c5.xlarge", 4, "c5.large", 2));
         repository.saveAll(secondSet);
 
         // ファイルの内容を確認
@@ -92,12 +96,12 @@ class InstanceTypeRepositoryTest {
         List<String> lines = Files.readAllLines(filePath);
 
         // 古いデータが存在しないことを確認（上書きされている）
-        assertFalse(lines.contains("1,t2.micro"));
-        assertFalse(lines.contains("2,t2.small"));
+        assertFalse(lines.contains("1,t2.xlarge,4,t2.medium,2,t2.micro,1"));
+        assertFalse(lines.contains("2,t3.xlarge,4,t3.medium,2,t3.micro,1"));
 
         // 新しいデータが存在することを確認
-        assertTrue(lines.contains("3,t3.large"));
-        assertTrue(lines.contains("4,t3.xlarge"));
+        assertTrue(lines.contains("3,m5.2xlarge,8,m5.large,2,m5.small,1"));
+        assertTrue(lines.contains("4,c5.4xlarge,16,c5.xlarge,4,c5.large,2"));
 
         // データ行数を確認（ヘッダー + 2行）
         assertEquals(3, lines.size());
@@ -116,7 +120,9 @@ class InstanceTypeRepositoryTest {
         // ヘッダーのみが存在することを確認
         List<String> lines = Files.readAllLines(filePath);
         assertEquals(1, lines.size());
-        assertEquals("Id,InstanceType", lines.get(0));
+        assertEquals(
+                "InstanceTypeId,HighInstanceType,HighCpuCore,LowInstanceType,LowCpuCore,VeryLowInstanceType,VeryLowCpuCore",
+                lines.get(0));
     }
 
     @Test
@@ -129,7 +135,7 @@ class InstanceTypeRepositoryTest {
 
         // データを保存
         List<InstanceTypeInfo> instanceTypes = Arrays.asList(
-                new InstanceTypeInfo("1", "t2.micro"));
+                new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
         repository.saveAll(instanceTypes);
 
         // ディレクトリとファイルが作成されたことを確認

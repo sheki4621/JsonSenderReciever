@@ -79,7 +79,11 @@ public class InformationCollectionScheduler implements CommandLineRunner {
             logger.info("インスタンスタイプを{}件取得しました", instanceTypes.size());
 
             for (InstanceTypeInfo info : instanceTypes) {
-                logger.info("  - インスタンスタイプ: {}", info.getInstanceType());
+                logger.info("  - ID: {}, High: {} ({}コア), Low: {} ({}コア), VeryLow: {} ({}コア)",
+                        info.getInstanceTypeId(),
+                        info.getHighInstanceType(), info.getHighCpuCore(),
+                        info.getLowInstanceType(), info.getLowCpuCore(),
+                        info.getVeryLowInstanceType(), info.getVeryLowCpuCore());
             }
 
         } catch (Exception e) {

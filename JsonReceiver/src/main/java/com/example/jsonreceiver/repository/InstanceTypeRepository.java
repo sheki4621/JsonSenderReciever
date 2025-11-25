@@ -11,18 +11,10 @@ import java.util.List;
 public class InstanceTypeRepository extends CsvRepositoryBase {
 
     private static final String FILE_NAME = "InstanceType.csv";
-    private static final String[] HEADERS = { "Id", "InstanceType" };
-
-    /**
-     * 単一のインスタンスタイプを追記保存する
-     * 
-     * @param id           ID
-     * @param instanceType インスタンスタイプ名
-     * @throws IOException IO例外
-     */
-    public void save(String id, String instanceType) throws IOException {
-        writeToCsv(FILE_NAME, HEADERS, id, instanceType);
-    }
+    private static final String[] HEADERS = {
+            "InstanceTypeId", "HighInstanceType", "HighCpuCore",
+            "LowInstanceType", "LowCpuCore", "VeryLowInstanceType", "VeryLowCpuCore"
+    };
 
     /**
      * インスタンスタイプのリストを上書き保存する
@@ -34,7 +26,15 @@ public class InstanceTypeRepository extends CsvRepositoryBase {
     public void saveAll(List<InstanceTypeInfo> instanceTypes) throws IOException {
         List<Object[]> values = new ArrayList<>();
         for (InstanceTypeInfo info : instanceTypes) {
-            values.add(new Object[] { info.getId(), info.getInstanceType() });
+            values.add(new Object[] {
+                    info.getInstanceTypeId(),
+                    info.getHighInstanceType(),
+                    info.getHighCpuCore(),
+                    info.getLowInstanceType(),
+                    info.getLowCpuCore(),
+                    info.getVeryLowInstanceType(),
+                    info.getVeryLowCpuCore()
+            });
         }
         overwriteToCsv(FILE_NAME, HEADERS, values);
     }

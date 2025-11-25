@@ -36,7 +36,7 @@ class InformationCollectionSchedulerTest {
     void testRun_startsCollectionThread() throws Exception {
         // モックの戻り値を設定
         List<InstanceTypeInfo> mockInstanceTypes = Arrays.asList(
-                new InstanceTypeInfo("1", "t2.micro"));
+                new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
         List<SystemInfo> mockSystemInfo = Arrays.asList(
                 new SystemInfo("192.168.1.1", "host1", "RHEL", "HEL-01"));
 
@@ -58,7 +58,7 @@ class InformationCollectionSchedulerTest {
         // 1回目は例外をスロー、2回目以降は成功するように設定
         when(informationCollectionService.collectInstanceTypes())
                 .thenThrow(new RuntimeException("Test exception"))
-                .thenReturn(Arrays.asList(new InstanceTypeInfo("1", "t2.micro")));
+                .thenReturn(Arrays.asList(new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1)));
 
         when(informationCollectionService.collectSystemInfo())
                 .thenReturn(Arrays.asList(

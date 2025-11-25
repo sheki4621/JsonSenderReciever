@@ -12,12 +12,37 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class InstanceTypeInfo {
     /**
-     * ID
+     * インスタンスタイプID
      */
-    private String id;
+    private String instanceTypeId;
 
     /**
-     * インスタンスタイプ名
+     * Highインスタンスタイプ
      */
-    private String instanceType;
+    private String highInstanceType;
+
+    /**
+     * HighCPUコア数
+     */
+    private Integer highCpuCore;
+
+    /**
+     * Lowインスタンスタイプ
+     */
+    private String lowInstanceType;
+
+    /**
+     * LowCPUコア数
+     */
+    private Integer lowCpuCore;
+
+    /**
+     * VeryLowインスタンスタイプ
+     */
+    private String veryLowInstanceType;
+
+    /**
+     * VeryLowCPUコア数
+     */
+    private Integer veryLowCpuCore;
 }
