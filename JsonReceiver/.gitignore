@@ -57,7 +57,3 @@ bin/
 # Spring Boot
 help.md
 .mvn/wrapper/maven-wrapper.jar
-
-# app
-**/json/**
-*.csv
