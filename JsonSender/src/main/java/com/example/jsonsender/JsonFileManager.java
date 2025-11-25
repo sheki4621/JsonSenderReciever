@@ -32,12 +32,10 @@ public class JsonFileManager {
     private final ExecutorService resendExecutor;
     private volatile boolean running = true;
 
-    public JsonFileManager(AppConfig appConfig, @Lazy TcpClient tcpClient) {
+    public JsonFileManager(AppConfig appConfig, @Lazy TcpClient tcpClient, ObjectMapper objectMapper) {
         this.appConfig = appConfig;
         this.tcpClient = tcpClient;
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-        this.objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        this.objectMapper = objectMapper;
         this.resendExecutor = Executors.newSingleThreadExecutor();
     }
 
@@ -63,7 +61,7 @@ public class JsonFileManager {
     }
 
     private void createOutputDir() {
-        File dir = new File(appConfig.getJsonOutputDir());
+        File dir = new File(appConfig.getJson().getOutputDir());
         if (!dir.exists()) {
             if (dir.mkdirs()) {
                 logger.info("Created JSON output directory: {}", dir.getAbsolutePath());
@@ -84,7 +82,7 @@ public class JsonFileManager {
             String noticeType = node.has("NoticeType") ? node.get("NoticeType").asText() : "Unknown";
 
             String filename = String.format("%s_%s.json", timestamp, noticeType);
-            Path path = Paths.get(appConfig.getJsonOutputDir(), filename);
+            Path path = Paths.get(appConfig.getJson().getOutputDir(), filename);
 
             objectMapper.writeValue(path.toFile(), node);
             logger.warn("Saved failed JSON to file: {}", path);
@@ -110,7 +108,7 @@ public class JsonFileManager {
     }
 
     private void processFiles() {
-        File dir = new File(appConfig.getJsonOutputDir());
+        File dir = new File(appConfig.getJson().getOutputDir());
         if (!dir.exists() || !dir.isDirectory()) {
             return;
         }
@@ -155,8 +153,8 @@ public class JsonFileManager {
                 // But TcpClient currently only has one method. We will modify TcpClient later.
                 // For now, assume we will add a boolean flag to sendJson.
 
-                boolean success = tcpClient.sendJsonDirectly(appConfig.getDistHostname(), appConfig.getDistPort(),
-                        jsonNode);
+                boolean success = tcpClient.sendJsonDirectly(appConfig.getDist().getHostname(),
+                        appConfig.getDist().getPort(), jsonNode);
 
                 if (success) {
                     if (file.delete()) {
@@ -187,6 +185,6 @@ public class JsonFileManager {
     private boolean isOldFile(File file) {
         long diff = System.currentTimeMillis() - file.lastModified();
         long days = TimeUnit.MILLISECONDS.toDays(diff);
-        return days >= appConfig.getJsonRotationDay();
+        return days >= appConfig.getJson().getRotationDay();
     }
 }

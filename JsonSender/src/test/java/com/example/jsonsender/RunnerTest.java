@@ -40,11 +40,17 @@ class RunnerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        // ネストされた設定オブジェクトのモック作成
+        AppConfig.Dist dist = org.mockito.Mockito.mock(AppConfig.Dist.class);
+        when(dist.getHostname()).thenReturn("localhost");
+        when(dist.getPort()).thenReturn(8080);
+
         when(appConfig.getTimezone()).thenReturn("UTC");
         when(appConfig.getAgentVersion()).thenReturn("1.0.0");
-        when(appConfig.getDistHostname()).thenReturn("localhost");
-        when(appConfig.getDistPort()).thenReturn(8080);
+        when(appConfig.getDist()).thenReturn(dist);
         when(appConfig.getNoticeIntervalSec()).thenReturn(1);
+        when(appConfig.getErrorRetryIntervalSec()).thenReturn(5);
 
         runner = new Runner(tcpClient, metricsCollector, appConfig);
     }

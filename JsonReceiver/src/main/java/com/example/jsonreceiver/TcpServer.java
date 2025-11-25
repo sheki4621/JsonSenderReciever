@@ -5,14 +5,16 @@ import com.example.jsonreceiver.service.InstanceStatusService;
 import com.example.jsonreceiver.service.MetricsService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PreDestroy;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -27,12 +29,17 @@ public class TcpServer implements CommandLineRunner {
     private final MetricsService metricsService;
     private final InstanceStatusService instanceStatusService;
     private final ExecutorService noticeProcessingExecutor;
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper;
+
+    @Qualifier("tcpServerExecutor")
+    private final TaskExecutor taskExecutor;
 
     @Value("${tcp.server.port:9999}")
     private int port;
 
     private int actualPort;
+    private volatile boolean running = true;
+    private ServerSocket serverSocket;
 
     public int getPort() {
         return actualPort;
@@ -40,11 +47,13 @@ public class TcpServer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        new Thread(() -> {
-            try (ServerSocket serverSocket = new ServerSocket(port)) {
+        taskExecutor.execute(() -> {
+            try {
+                serverSocket = new ServerSocket(port);
                 this.actualPort = serverSocket.getLocalPort();
                 logger.info("TCP Server started on port {}", actualPort);
-                while (true) {
+
+                while (running) {
                     try (Socket clientSocket = serverSocket.accept();
                             BufferedReader in = new BufferedReader(
                                     new InputStreamReader(clientSocket.getInputStream()))) {
@@ -117,12 +126,36 @@ public class TcpServer implements CommandLineRunner {
                             }
                         }
                     } catch (Exception e) {
-                        logger.error("Error handling client", e);
+                        if (running) {
+                            logger.error("Error handling client", e);
+                        }
                     }
                 }
             } catch (Exception e) {
-                logger.error("Error starting server", e);
+                if (running) {
+                    logger.error("Error starting server", e);
+                }
+            } finally {
+                closeServerSocket();
             }
-        }).start();
+        });
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        logger.info("Shutting down TCP Server");
+        running = false;
+        closeServerSocket();
+    }
+
+    private void closeServerSocket() {
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+                logger.info("ServerSocket closed successfully");
+            } catch (Exception e) {
+                logger.error("Error closing ServerSocket", e);
+            }
+        }
     }
 }

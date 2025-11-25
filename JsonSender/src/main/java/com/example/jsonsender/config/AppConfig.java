@@ -1,49 +1,72 @@
 package com.example.jsonsender.config;
 
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
-@Data
-@Component
+@Getter
+@Setter
+@ConfigurationProperties(prefix = "app")
+@Validated
 public class AppConfig {
 
-    @Value("${app.Name}")
-    private String appName;
+    @NotBlank
+    private String name;
 
-    @Value("${app.NoticeIntervalSec}")
+    @Min(1)
     private int noticeIntervalSec;
 
-    @Value("${app.Timezone}")
+    @NotBlank
     private String timezone;
 
-    @Value("${app.AgentVersion}")
+    @NotBlank
     private String agentVersion;
 
-    @Value("${app.LogLevel}")
+    @NotBlank
     private String logLevel;
 
-    @Value("${dist.Hostname}")
-    private String distHostname;
+    @Min(1)
+    private int errorRetryIntervalSec;
 
-    @Value("${dist.Port}")
-    private int distPort;
+    private Dist dist = new Dist();
+    private Sender sender = new Sender();
+    private Json json = new Json();
 
-    @Value("${sender.RetryMax}")
-    private int retryMax;
+    @Getter
+    @Setter
+    public static class Dist {
+        @NotBlank
+        private String hostname;
 
-    @Value("${sender.RetryIntervalSec}")
-    private int retryIntervalSec;
+        @Min(1)
+        private int port;
+    }
 
-    @Value("${sender.Timeout}")
-    private int timeout;
+    @Getter
+    @Setter
+    public static class Sender {
+        @Min(0)
+        private int retryMax;
 
-    @Value("${json.OutputDir}")
-    private String jsonOutputDir;
+        @Min(1)
+        private int retryIntervalSec;
 
-    @Value("${json.LotationDay}")
-    private int jsonRotationDay;
+        @Min(1)
+        private int timeout;
+    }
 
-    @Value("${json.FailedArchive}")
-    private boolean failedArchive;
+    @Getter
+    @Setter
+    public static class Json {
+        @NotBlank
+        private String outputDir;
+
+        @Min(1)
+        private int rotationDay;
+
+        private boolean failedArchive;
+    }
 }
