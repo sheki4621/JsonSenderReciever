@@ -1,5 +1,6 @@
 package com.example.jsonreceiver.service;
 
+import com.example.jsonreceiver.dto.InstanceType;
 import com.example.jsonreceiver.dto.MetricsJson;
 import com.example.jsonreceiver.dto.ResourceInfo;
 import com.example.jsonreceiver.dto.ThresholdInfo;
@@ -50,18 +51,18 @@ public class ThresholdService {
             logger.info("Checking threshold for hostname: {} CPU={} Memory={}", hostname, cpuUsage, memoryUsage);
 
             // しきい値を超えているか判定
-            String targetInstanceType = null;
+            InstanceType targetInstanceType = null;
             boolean cpuExceedsUpper = cpuUsage > threshold.getCpuUpperLimit();
             boolean memoryExceedsUpper = memoryUsage > threshold.getMemoryUpperLimit();
             boolean cpuBelowLower = cpuUsage < threshold.getCpuLowerLimit();
             boolean memoryBelowLower = memoryUsage < threshold.getMemoryLowerLimit();
 
             if (cpuExceedsUpper || memoryExceedsUpper) {
-                targetInstanceType = "HIGH";
+                targetInstanceType = InstanceType.HIGH;
                 logger.info("Metrics exceed upper limit for hostname: {} (CPU: {}, Memory: {})",
                         hostname, cpuUsage, memoryUsage);
             } else if (cpuBelowLower || memoryBelowLower) {
-                targetInstanceType = "LOW";
+                targetInstanceType = InstanceType.LOW;
                 logger.info("Metrics below lower limit for hostname: {} (CPU: {}, Memory: {})",
                         hostname, cpuUsage, memoryUsage);
             }
@@ -100,10 +101,10 @@ public class ThresholdService {
                 boolean historyExceedsUpper = histCpuExceedsUpper || histMemoryExceedsUpper;
                 boolean historyBelowLower = histCpuBelowLower || histMemoryBelowLower;
 
-                if ("HIGH".equals(targetInstanceType) && !historyExceedsUpper) {
+                if (targetInstanceType == InstanceType.HIGH && !historyExceedsUpper) {
                     allExceed = false;
                     break;
-                } else if ("LOW".equals(targetInstanceType) && !historyBelowLower) {
+                } else if (targetInstanceType == InstanceType.LOW && !historyBelowLower) {
                     allExceed = false;
                     break;
                 }

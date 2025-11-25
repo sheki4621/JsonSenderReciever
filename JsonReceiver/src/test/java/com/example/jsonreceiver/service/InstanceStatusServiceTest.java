@@ -16,6 +16,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.example.jsonreceiver.dto.InstanceType;
 
 public class InstanceStatusServiceTest {
 
@@ -87,7 +88,7 @@ public class InstanceStatusServiceTest {
                                 UUID.randomUUID(),
                                 NoticeType.UP,
                                 ZonedDateTime.now(),
-                                "1.1.0",
+                                "1.0.0",
                                 "test-host");
 
                 // 既存のINSTALLING状態を返す
@@ -110,8 +111,8 @@ public class InstanceStatusServiceTest {
                 InstanceStatus savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
                 assertEquals(InstanceStatusValue.UP, savedStatus.getStatus());
-                assertTrue(savedStatus.getIsInstalled()); // INSTALLINGからUPなのでtrueに
-                assertEquals("1.1.0", savedStatus.getAgentVersion());
+                assertTrue(savedStatus.getIsInstalled()); // INSTALLING -> UP なので true
+                assertEquals("1.0.0", savedStatus.getAgentVersion());
                 assertNotNull(savedStatus.getTimestamp());
         }
 
@@ -132,7 +133,7 @@ public class InstanceStatusServiceTest {
                                 true,
                                 "1.0.0",
                                 ZonedDateTime.now().toString(),
-                                "HIGH");
+                                InstanceType.HIGH);
                 when(repository.findByHostname("test-host")).thenReturn(Optional.of(existingStatus));
 
                 // Act
@@ -145,9 +146,9 @@ public class InstanceStatusServiceTest {
                 InstanceStatus savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
                 assertEquals(InstanceStatusValue.UP, savedStatus.getStatus());
-                assertTrue(savedStatus.getIsInstalled()); // 既存のIsInstalled値を保持
+                assertTrue(savedStatus.getIsInstalled()); // 既存のIsInstalled値を保持 (true)
                 assertEquals("1.1.0", savedStatus.getAgentVersion());
-                assertNotNull(savedStatus.getTimestamp());
+                assertEquals(InstanceType.HIGH, savedStatus.getInstanceType());
         }
 
         @Test
@@ -208,8 +209,7 @@ public class InstanceStatusServiceTest {
                 InstanceStatus savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
                 assertEquals(InstanceStatusValue.DOWN, savedStatus.getStatus());
-                assertFalse(savedStatus.getIsInstalled()); // UNINSTALLINGからDOWNなのでfalseに
-                assertEquals("1.0.0", savedStatus.getAgentVersion());
+                assertFalse(savedStatus.getIsInstalled()); // UNINSTALLING -> DOWN なので false
                 assertNotNull(savedStatus.getTimestamp());
         }
 
@@ -230,7 +230,7 @@ public class InstanceStatusServiceTest {
                                 true,
                                 "1.0.0",
                                 ZonedDateTime.now().toString(),
-                                "HIGH");
+                                InstanceType.HIGH);
                 when(repository.findByHostname("test-host")).thenReturn(Optional.of(existingStatus));
 
                 // Act

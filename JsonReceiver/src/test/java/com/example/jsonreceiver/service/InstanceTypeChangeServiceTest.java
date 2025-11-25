@@ -2,6 +2,7 @@ package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.InstanceTypeInfo;
 import com.example.jsonreceiver.dto.SystemInfo;
+import com.example.jsonreceiver.dto.InstanceType;
 import com.example.jsonreceiver.repository.InstanceStatusRepository;
 import com.example.jsonreceiver.repository.InstanceTypeLinkRepository;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
@@ -60,7 +61,7 @@ public class InstanceTypeChangeServiceTest {
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
 
         // Act
-        service.changeInstanceType("test-host", "HIGH");
+        service.changeInstanceType("test-host", InstanceType.HIGH);
 
         // スレッドが実行されるまで待機
         try {
@@ -73,7 +74,7 @@ public class InstanceTypeChangeServiceTest {
         verify(systemInfoRepository).findByHostname("test-host");
         verify(instanceTypeLinkRepository).findByElType("EL-A");
         verify(instanceTypeRepository).findByInstanceTypeId("1");
-        verify(instanceStatusRepository, atLeastOnce()).updateInstanceType("test-host", "HIGH");
+        verify(instanceStatusRepository, atLeastOnce()).updateInstanceType("test-host", InstanceType.HIGH);
     }
 
     @Test
@@ -88,7 +89,7 @@ public class InstanceTypeChangeServiceTest {
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
 
         // Act
-        service.changeInstanceType("test-host", "LOW");
+        service.changeInstanceType("test-host", InstanceType.LOW);
 
         // スレッドが実行されるまで待機
         try {
@@ -101,7 +102,7 @@ public class InstanceTypeChangeServiceTest {
         verify(systemInfoRepository).findByHostname("test-host");
         verify(instanceTypeLinkRepository).findByElType("EL-A");
         verify(instanceTypeRepository).findByInstanceTypeId("1");
-        verify(instanceStatusRepository, atLeastOnce()).updateInstanceType("test-host", "LOW");
+        verify(instanceStatusRepository, atLeastOnce()).updateInstanceType("test-host", InstanceType.LOW);
     }
 
     @Test
@@ -110,7 +111,7 @@ public class InstanceTypeChangeServiceTest {
         when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.empty());
 
         // Act
-        service.changeInstanceType("test-host", "HIGH");
+        service.changeInstanceType("test-host", InstanceType.HIGH);
 
         // Assert
         verify(systemInfoRepository).findByHostname("test-host");
@@ -126,7 +127,7 @@ public class InstanceTypeChangeServiceTest {
         when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.empty());
 
         // Act
-        service.changeInstanceType("test-host", "HIGH");
+        service.changeInstanceType("test-host", InstanceType.HIGH);
 
         // Assert
         verify(systemInfoRepository).findByHostname("test-host");
@@ -144,7 +145,7 @@ public class InstanceTypeChangeServiceTest {
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.empty());
 
         // Act
-        service.changeInstanceType("test-host", "HIGH");
+        service.changeInstanceType("test-host", InstanceType.HIGH);
 
         // Assert
         verify(systemInfoRepository).findByHostname("test-host");

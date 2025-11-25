@@ -2,6 +2,7 @@ package com.example.jsonreceiver.repository;
 
 import com.example.jsonreceiver.dto.InstanceStatus;
 import com.example.jsonreceiver.dto.InstanceStatusValue;
+import com.example.jsonreceiver.dto.InstanceType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,18 +26,10 @@ public class InstanceStatusRepositoryTest {
     private Path csvFilePath;
 
     @BeforeEach
-    public void setUp() {
-        Path csvDir = tempDir.resolve("csv");
-        try {
-            Files.createDirectories(csvDir);
-        } catch (IOException e) {
-            fail("Failed to create test directory");
-        }
-        csvFilePath = csvDir.resolve("InstanceStatus.csv");
-
-        // Repositoryを作成し、outputDirをテスト用に設定
+    public void setUp() throws IOException {
         repository = new InstanceStatusRepository();
-        repository.setOutputDir(csvDir.toString());
+        repository.setOutputDir(tempDir.toString());
+        csvFilePath = tempDir.resolve("InstanceStatus.csv");
     }
 
     @Test
@@ -48,7 +41,7 @@ public class InstanceStatusRepositoryTest {
                 true,
                 "1.0.0",
                 ZonedDateTime.now().toString(),
-                "HIGH");
+                InstanceType.HIGH);
 
         // Act
         repository.save(status);
@@ -77,7 +70,7 @@ public class InstanceStatusRepositoryTest {
                 false,
                 "1.1.0",
                 ZonedDateTime.now().toString(),
-                "LOW");
+                InstanceType.LOW);
         repository.save(status1);
         repository.save(status2);
 
@@ -120,7 +113,7 @@ public class InstanceStatusRepositoryTest {
                 true,
                 "1.1.0",
                 ZonedDateTime.now().toString(),
-                "HIGH");
+                InstanceType.HIGH);
         repository.save(updatedStatus);
 
         // Assert

@@ -2,6 +2,9 @@ package com.example.jsonreceiver.repository;
 
 import com.example.jsonreceiver.dto.InstanceStatus;
 import com.example.jsonreceiver.dto.InstanceStatusValue;
+import com.example.jsonreceiver.dto.InstanceType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -10,6 +13,7 @@ import java.util.*;
 @Repository
 public class InstanceStatusRepository extends CsvRepositoryBase {
 
+    private static final Logger logger = LoggerFactory.getLogger(InstanceStatusRepository.class);
     private static final String FILE_NAME = "InstanceStatus.csv";
     private static final String[] HEADERS = { "Hostname", "Status", "IsInstalled", "AgentVersion", "Timestamp",
             "InstanceType" };
@@ -33,13 +37,21 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                 String[] parts = line.split(",", -1);
                 if (parts.length >= 6) {
                     String hostname = parts[0];
+                    InstanceType instanceType = null;
+                    if (!parts[5].isEmpty()) {
+                        try {
+                            instanceType = InstanceType.valueOf(parts[5]);
+                        } catch (IllegalArgumentException e) {
+                            logger.warn("Invalid InstanceType value: {}", parts[5]);
+                        }
+                    }
                     InstanceStatus existingStatus = new InstanceStatus(
                             hostname,
                             InstanceStatusValue.valueOf(parts[1]),
                             Boolean.parseBoolean(parts[2]),
                             parts[3],
                             parts[4],
-                            parts[5]);
+                            instanceType);
                     statusMap.put(hostname, existingStatus);
                 }
             }
@@ -57,7 +69,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                     s.getIsInstalled(),
                     s.getAgentVersion(),
                     s.getTimestamp(),
-                    s.getInstanceType() != null ? s.getInstanceType() : ""
+                    s.getInstanceType() != null ? s.getInstanceType().name() : ""
             });
         }
 
@@ -83,13 +95,21 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
             if (parts.length >= 6 && parts[0].equals(hostname)) {
+                InstanceType instanceType = null;
+                if (!parts[5].isEmpty()) {
+                    try {
+                        instanceType = InstanceType.valueOf(parts[5]);
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Invalid InstanceType value: {}", parts[5]);
+                    }
+                }
                 InstanceStatus status = new InstanceStatus(
                         parts[0],
                         InstanceStatusValue.valueOf(parts[1]),
                         Boolean.parseBoolean(parts[2]),
                         parts[3],
                         parts[4],
-                        parts[5]);
+                        instanceType);
                 return Optional.of(status);
             }
         }
@@ -104,7 +124,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
      * @param instanceType インスタンスタイプ
      * @throws IOException IO例外
      */
-    public void updateInstanceType(String hostname, String instanceType) throws IOException {
+    public void updateInstanceType(String hostname, InstanceType instanceType) throws IOException {
         List<String> lines = readFromCsv(FILE_NAME);
 
         if (lines.isEmpty()) {
@@ -119,13 +139,21 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
             String[] parts = line.split(",", -1);
             if (parts.length >= 6) {
                 String hostnameInCsv = parts[0];
+                InstanceType existingInstanceType = null;
+                if (!parts[5].isEmpty()) {
+                    try {
+                        existingInstanceType = InstanceType.valueOf(parts[5]);
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Invalid InstanceType value: {}", parts[5]);
+                    }
+                }
                 InstanceStatus existingStatus = new InstanceStatus(
                         hostnameInCsv,
                         InstanceStatusValue.valueOf(parts[1]),
                         Boolean.parseBoolean(parts[2]),
                         parts[3],
                         parts[4],
-                        parts[5]);
+                        existingInstanceType);
                 statusMap.put(hostnameInCsv, existingStatus);
             }
         }
@@ -151,7 +179,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                         s.getIsInstalled(),
                         s.getAgentVersion(),
                         s.getTimestamp(),
-                        s.getInstanceType() != null ? s.getInstanceType() : ""
+                        s.getInstanceType() != null ? s.getInstanceType().name() : ""
                 });
             }
 

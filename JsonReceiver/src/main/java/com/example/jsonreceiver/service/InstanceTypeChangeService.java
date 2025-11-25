@@ -44,9 +44,9 @@ public class InstanceTypeChangeService {
      * 外部シェルを呼び出してインスタンスタイプを変更します（外部呼び出しは空実装）
      * 
      * @param hostname           ホスト名
-     * @param targetInstanceType 変更先のインスタンスタイプ ("HIGH" または "LOW")
+     * @param targetInstanceType 変更先のインスタンスタイプ
      */
-    public void changeInstanceType(String hostname, String targetInstanceType) {
+    public void changeInstanceType(String hostname, InstanceType targetInstanceType) {
         logger.info("Changing instance type for hostname: {} to: {}", hostname, targetInstanceType);
 
         try {
@@ -80,14 +80,18 @@ public class InstanceTypeChangeService {
 
             // 4. targetInstanceTypeに応じて適切なインスタンスタイプを選択
             String actualInstanceType;
-            if ("HIGH".equals(targetInstanceType)) {
+            if (targetInstanceType == InstanceType.HIGH) {
                 actualInstanceType = typeInfo.getHighInstanceType();
                 logger.info("Selected HIGH instance type: {} (CPU cores: {})",
                         actualInstanceType, typeInfo.getHighCpuCore());
-            } else if ("LOW".equals(targetInstanceType)) {
+            } else if (targetInstanceType == InstanceType.LOW) {
                 actualInstanceType = typeInfo.getLowInstanceType();
                 logger.info("Selected LOW instance type: {} (CPU cores: {})",
                         actualInstanceType, typeInfo.getLowCpuCore());
+            } else if (targetInstanceType == InstanceType.VERYLOW) {
+                actualInstanceType = typeInfo.getVeryLowInstanceType();
+                logger.info("Selected VERYLOW instance type: {} (CPU cores: {})",
+                        actualInstanceType, typeInfo.getVeryLowCpuCore());
             } else {
                 logger.error("Invalid targetInstanceType: {}", targetInstanceType);
                 return;
@@ -124,7 +128,7 @@ public class InstanceTypeChangeService {
      * @param hostname           ホスト名
      * @param targetInstanceType 変更先のインスタンスタイプ
      */
-    private void startMonitoringThread(String hostname, String targetInstanceType) {
+    private void startMonitoringThread(String hostname, InstanceType targetInstanceType) {
         logger.info("Starting monitoring thread for hostname: {}", hostname);
 
         AtomicInteger retryCount = new AtomicInteger(0);

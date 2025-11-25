@@ -36,7 +36,7 @@ public class InstanceStatusService {
             installAgent(installJson.getInstanceName());
 
             // 既存のInstanceTypeを取得
-            String existingInstanceType = null;
+            InstanceType existingInstanceType = null;
             try {
                 Optional<InstanceStatus> existingOpt = repository.findByHostname(installJson.getInstanceName());
                 if (existingOpt.isPresent()) {
@@ -77,7 +77,7 @@ public class InstanceStatusService {
             uninstallAgent(uninstallJson.getInstanceName());
 
             // 既存のInstanceTypeを取得
-            String existingInstanceType = null;
+            InstanceType existingInstanceType = null;
             try {
                 Optional<InstanceStatus> existingOpt = repository.findByHostname(uninstallJson.getInstanceName());
                 if (existingOpt.isPresent()) {
@@ -119,7 +119,7 @@ public class InstanceStatusService {
             Optional<InstanceStatus> existingOpt = repository.findByHostname(upJson.getInstanceName());
 
             boolean isInstalled = true; // デフォルトはtrue
-            String existingInstanceType = null;
+            InstanceType existingInstanceType = null;
             if (existingOpt.isPresent()) {
                 InstanceStatus existing = existingOpt.get();
                 // INSTALLINGからUPの場合はIsInstalledをtrueに
@@ -162,24 +162,26 @@ public class InstanceStatusService {
             logger.info("Processing DOWN notification for instance: {}", downJson.getInstanceName());
 
             // 既存データを取得
-            Optional<InstanceStatus> existingOpt = repository.findByHostname(downJson.getInstanceName());
-
-            boolean isInstalled = false; // デフォルトはfalse
-            String existingInstanceType = null;
-            if (existingOpt.isPresent()) {
-                InstanceStatus existing = existingOpt.get();
-                // UNINSTALLINGからDOWNの場合はIsInstalledをfalseに
-                if (existing.getStatus() == InstanceStatusValue.UNINSTALLING) {
-                    isInstalled = false;
-                } else {
-                    // その他の場合は既存値を保持
-                    isInstalled = existing.getIsInstalled();
+            // UPの場合、前の状態がINSTALLINGだったらisInstalledをtrueに
+            InstanceType existingInstanceType = null;
+            boolean isInstalled = false; // デフォルトはfalse (DOWNなので)
+            try {
+                Optional<InstanceStatus> existingOpt = repository.findByHostname(downJson.getInstanceName());
+                if (existingOpt.isPresent()) {
+                    InstanceStatus existing = existingOpt.get();
+                    existingInstanceType = existing.getInstanceType();
+                    // 前のステータスがUNINSTALLINGの場合はisInstalledをfalseに
+                    if (existing.getStatus() == InstanceStatusValue.UNINSTALLING) {
+                        isInstalled = false;
+                    } else {
+                        // その他の場合は既存値を保持
+                        isInstalled = existing.getIsInstalled();
+                    }
                 }
-                // InstanceTypeを保持
-                existingInstanceType = existing.getInstanceType();
+            } catch (IOException e) {
+                logger.warn("Failed to retrieve existing status for DOWN", e);
             }
 
-            // ステータスをDOWNに変更
             InstanceStatus status = new InstanceStatus(
                     downJson.getInstanceName(),
                     InstanceStatusValue.DOWN,

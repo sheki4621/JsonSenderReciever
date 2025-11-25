@@ -13,5 +13,5 @@ public class InstanceStatus {
     private Boolean isInstalled;
     private String agentVersion;
     private String timestamp;
-    private String instanceType;
+    private InstanceType instanceType;
 }

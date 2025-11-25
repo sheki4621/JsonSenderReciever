@@ -51,7 +51,7 @@ public class ThresholdServiceTest {
 
         // Assert
         verify(thresholdRepository).findByHostname("test-host");
-        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), anyString());
+        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), any(InstanceType.class));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ThresholdServiceTest {
         // Assert
         verify(thresholdRepository).findByHostname("test-host");
         verify(resourceInfoRepository, never()).findLastNByHostname(anyString(), anyInt());
-        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), anyString());
+        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), any(InstanceType.class));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ThresholdServiceTest {
         // Assert
         verify(thresholdRepository).findByHostname("test-host");
         verify(resourceInfoRepository).findLastNByHostname("test-host", 2);
-        verify(instanceTypeChangeService).changeInstanceType("test-host", "HIGH");
+        verify(instanceTypeChangeService).changeInstanceType("test-host", InstanceType.HIGH);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class ThresholdServiceTest {
         // Assert
         verify(thresholdRepository).findByHostname("test-host");
         verify(resourceInfoRepository).findLastNByHostname("test-host", 2);
-        verify(instanceTypeChangeService).changeInstanceType("test-host", "LOW");
+        verify(instanceTypeChangeService).changeInstanceType("test-host", InstanceType.LOW);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class ThresholdServiceTest {
         // Assert
         verify(thresholdRepository).findByHostname("test-host");
         verify(resourceInfoRepository).findLastNByHostname("test-host", 2);
-        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), anyString());
+        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), any(InstanceType.class));
     }
 
     @Test
@@ -160,7 +160,7 @@ public class ThresholdServiceTest {
         verify(thresholdRepository).findByHostname("test-host");
         verify(resourceInfoRepository).findLastNByHostname("test-host", 2);
         // 過去データ不足なのでインスタンスタイプ変更は実行されない
-        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), anyString());
+        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), any(InstanceType.class));
     }
 
     private MetricsJson createMetricsJson(String hostname, double cpuUsage, double memoryUsage) {
