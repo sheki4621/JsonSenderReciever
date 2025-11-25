@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
-import com.example.jsonreceiver.repository.*;
+import com.example.jsonreceiver.repository.*; // includes InstanceStatusRepository
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -29,6 +29,9 @@ public class ThresholdServiceTest {
     @Mock
     private InstanceTypeChangeService instanceTypeChangeService;
 
+    @Mock
+    private InstanceStatusRepository instanceStatusRepository;
+
     private ThresholdService thresholdService;
 
     @BeforeEach
@@ -37,7 +40,8 @@ public class ThresholdServiceTest {
         thresholdService = new ThresholdService(
                 resourceInfoRepository,
                 thresholdRepository,
-                instanceTypeChangeService);
+                instanceTypeChangeService,
+                instanceStatusRepository);
     }
 
     @Test

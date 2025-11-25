@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import com.example.jsonreceiver.dto.InstanceStatus;
+import com.example.jsonreceiver.repository.InstanceStatusRepository;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +30,8 @@ public class ThresholdService {
     private final ResourceInfoRepository resourceInfoRepository;
     private final ThresholdRepository thresholdRepository;
     private final InstanceTypeChangeService instanceTypeChangeService;
+    // Added repository to fetch current instance type
+    private final InstanceStatusRepository instanceStatusRepository;
 
     /**
      * しきい値チェックを実行します
@@ -111,8 +115,21 @@ public class ThresholdService {
             }
 
             if (allExceed) {
-                logger.info("Continuous threshold violation detected for hostname: {} (count: {})",
-                        hostname, continueCount);
+                logger.info("Continuous threshold violation detected for hostname: {} (count: {})", hostname,
+                        continueCount);
+                // Check current instance type to avoid unnecessary change
+                try {
+                    InstanceStatus currentStatus = instanceStatusRepository
+                            .findByHostname(hostname).orElse(null);
+                    if (currentStatus != null && currentStatus.getInstanceType() == targetInstanceType) {
+                        logger.warn("Instance type is already {} for hostname: {}. No change performed.",
+                                targetInstanceType, hostname);
+                        return;
+                    }
+                } catch (java.io.IOException e) {
+                    logger.error("Failed to retrieve current instance status for hostname: {}", hostname, e);
+                    // Proceed with change despite the error
+                }
                 instanceTypeChangeService.changeInstanceType(hostname, targetInstanceType);
             } else {
                 logger.debug("Threshold violation not continuous for hostname: {}", hostname);
