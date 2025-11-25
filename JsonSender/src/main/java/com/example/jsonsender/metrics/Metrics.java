@@ -1,0 +1,17 @@
+package com.example.jsonsender.metrics;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Metrics {
+    @JsonProperty("CpuUsage")
+    private Double cpuUsage;
+
+    @JsonProperty("MemoryUsage")
+    private Double memoryUsage;
+}
