@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ public class TcpServer implements CommandLineRunner {
     private final MetricsService metricsService;
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
-    @org.springframework.beans.factory.annotation.Value("${tcp.server.port:9999}")
+    @Value("${tcp.server.port:9999}")
     private int port;
 
     private int actualPort;
