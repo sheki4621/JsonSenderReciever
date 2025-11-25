@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class TcpServer implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(TcpServer.class);
     private final MetricsService metricsService;
     private final InstanceStatusService instanceStatusService;
+    private final ExecutorService noticeProcessingExecutor;
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Value("${tcp.server.port:9999}")
@@ -56,25 +58,56 @@ public class TcpServer implements CommandLineRunner {
                                     String noticeTypeStr = jsonNode.get("NoticeType").asText();
                                     if (NoticeType.METRICS.name().equals(noticeTypeStr)) {
                                         MetricsJson metricsJson = objectMapper.treeToValue(jsonNode, MetricsJson.class);
-                                        metricsService.processMetrics(metricsJson);
-                                        logger.info("Processed METRICS: {}", metricsJson.getId());
+                                        noticeProcessingExecutor.submit(() -> {
+                                            try {
+                                                metricsService.processMetrics(metricsJson);
+                                                logger.info("Processed METRICS: {}", metricsJson.getId());
+                                            } catch (Exception e) {
+                                                logger.error("Failed to process METRICS: {}", metricsJson.getId(), e);
+                                            }
+                                        });
                                     } else if (NoticeType.INSTALL.name().equals(noticeTypeStr)) {
                                         InstallJson installJson = objectMapper.treeToValue(jsonNode, InstallJson.class);
-                                        instanceStatusService.processInstall(installJson);
-                                        logger.info("Processed INSTALL: {}", installJson.getId());
+                                        noticeProcessingExecutor.submit(() -> {
+                                            try {
+                                                instanceStatusService.processInstall(installJson);
+                                                logger.info("Processed INSTALL: {}", installJson.getId());
+                                            } catch (Exception e) {
+                                                logger.error("Failed to process INSTALL: {}", installJson.getId(), e);
+                                            }
+                                        });
                                     } else if (NoticeType.UNINSTALL.name().equals(noticeTypeStr)) {
                                         UninstallJson uninstallJson = objectMapper.treeToValue(jsonNode,
                                                 UninstallJson.class);
-                                        instanceStatusService.processUninstall(uninstallJson);
-                                        logger.info("Processed UNINSTALL: {}", uninstallJson.getId());
+                                        noticeProcessingExecutor.submit(() -> {
+                                            try {
+                                                instanceStatusService.processUninstall(uninstallJson);
+                                                logger.info("Processed UNINSTALL: {}", uninstallJson.getId());
+                                            } catch (Exception e) {
+                                                logger.error("Failed to process UNINSTALL: {}", uninstallJson.getId(),
+                                                        e);
+                                            }
+                                        });
                                     } else if (NoticeType.UP.name().equals(noticeTypeStr)) {
                                         UpJson upJson = objectMapper.treeToValue(jsonNode, UpJson.class);
-                                        instanceStatusService.processUp(upJson);
-                                        logger.info("Processed UP: {}", upJson.getId());
+                                        noticeProcessingExecutor.submit(() -> {
+                                            try {
+                                                instanceStatusService.processUp(upJson);
+                                                logger.info("Processed UP: {}", upJson.getId());
+                                            } catch (Exception e) {
+                                                logger.error("Failed to process UP: {}", upJson.getId(), e);
+                                            }
+                                        });
                                     } else if (NoticeType.DOWN.name().equals(noticeTypeStr)) {
                                         DownJson downJson = objectMapper.treeToValue(jsonNode, DownJson.class);
-                                        instanceStatusService.processDown(downJson);
-                                        logger.info("Processed DOWN: {}", downJson.getId());
+                                        noticeProcessingExecutor.submit(() -> {
+                                            try {
+                                                instanceStatusService.processDown(downJson);
+                                                logger.info("Processed DOWN: {}", downJson.getId());
+                                            } catch (Exception e) {
+                                                logger.error("Failed to process DOWN: {}", downJson.getId(), e);
+                                            }
+                                        });
                                     } else {
                                         logger.info("Ignored NoticeType: {}", noticeTypeStr);
                                     }
