@@ -23,4 +23,7 @@ public abstract class NoticeBaseJson {
 
     @JsonProperty("AgentVersion")
     private String agentVersion;
+
+    @JsonProperty("InstanceName")
+    private String instanceName;
 }

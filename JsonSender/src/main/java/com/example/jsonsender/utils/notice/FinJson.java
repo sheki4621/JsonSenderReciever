@@ -14,7 +14,7 @@ import java.util.UUID;
 @ToString(callSuper = true)
 public class FinJson extends NoticeBaseJson {
 
-    public FinJson(UUID id, ZonedDateTime timestamp, String agentVersion) {
-        super(id, NoticeType.FIN, timestamp, agentVersion);
+    public FinJson(UUID id, ZonedDateTime timestamp, String agentVersion, String instanceName) {
+        super(id, NoticeType.FIN, timestamp, agentVersion, instanceName);
     }
 }

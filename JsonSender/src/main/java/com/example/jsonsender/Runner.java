@@ -35,7 +35,8 @@ public class Runner implements CommandLineRunner {
         InitJson initNotice = new InitJson(
                 IdUtils.getId(),
                 TimeUtils.getNow(appConfig.getTimezone()),
-                appConfig.getAgentVersion());
+                appConfig.getAgentVersion(),
+                com.example.jsonsender.utils.InstanceUtils.getInstanceName());
         tcpClient.sendJson(appConfig.getDistHostname(), appConfig.getDistPort(), initNotice);
 
         while (true) {
@@ -46,6 +47,7 @@ public class Runner implements CommandLineRunner {
                         NoticeType.METRICS,
                         TimeUtils.getNow(appConfig.getTimezone()),
                         appConfig.getAgentVersion(),
+                        com.example.jsonsender.utils.InstanceUtils.getInstanceName(),
                         metrics);
 
                 tcpClient.sendJson(appConfig.getDistHostname(), appConfig.getDistPort(), metricsJson);
@@ -68,7 +70,8 @@ public class Runner implements CommandLineRunner {
         FinJson finNotice = new FinJson(
                 IdUtils.getId(),
                 TimeUtils.getNow(appConfig.getTimezone()),
-                appConfig.getAgentVersion());
+                appConfig.getAgentVersion(),
+                com.example.jsonsender.utils.InstanceUtils.getInstanceName());
         tcpClient.sendJsonDirectly(appConfig.getDistHostname(), appConfig.getDistPort(), finNotice);
     }
 }

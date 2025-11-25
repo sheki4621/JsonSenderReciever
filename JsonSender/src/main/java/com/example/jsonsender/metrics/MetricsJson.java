@@ -18,8 +18,9 @@ public class MetricsJson extends com.example.jsonsender.utils.notice.NoticeBaseJ
     @JsonProperty("Metrics")
     private Metrics metrics;
 
-    public MetricsJson(UUID id, NoticeType noticeType, ZonedDateTime timestamp, String agentVersion, Metrics metrics) {
-        super(id, noticeType, timestamp, agentVersion);
+    public MetricsJson(UUID id, NoticeType noticeType, ZonedDateTime timestamp, String agentVersion,
+            String instanceName, Metrics metrics) {
+        super(id, noticeType, timestamp, agentVersion, instanceName);
         this.metrics = metrics;
     }
 }

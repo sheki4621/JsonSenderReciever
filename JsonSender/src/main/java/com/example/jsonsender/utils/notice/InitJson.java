@@ -14,7 +14,7 @@ import java.util.UUID;
 @ToString(callSuper = true)
 public class InitJson extends NoticeBaseJson {
 
-    public InitJson(UUID id, ZonedDateTime timestamp, String agentVersion) {
-        super(id, NoticeType.INIT, timestamp, agentVersion);
+    public InitJson(UUID id, ZonedDateTime timestamp, String agentVersion, String instanceName) {
+        super(id, NoticeType.INIT, timestamp, agentVersion, instanceName);
     }
 }

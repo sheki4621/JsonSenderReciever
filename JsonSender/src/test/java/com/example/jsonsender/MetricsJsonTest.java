@@ -30,7 +30,7 @@ class MetricsJsonTest {
         UUID id = com.example.jsonsender.utils.IdUtils.getId();
         ZonedDateTime now = com.example.jsonsender.utils.TimeUtils.getNow("Asia/Tokyo");
         Metrics metrics = new Metrics(23.4, 34.5);
-        MetricsJson metricsJson = new MetricsJson(id, NoticeType.METRICS, now, "1.0", metrics);
+        MetricsJson metricsJson = new MetricsJson(id, NoticeType.METRICS, now, "1.0", "test-instance", metrics);
 
         String json = objectMapper.writeValueAsString(metricsJson);
         System.out.println(json);
@@ -39,6 +39,7 @@ class MetricsJsonTest {
         assertTrue(json.contains("\"NoticeType\":\"METRICS\""));
         assertTrue(json.contains("\"timestamp\":"));
         assertTrue(json.contains("\"AgentVersion\":\"1.0\""));
+        assertTrue(json.contains("\"InstanceName\":\"test-instance\""));
         assertTrue(json.contains("\"Metrics\":"));
         assertTrue(json.contains("\"CpuUsage\":23.4"));
         assertTrue(json.contains("\"MemoryUsage\":34.5"));
@@ -49,7 +50,7 @@ class MetricsJsonTest {
         UUID id = com.example.jsonsender.utils.IdUtils.getId();
         ZonedDateTime now = com.example.jsonsender.utils.TimeUtils.getNow("Asia/Tokyo");
         Metrics metrics = new Metrics(null, null);
-        MetricsJson metricsJson = new MetricsJson(id, NoticeType.METRICS, now, "1.0", metrics);
+        MetricsJson metricsJson = new MetricsJson(id, NoticeType.METRICS, now, "1.0", "test-instance", metrics);
 
         String json = objectMapper.writeValueAsString(metricsJson);
 
