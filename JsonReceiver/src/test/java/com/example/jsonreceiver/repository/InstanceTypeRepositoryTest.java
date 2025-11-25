@@ -48,11 +48,9 @@ class InstanceTypeRepositoryTest {
     void testSaveAll_createsFileWithHeaders() throws IOException {
         // テストデータを作成
         List<InstanceTypeInfo> instanceTypes = Arrays.asList(
-                new InstanceTypeInfo("t2.micro"),
-                new InstanceTypeInfo("t2.small"),
-                new InstanceTypeInfo("t3.micro"));
-
-        // saveAllメソッドを呼び出し
+                new InstanceTypeInfo("1", "t2.micro"),
+                new InstanceTypeInfo("2", "t2.small"),
+                new InstanceTypeInfo("3", "t3.micro")); // saveAllメソッドを呼び出し
         repository.saveAll(instanceTypes);
 
         // ファイルが作成されたことを確認
@@ -64,29 +62,29 @@ class InstanceTypeRepositoryTest {
         assertFalse(lines.isEmpty());
 
         // ヘッダーが存在することを確認
-        assertEquals("InstanceType", lines.get(0));
+        assertEquals("Id,InstanceType", lines.get(0));
 
         // データ行数を確認（ヘッダー + 3行）
         assertEquals(4, lines.size());
 
         // データの内容を確認
-        assertTrue(lines.contains("t2.micro"));
-        assertTrue(lines.contains("t2.small"));
-        assertTrue(lines.contains("t3.micro"));
+        assertTrue(lines.contains("1,t2.micro"));
+        assertTrue(lines.contains("2,t2.small"));
+        assertTrue(lines.contains("3,t3.micro"));
     }
 
     @Test
     void testSaveAll_overwritesExistingFile() throws IOException {
         // 最初のデータセットを保存
         List<InstanceTypeInfo> firstSet = Arrays.asList(
-                new InstanceTypeInfo("t2.micro"),
-                new InstanceTypeInfo("t2.small"));
+                new InstanceTypeInfo("1", "t2.micro"),
+                new InstanceTypeInfo("2", "t2.small"));
         repository.saveAll(firstSet);
 
         // 2回目のデータセットを保存（上書き）
         List<InstanceTypeInfo> secondSet = Arrays.asList(
-                new InstanceTypeInfo("t3.large"),
-                new InstanceTypeInfo("t3.xlarge"));
+                new InstanceTypeInfo("3", "t3.large"),
+                new InstanceTypeInfo("4", "t3.xlarge"));
         repository.saveAll(secondSet);
 
         // ファイルの内容を確認
@@ -94,12 +92,12 @@ class InstanceTypeRepositoryTest {
         List<String> lines = Files.readAllLines(filePath);
 
         // 古いデータが存在しないことを確認（上書きされている）
-        assertFalse(lines.contains("t2.micro"));
-        assertFalse(lines.contains("t2.small"));
+        assertFalse(lines.contains("1,t2.micro"));
+        assertFalse(lines.contains("2,t2.small"));
 
         // 新しいデータが存在することを確認
-        assertTrue(lines.contains("t3.large"));
-        assertTrue(lines.contains("t3.xlarge"));
+        assertTrue(lines.contains("3,t3.large"));
+        assertTrue(lines.contains("4,t3.xlarge"));
 
         // データ行数を確認（ヘッダー + 2行）
         assertEquals(3, lines.size());
@@ -118,7 +116,7 @@ class InstanceTypeRepositoryTest {
         // ヘッダーのみが存在することを確認
         List<String> lines = Files.readAllLines(filePath);
         assertEquals(1, lines.size());
-        assertEquals("InstanceType", lines.get(0));
+        assertEquals("Id,InstanceType", lines.get(0));
     }
 
     @Test
@@ -131,7 +129,7 @@ class InstanceTypeRepositoryTest {
 
         // データを保存
         List<InstanceTypeInfo> instanceTypes = Arrays.asList(
-                new InstanceTypeInfo("t2.micro"));
+                new InstanceTypeInfo("1", "t2.micro"));
         repository.saveAll(instanceTypes);
 
         // ディレクトリとファイルが作成されたことを確認

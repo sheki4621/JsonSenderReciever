@@ -11,17 +11,17 @@ import java.util.List;
 public class InstanceTypeRepository extends CsvRepositoryBase {
 
     private static final String FILE_NAME = "InstanceType.csv";
-    private static final String[] HEADERS = { "InstanceType" };
+    private static final String[] HEADERS = { "Id", "InstanceType" };
 
     /**
      * 単一のインスタンスタイプを追記保存する
      * 
-     * @param id           ID（将来的な拡張用、現在は使用されていない）
+     * @param id           ID
      * @param instanceType インスタンスタイプ名
      * @throws IOException IO例外
      */
     public void save(String id, String instanceType) throws IOException {
-        writeToCsv(FILE_NAME, HEADERS, instanceType);
+        writeToCsv(FILE_NAME, HEADERS, id, instanceType);
     }
 
     /**
@@ -34,8 +34,9 @@ public class InstanceTypeRepository extends CsvRepositoryBase {
     public void saveAll(List<InstanceTypeInfo> instanceTypes) throws IOException {
         List<Object[]> values = new ArrayList<>();
         for (InstanceTypeInfo info : instanceTypes) {
-            values.add(new Object[] { info.getInstanceType() });
+            values.add(new Object[] { info.getId(), info.getInstanceType() });
         }
         overwriteToCsv(FILE_NAME, HEADERS, values);
     }
+
 }

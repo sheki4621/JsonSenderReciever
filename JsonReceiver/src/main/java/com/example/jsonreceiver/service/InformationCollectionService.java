@@ -134,11 +134,11 @@ public class InformationCollectionService {
 
         // TODO: 将来的にシェルスクリプトを呼び出す処理に置き換える
         List<InstanceTypeInfo> instanceTypes = new ArrayList<>();
-        instanceTypes.add(new InstanceTypeInfo("t2.micro"));
-        instanceTypes.add(new InstanceTypeInfo("t2.small"));
-        instanceTypes.add(new InstanceTypeInfo("t2.medium"));
-        instanceTypes.add(new InstanceTypeInfo("t3.micro"));
-        instanceTypes.add(new InstanceTypeInfo("t3.small"));
+        instanceTypes.add(new InstanceTypeInfo("1", "t2.micro"));
+        instanceTypes.add(new InstanceTypeInfo("2", "t2.small"));
+        instanceTypes.add(new InstanceTypeInfo("3", "t2.medium"));
+        instanceTypes.add(new InstanceTypeInfo("4", "t3.micro"));
+        instanceTypes.add(new InstanceTypeInfo("5", "t3.small"));
 
         return instanceTypes;
     }

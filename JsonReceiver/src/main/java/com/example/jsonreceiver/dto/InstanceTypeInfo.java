@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class InstanceTypeInfo {
     /**
+     * ID
+     */
+    private String id;
+
+    /**
      * インスタンスタイプ名
      */
     private String instanceType;
