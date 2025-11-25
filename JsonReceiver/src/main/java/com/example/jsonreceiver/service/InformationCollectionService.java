@@ -2,6 +2,9 @@ package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.InstanceTypeInfo;
 import com.example.jsonreceiver.dto.SystemInfo;
+import com.example.jsonreceiver.repository.InstanceTypeRepository;
+import com.example.jsonreceiver.repository.SystemInfoRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,9 +19,13 @@ import java.util.List;
  * 現在はサンプルデータを返し、将来的にシェルスクリプトを呼び出す構造になっています。
  */
 @Service
+@RequiredArgsConstructor
 public class InformationCollectionService {
 
     private static final Logger logger = LoggerFactory.getLogger(InformationCollectionService.class);
+
+    private final InstanceTypeRepository instanceTypeRepository;
+    private final SystemInfoRepository systemInfoRepository;
 
     @Value("${info.collection.retry.max-attempts:3}")
     private int maxRetryAttempts;
@@ -29,23 +36,47 @@ public class InformationCollectionService {
     /**
      * インスタンスタイプ一覧を収集します。
      * リトライロジック付きで、失敗時は設定された回数まで再試行します。
+     * 収集したデータはCSVファイルに上書き出力されます。
      * 
      * @return インスタンスタイプ情報のリスト
      * @throws RuntimeException すべてのリトライが失敗した場合
      */
     public List<InstanceTypeInfo> collectInstanceTypes() {
-        return executeWithRetry("インスタンスタイプ一覧", this::fetchInstanceTypes);
+        List<InstanceTypeInfo> instanceTypes = executeWithRetry("インスタンスタイプ一覧", this::fetchInstanceTypes);
+
+        // CSV出力
+        try {
+            instanceTypeRepository.saveAll(instanceTypes);
+            logger.debug("インスタンスタイプ一覧をCSVファイルに出力しました");
+        } catch (Exception e) {
+            logger.error("インスタンスタイプのCSV出力に失敗しました", e);
+            // CSV出力に失敗しても、データの収集自体は成功しているため例外をスローしない
+        }
+
+        return instanceTypes;
     }
 
     /**
      * システム情報を収集します。
      * リトライロジック付きで、失敗時は設定された回数まで再試行します。
+     * 収集したデータはCSVファイルに上書き出力されます。
      * 
      * @return システム情報のリスト
      * @throws RuntimeException すべてのリトライが失敗した場合
      */
     public List<SystemInfo> collectSystemInfo() {
-        return executeWithRetry("システム情報", this::fetchSystemInfo);
+        List<SystemInfo> systemInfoList = executeWithRetry("システム情報", this::fetchSystemInfo);
+
+        // CSV出力
+        try {
+            systemInfoRepository.saveAll(systemInfoList);
+            logger.debug("システム情報をCSVファイルに出力しました");
+        } catch (Exception e) {
+            logger.error("システム情報のCSV出力に失敗しました", e);
+            // CSV出力に失敗しても、データの収集自体は成功しているため例外をスローしない
+        }
+
+        return systemInfoList;
     }
 
     /**
