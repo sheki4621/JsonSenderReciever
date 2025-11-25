@@ -152,4 +152,84 @@ public class InstanceTypeChangeServiceTest {
         verify(instanceTypeLinkRepository).findByElType("EL-A");
         verify(instanceTypeRepository).findByInstanceTypeId("1");
     }
+
+    @Test
+    public void testChangeInstanceType_MaxRetryReached() throws IOException {
+        // Arrange
+        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
+        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
+
+        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
+        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
+
+        // Create spy
+        InstanceTypeChangeService spyService = spy(service);
+
+        // Override config for faster test
+        ReflectionTestUtils.setField(spyService, "checkIntervalSeconds", 1);
+        ReflectionTestUtils.setField(spyService, "maxRetryCount", 3);
+
+        // Mock checkInstanceTypeChangeCompletion to always return false
+        doReturn(false).when(spyService).checkInstanceTypeChangeCompletion(anyString());
+
+        // Act
+        spyService.changeInstanceType("test-host", InstanceType.HIGH);
+
+        // Wait for retries
+        try {
+            // 1s initial + 3 * 1s interval + buffer
+            Thread.sleep(4500);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        // Assert
+        // Should be called exactly maxRetryCount times (3)
+        verify(spyService, times(3)).checkInstanceTypeChangeCompletion("test-host");
+
+        // Should NOT update instance status
+        verify(instanceStatusRepository, never()).updateInstanceType(anyString(), any());
+    }
+
+    @Test
+    public void testChangeInstanceType_SuccessAfterRetries() throws IOException {
+        // Arrange
+        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
+        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
+
+        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
+        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
+
+        // Create spy
+        InstanceTypeChangeService spyService = spy(service);
+
+        // Override config for faster test
+        ReflectionTestUtils.setField(spyService, "checkIntervalSeconds", 1);
+        ReflectionTestUtils.setField(spyService, "maxRetryCount", 3);
+
+        // Mock checkInstanceTypeChangeCompletion to return false twice, then true
+        doReturn(false).doReturn(false).doReturn(true).when(spyService).checkInstanceTypeChangeCompletion(anyString());
+
+        // Act
+        spyService.changeInstanceType("test-host", InstanceType.HIGH);
+
+        // Wait for retries
+        try {
+            // 1s initial + 2 * 1s interval + buffer
+            Thread.sleep(3500);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        // Assert
+        // Should be called 3 times (2 failures + 1 success)
+        verify(spyService, times(3)).checkInstanceTypeChangeCompletion("test-host");
+
+        // Should update instance status
+        verify(instanceStatusRepository, times(1)).updateInstanceType("test-host", InstanceType.HIGH);
+    }
 }

@@ -132,14 +132,17 @@ public class InstanceTypeChangeService {
         logger.info("Starting monitoring thread for hostname: {}", hostname);
 
         AtomicInteger retryCount = new AtomicInteger(0);
+        scheduleNextCheck(hostname, targetInstanceType, retryCount, 1);
+    }
 
-        monitoringExecutor.scheduleAtFixedRate(() -> {
+    private void scheduleNextCheck(String hostname, InstanceType targetInstanceType, AtomicInteger retryCount,
+            long delaySeconds) {
+        monitoringExecutor.schedule(() -> {
             try {
                 int currentRetry = retryCount.incrementAndGet();
                 logger.debug("Checking instance type change completion for hostname: {} (attempt {}/{})",
                         hostname, currentRetry, maxRetryCount);
 
-                // 外部シェルを呼び出してインスタンスタイプ変更完了を確認（空実装のため常にtrue）
                 boolean isCompleted = checkInstanceTypeChangeCompletion(hostname);
 
                 if (isCompleted) {
@@ -151,29 +154,27 @@ public class InstanceTypeChangeService {
 
                     logger.info("Successfully updated InstanceType to {} for hostname: {}",
                             targetInstanceType, hostname);
-
-                    // 完了したのでスレッドを停止
-                    throw new RuntimeException("Completed");
+                    return; // 完了
                 }
 
                 if (currentRetry >= maxRetryCount) {
                     logger.warn("Max retry count reached for hostname: {}, stopping monitoring thread",
                             hostname);
-                    throw new RuntimeException("Max retry count reached");
+                    return; // 最大リトライ回数到達
                 }
 
+                // 次回のチェックをスケジュール
+                scheduleNextCheck(hostname, targetInstanceType, retryCount, checkIntervalSeconds);
+
             } catch (Exception e) {
-                if ("Completed".equals(e.getMessage())) {
-                    logger.debug("Monitoring thread completed successfully for hostname: {}", hostname);
-                } else if ("Max retry count reached".equals(e.getMessage())) {
-                    logger.warn("Monitoring thread stopped due to max retry count for hostname: {}", hostname);
-                } else {
-                    logger.error("Error in monitoring thread for hostname: {}", hostname, e);
+                logger.error("Error in monitoring thread for hostname: {}", hostname, e);
+                // エラーが発生してもリトライ上限までは継続するか、ここで停止するか。
+                // ここでは安全のため停止せず、次回のスケジュールを行う（リトライカウントは増えている）
+                if (retryCount.get() < maxRetryCount) {
+                    scheduleNextCheck(hostname, targetInstanceType, retryCount, checkIntervalSeconds);
                 }
-                // 例外が発生したらこのスケジュールを停止
-                throw new RuntimeException(e);
             }
-        }, 1, checkIntervalSeconds, TimeUnit.SECONDS); // 初回実行は1秒後
+        }, delaySeconds, TimeUnit.SECONDS);
     }
 
     /**
@@ -182,7 +183,7 @@ public class InstanceTypeChangeService {
      * @param hostname ホスト名
      * @return 変更完了の場合true
      */
-    private boolean checkInstanceTypeChangeCompletion(String hostname) {
+    protected boolean checkInstanceTypeChangeCompletion(String hostname) {
         logger.debug("Checking instance type change completion for hostname: {} (stub implementation)", hostname);
         // TODO: 外部シェルを呼び出してインスタンスタイプ変更完了を確認
         // 現在は空実装のため、即座に完了とみなす
