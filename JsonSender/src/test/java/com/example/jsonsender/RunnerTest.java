@@ -3,8 +3,8 @@ package com.example.jsonsender;
 import com.example.jsonsender.config.AppConfig;
 import com.example.jsonsender.metrics.Metrics;
 import com.example.jsonsender.utils.collector.Collector;
-import com.example.jsonsender.utils.notice.FinJson;
-import com.example.jsonsender.utils.notice.InitJson;
+import com.example.jsonsender.utils.notice.DownJson;
+import com.example.jsonsender.utils.notice.UpJson;
 import com.example.jsonsender.utils.notice.NoticeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,12 +50,12 @@ class RunnerTest {
     }
 
     @Test
-    void testRunSendsInitNotification() throws Exception {
+    void testRunSendsUpNotification() throws Exception {
         // Arrange
         // Throw InterruptedException to break the loop immediately after first
         // iteration logic (or before)
-        // Actually, we want it to run at least once to send INIT?
-        // INIT is sent BEFORE the loop.
+        // Actually, we want it to run at least once to send UP?
+        // UP is sent BEFORE the loop.
         // So we can just throw InterruptedException immediately in
         // metricsCollector.collect()
         when(metricsCollector.collect()).thenThrow(new InterruptedException("Stop loop"));
@@ -68,13 +68,13 @@ class RunnerTest {
         verify(tcpClient).sendJson(anyString(), anyInt(), captor.capture());
 
         Object captured = captor.getValue();
-        assertThat(captured).isInstanceOf(InitJson.class);
-        InitJson notice = (InitJson) captured;
-        assertThat(notice.getNoticeType()).isEqualTo(NoticeType.INIT);
+        assertThat(captured).isInstanceOf(UpJson.class);
+        UpJson notice = (UpJson) captured;
+        assertThat(notice.getNoticeType()).isEqualTo(NoticeType.UP);
     }
 
     @Test
-    void testOnExitSendsFinNotification() {
+    void testOnExitSendsDownNotification() {
         // Act
         runner.onExit();
 
@@ -83,8 +83,8 @@ class RunnerTest {
         verify(tcpClient).sendJsonDirectly(anyString(), anyInt(), captor.capture());
 
         Object captured = captor.getValue();
-        assertThat(captured).isInstanceOf(FinJson.class);
-        FinJson notice = (FinJson) captured;
-        assertThat(notice.getNoticeType()).isEqualTo(NoticeType.FIN);
+        assertThat(captured).isInstanceOf(DownJson.class);
+        DownJson notice = (DownJson) captured;
+        assertThat(notice.getNoticeType()).isEqualTo(NoticeType.DOWN);
     }
 }

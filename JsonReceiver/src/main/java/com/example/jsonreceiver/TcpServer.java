@@ -1,7 +1,7 @@
 package com.example.jsonreceiver;
 
-import com.example.jsonreceiver.dto.MetricsJson;
-import com.example.jsonreceiver.dto.NoticeType;
+import com.example.jsonreceiver.dto.*;
+import com.example.jsonreceiver.service.InstanceStatusService;
 import com.example.jsonreceiver.service.MetricsService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +24,7 @@ public class TcpServer implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(TcpServer.class);
     private final MetricsService metricsService;
+    private final InstanceStatusService instanceStatusService;
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Value("${tcp.server.port:9999}")
@@ -57,6 +58,23 @@ public class TcpServer implements CommandLineRunner {
                                         MetricsJson metricsJson = objectMapper.treeToValue(jsonNode, MetricsJson.class);
                                         metricsService.processMetrics(metricsJson);
                                         logger.info("Processed METRICS: {}", metricsJson.getId());
+                                    } else if (NoticeType.INSTALL.name().equals(noticeTypeStr)) {
+                                        InstallJson installJson = objectMapper.treeToValue(jsonNode, InstallJson.class);
+                                        instanceStatusService.processInstall(installJson);
+                                        logger.info("Processed INSTALL: {}", installJson.getId());
+                                    } else if (NoticeType.UNINSTALL.name().equals(noticeTypeStr)) {
+                                        UninstallJson uninstallJson = objectMapper.treeToValue(jsonNode,
+                                                UninstallJson.class);
+                                        instanceStatusService.processUninstall(uninstallJson);
+                                        logger.info("Processed UNINSTALL: {}", uninstallJson.getId());
+                                    } else if (NoticeType.UP.name().equals(noticeTypeStr)) {
+                                        UpJson upJson = objectMapper.treeToValue(jsonNode, UpJson.class);
+                                        instanceStatusService.processUp(upJson);
+                                        logger.info("Processed UP: {}", upJson.getId());
+                                    } else if (NoticeType.DOWN.name().equals(noticeTypeStr)) {
+                                        DownJson downJson = objectMapper.treeToValue(jsonNode, DownJson.class);
+                                        instanceStatusService.processDown(downJson);
+                                        logger.info("Processed DOWN: {}", downJson.getId());
                                     } else {
                                         logger.info("Ignored NoticeType: {}", noticeTypeStr);
                                     }

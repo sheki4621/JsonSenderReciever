@@ -12,9 +12,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class InitJson extends NoticeBaseJson {
+public class DownJson extends NoticeBaseJson {
 
-    public InitJson(UUID id, ZonedDateTime timestamp, String agentVersion, String instanceName) {
-        super(id, NoticeType.INIT, timestamp, agentVersion, instanceName);
+    public DownJson(UUID id, ZonedDateTime timestamp, String agentVersion, String instanceName) {
+        super(id, NoticeType.DOWN, timestamp, agentVersion, instanceName);
     }
 }

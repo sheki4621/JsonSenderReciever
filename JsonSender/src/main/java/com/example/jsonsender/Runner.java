@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import com.example.jsonsender.metrics.Metrics;
 import com.example.jsonsender.metrics.MetricsJson;
 import com.example.jsonsender.utils.collector.Collector;
-import com.example.jsonsender.utils.notice.FinJson;
-import com.example.jsonsender.utils.notice.InitJson;
+import com.example.jsonsender.utils.notice.DownJson;
+import com.example.jsonsender.utils.notice.UpJson;
 import com.example.jsonsender.utils.notice.NoticeType;
 import com.example.jsonsender.utils.IdUtils;
 import com.example.jsonsender.utils.TimeUtils;
@@ -31,13 +31,13 @@ public class Runner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Send INIT notification
-        InitJson initNotice = new InitJson(
+        // Send UP notification
+        UpJson upNotice = new UpJson(
                 IdUtils.getId(),
                 TimeUtils.getNow(appConfig.getTimezone()),
                 appConfig.getAgentVersion(),
                 com.example.jsonsender.utils.InstanceUtils.getInstanceName());
-        tcpClient.sendJson(appConfig.getDistHostname(), appConfig.getDistPort(), initNotice);
+        tcpClient.sendJson(appConfig.getDistHostname(), appConfig.getDistPort(), upNotice);
 
         while (true) {
             try {
@@ -66,12 +66,12 @@ public class Runner implements CommandLineRunner {
 
     @PreDestroy
     public void onExit() {
-        // Send FIN notification
-        FinJson finNotice = new FinJson(
+        // Send DOWN notification
+        DownJson downNotice = new DownJson(
                 IdUtils.getId(),
                 TimeUtils.getNow(appConfig.getTimezone()),
                 appConfig.getAgentVersion(),
                 com.example.jsonsender.utils.InstanceUtils.getInstanceName());
-        tcpClient.sendJsonDirectly(appConfig.getDistHostname(), appConfig.getDistPort(), finNotice);
+        tcpClient.sendJsonDirectly(appConfig.getDistHostname(), appConfig.getDistPort(), downNotice);
     }
 }

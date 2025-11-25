@@ -12,9 +12,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class FinJson extends NoticeBaseJson {
+public class UninstallJson extends NoticeBaseJson {
 
-    public FinJson(UUID id, ZonedDateTime timestamp, String agentVersion, String instanceName) {
-        super(id, NoticeType.FIN, timestamp, agentVersion, instanceName);
+    public UninstallJson(UUID id, ZonedDateTime timestamp, String agentVersion, String instanceName) {
+        super(id, NoticeType.UNINSTALL, timestamp, agentVersion, instanceName);
     }
 }

@@ -17,6 +17,15 @@ public abstract class CsvRepositoryBase {
     private String outputDir;
 
     /**
+     * outputDirを設定するセッター
+     * 
+     * @param outputDir 出力ディレクトリ
+     */
+    public void setOutputDir(String outputDir) {
+        this.outputDir = outputDir;
+    }
+
+    /**
      * CSV ファイルに追記モードでデータを書き込む
      * 
      * @param fileName ファイル名
@@ -76,5 +85,23 @@ public abstract class CsvRepositoryBase {
                 printer.printRecord(valueArray);
             }
         }
+    }
+
+    /**
+     * CSV ファイルからデータを読み込む
+     * 
+     * @param fileName ファイル名
+     * @return CSVファイルの全行（ヘッダーを含む）
+     * @throws IOException IO例外
+     */
+    protected List<String> readFromCsv(String fileName) throws IOException {
+        Path dirPath = Paths.get(outputDir);
+        Path filePath = dirPath.resolve(fileName);
+
+        if (!Files.exists(filePath)) {
+            return List.of();
+        }
+
+        return Files.readAllLines(filePath);
     }
 }
