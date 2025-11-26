@@ -50,12 +50,12 @@ public class TcpClient {
                 socket.connect(new java.net.InetSocketAddress(host, port), timeout * 1000);
                 try (PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
                     String json = objectMapper.writeValueAsString(data);
-                    logger.info("Sending JSON: {}", json);
+                    logger.info("JSONを送信します: {}", json);
                     out.println(json);
                     return true; // Success
                 }
             } catch (Exception e) {
-                logger.warn("Error sending JSON (Attempt {}/{}): {}", i + 1, retryMax + 1, e.getMessage());
+                logger.warn("JSON送信エラー (試行 {}/{}): {}", i + 1, retryMax + 1, e.getMessage());
                 if (i < retryMax) {
                     try {
                         Thread.sleep(retryIntervalSec * 1000L);
@@ -66,7 +66,7 @@ public class TcpClient {
                 }
             }
         }
-        logger.error("Failed to send JSON after {} attempts", retryMax + 1);
+        logger.error("{}回の試行後もJSON送信に失敗しました", retryMax + 1);
         return false;
     }
 }

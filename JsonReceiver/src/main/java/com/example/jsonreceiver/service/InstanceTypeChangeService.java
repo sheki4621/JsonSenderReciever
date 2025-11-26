@@ -47,33 +47,33 @@ public class InstanceTypeChangeService {
      * @param targetInstanceType 変更先のインスタンスタイプ
      */
     public void changeInstanceType(String hostname, InstanceType targetInstanceType) {
-        logger.info("Changing instance type for hostname: {} to: {}", hostname, targetInstanceType);
+        logger.info("ホスト名 {} のインスタンスタイプを {} に変更します", hostname, targetInstanceType);
 
         try {
             // 1. SystemInfo.csvからホスト名でElTypeを取得
             Optional<SystemInfo> systemInfoOpt = systemInfoRepository.findByHostname(hostname);
             if (systemInfoOpt.isEmpty()) {
-                logger.error("SystemInfo not found for hostname: {}", hostname);
+                logger.error("ホスト名 {} の SystemInfo が見つかりません", hostname);
                 return;
             }
             SystemInfo systemInfo = systemInfoOpt.get();
             String elType = systemInfo.getElType();
-            logger.debug("Found ElType: {} for hostname: {}", elType, hostname);
+            logger.debug("ホスト名 {} の ElType を検出: {}", hostname, elType);
 
             // 2. InstanceTypeLink.csvからElTypeでInstanceTypeIdを取得
             Optional<InstanceTypeLink> linkOpt = instanceTypeLinkRepository.findByElType(elType);
             if (linkOpt.isEmpty()) {
-                logger.error("InstanceTypeLink not found for ElType: {}", elType);
+                logger.error("ElType {} に対する InstanceTypeLink が見つかりません", elType);
                 return;
             }
             InstanceTypeLink link = linkOpt.get();
             String instanceTypeId = link.getInstanceTypeId();
-            logger.debug("Found InstanceTypeId: {} for ElType: {}", instanceTypeId, elType);
+            logger.debug("ElType {} の InstanceTypeId を検出: {}", elType, instanceTypeId);
 
             // 3. InstanceType.csvからInstanceTypeIdで対応するインスタンスタイプを取得
             Optional<InstanceTypeInfo> typeInfoOpt = instanceTypeRepository.findByInstanceTypeId(instanceTypeId);
             if (typeInfoOpt.isEmpty()) {
-                logger.error("InstanceType not found for InstanceTypeId: {}", instanceTypeId);
+                logger.error("InstanceTypeId {} に対する InstanceType が見つかりません", instanceTypeId);
                 return;
             }
             InstanceTypeInfo typeInfo = typeInfoOpt.get();
@@ -82,18 +82,18 @@ public class InstanceTypeChangeService {
             String actualInstanceType;
             if (targetInstanceType == InstanceType.HIGH) {
                 actualInstanceType = typeInfo.getHighInstanceType();
-                logger.info("Selected HIGH instance type: {} (CPU cores: {})",
+                logger.info("選択された HIGH インスタンスタイプ: {} (CPU コア数: {})",
                         actualInstanceType, typeInfo.getHighCpuCore());
             } else if (targetInstanceType == InstanceType.LOW) {
                 actualInstanceType = typeInfo.getLowInstanceType();
-                logger.info("Selected LOW instance type: {} (CPU cores: {})",
+                logger.info("選択された LOW インスタンスタイプ: {} (CPU コア数: {})",
                         actualInstanceType, typeInfo.getLowCpuCore());
             } else if (targetInstanceType == InstanceType.VERYLOW) {
                 actualInstanceType = typeInfo.getVeryLowInstanceType();
-                logger.info("Selected VERYLOW instance type: {} (CPU cores: {})",
+                logger.info("選択された VERYLOW インスタンスタイプ: {} (CPU コア数: {})",
                         actualInstanceType, typeInfo.getVeryLowCpuCore());
             } else {
-                logger.error("Invalid targetInstanceType: {}", targetInstanceType);
+                logger.error("無効な targetInstanceType: {}", targetInstanceType);
                 return;
             }
 
@@ -104,7 +104,7 @@ public class InstanceTypeChangeService {
             startMonitoringThread(hostname, targetInstanceType);
 
         } catch (IOException e) {
-            logger.error("Failed to change instance type for hostname: {}", hostname, e);
+            logger.error("ホスト名 {} のインスタンスタイプ変更に失敗しました", hostname, e);
             throw new RuntimeException("Failed to change instance type", e);
         }
     }
@@ -116,7 +116,7 @@ public class InstanceTypeChangeService {
      * @param instanceType インスタンスタイプ
      */
     private void executeInstanceTypeChange(String hostname, String instanceType) {
-        logger.info("Executing instance type change for hostname: {} to: {} (stub implementation)",
+        logger.info("ホスト名 {} のインスタンスタイプ変更を実行します: {} (スタブ実装)",
                 hostname, instanceType);
         // TODO: 外部シェルを呼び出してインスタンスタイプを変更
     }
@@ -129,7 +129,7 @@ public class InstanceTypeChangeService {
      * @param targetInstanceType 変更先のインスタンスタイプ
      */
     private void startMonitoringThread(String hostname, InstanceType targetInstanceType) {
-        logger.info("Starting monitoring thread for hostname: {}", hostname);
+        logger.info("ホスト名 {} の監視スレッドを開始します", hostname);
 
         AtomicInteger retryCount = new AtomicInteger(0);
         scheduleNextCheck(hostname, targetInstanceType, retryCount, 1);
@@ -140,25 +140,25 @@ public class InstanceTypeChangeService {
         monitoringExecutor.schedule(() -> {
             try {
                 int currentRetry = retryCount.incrementAndGet();
-                logger.debug("Checking instance type change completion for hostname: {} (attempt {}/{})",
+                logger.debug("ホスト名 {} のインスタンスタイプ変更完了をチェック中 (試行 {}/{})",
                         hostname, currentRetry, maxRetryCount);
 
                 boolean isCompleted = checkInstanceTypeChangeCompletion(hostname);
 
                 if (isCompleted) {
-                    logger.info("Instance type change completed for hostname: {}, updating InstanceStatus.csv",
+                    logger.info("ホスト名 {} のインスタンスタイプ変更が完了しました。InstanceStatus.csv を更新します",
                             hostname);
 
                     // InstanceStatus.csvのInstanceTypeカラムを更新
                     instanceStatusRepository.updateInstanceType(hostname, targetInstanceType);
 
-                    logger.info("Successfully updated InstanceType to {} for hostname: {}",
+                    logger.info("ホスト名 {} のインスタンスタイプを {} に更新しました",
                             targetInstanceType, hostname);
                     return; // 完了
                 }
 
                 if (currentRetry >= maxRetryCount) {
-                    logger.warn("Max retry count reached for hostname: {}, stopping monitoring thread",
+                    logger.warn("ホスト名 {} の最大リトライ回数に達しました。監視スレッドを停止します",
                             hostname);
                     return; // 最大リトライ回数到達
                 }
@@ -167,9 +167,7 @@ public class InstanceTypeChangeService {
                 scheduleNextCheck(hostname, targetInstanceType, retryCount, checkIntervalSeconds);
 
             } catch (Exception e) {
-                logger.error("Error in monitoring thread for hostname: {}", hostname, e);
-                // エラーが発生してもリトライ上限までは継続するか、ここで停止するか。
-                // ここでは安全のため停止せず、次回のスケジュールを行う（リトライカウントは増えている）
+                logger.error("ホスト名 {} の監視スレッドでエラーが発生しました", hostname, e);
                 if (retryCount.get() < maxRetryCount) {
                     scheduleNextCheck(hostname, targetInstanceType, retryCount, checkIntervalSeconds);
                 }
@@ -184,9 +182,8 @@ public class InstanceTypeChangeService {
      * @return 変更完了の場合true
      */
     protected boolean checkInstanceTypeChangeCompletion(String hostname) {
-        logger.debug("Checking instance type change completion for hostname: {} (stub implementation)", hostname);
+        logger.debug("ホスト名 {} のインスタンスタイプ変更完了をチェック中 (スタブ実装)", hostname);
         // TODO: 外部シェルを呼び出してインスタンスタイプ変更完了を確認
-        // 現在は空実装のため、即座に完了とみなす
         return true;
     }
 }

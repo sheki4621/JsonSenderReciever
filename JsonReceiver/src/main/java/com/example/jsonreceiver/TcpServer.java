@@ -51,7 +51,7 @@ public class TcpServer implements CommandLineRunner {
             try {
                 serverSocket = new ServerSocket(port);
                 this.actualPort = serverSocket.getLocalPort();
-                logger.info("TCP Server started on port {}", actualPort);
+                logger.info("TCPサーバーがポート {} で起動しました", actualPort);
 
                 while (running) {
                     try (Socket clientSocket = serverSocket.accept();
@@ -60,7 +60,7 @@ public class TcpServer implements CommandLineRunner {
 
                         String inputLine;
                         while ((inputLine = in.readLine()) != null) {
-                            logger.info("Received raw: {}", inputLine);
+                            logger.info("受信した生データ: {}", inputLine);
                             try {
                                 JsonNode jsonNode = objectMapper.readTree(inputLine);
                                 if (jsonNode.has("NoticeType")) {
@@ -70,9 +70,9 @@ public class TcpServer implements CommandLineRunner {
                                         noticeProcessingExecutor.submit(() -> {
                                             try {
                                                 metricsService.processMetrics(metricsJson);
-                                                logger.info("Processed METRICS: {}", metricsJson.getId());
+                                                logger.info("METRICS を処理しました: {}", metricsJson.getId());
                                             } catch (Exception e) {
-                                                logger.error("Failed to process METRICS: {}", metricsJson.getId(), e);
+                                                logger.error("METRICS の処理に失敗しました: {}", metricsJson.getId(), e);
                                             }
                                         });
                                     } else if (NoticeType.INSTALL.name().equals(noticeTypeStr)) {
@@ -80,9 +80,9 @@ public class TcpServer implements CommandLineRunner {
                                         noticeProcessingExecutor.submit(() -> {
                                             try {
                                                 instanceStatusService.processInstall(installJson);
-                                                logger.info("Processed INSTALL: {}", installJson.getId());
+                                                logger.info("INSTALL を処理しました: {}", installJson.getId());
                                             } catch (Exception e) {
-                                                logger.error("Failed to process INSTALL: {}", installJson.getId(), e);
+                                                logger.error("INSTALL の処理に失敗しました: {}", installJson.getId(), e);
                                             }
                                         });
                                     } else if (NoticeType.UNINSTALL.name().equals(noticeTypeStr)) {
@@ -91,9 +91,9 @@ public class TcpServer implements CommandLineRunner {
                                         noticeProcessingExecutor.submit(() -> {
                                             try {
                                                 instanceStatusService.processUninstall(uninstallJson);
-                                                logger.info("Processed UNINSTALL: {}", uninstallJson.getId());
+                                                logger.info("UNINSTALL を処理しました: {}", uninstallJson.getId());
                                             } catch (Exception e) {
-                                                logger.error("Failed to process UNINSTALL: {}", uninstallJson.getId(),
+                                                logger.error("UNINSTALL の処理に失敗しました: {}", uninstallJson.getId(),
                                                         e);
                                             }
                                         });
@@ -102,9 +102,9 @@ public class TcpServer implements CommandLineRunner {
                                         noticeProcessingExecutor.submit(() -> {
                                             try {
                                                 instanceStatusService.processUp(upJson);
-                                                logger.info("Processed UP: {}", upJson.getId());
+                                                logger.info("UP を処理しました: {}", upJson.getId());
                                             } catch (Exception e) {
-                                                logger.error("Failed to process UP: {}", upJson.getId(), e);
+                                                logger.error("UP の処理に失敗しました: {}", upJson.getId(), e);
                                             }
                                         });
                                     } else if (NoticeType.DOWN.name().equals(noticeTypeStr)) {
@@ -112,28 +112,28 @@ public class TcpServer implements CommandLineRunner {
                                         noticeProcessingExecutor.submit(() -> {
                                             try {
                                                 instanceStatusService.processDown(downJson);
-                                                logger.info("Processed DOWN: {}", downJson.getId());
+                                                logger.info("DOWN を処理しました: {}", downJson.getId());
                                             } catch (Exception e) {
-                                                logger.error("Failed to process DOWN: {}", downJson.getId(), e);
+                                                logger.error("DOWN の処理に失敗しました: {}", downJson.getId(), e);
                                             }
                                         });
                                     } else {
-                                        logger.info("Ignored NoticeType: {}", noticeTypeStr);
+                                        logger.info("無視された NoticeType: {}", noticeTypeStr);
                                     }
                                 }
                             } catch (Exception e) {
-                                logger.error("Failed to parse or process JSON", e);
+                                logger.error("JSON の解析または処理に失敗しました", e);
                             }
                         }
                     } catch (Exception e) {
                         if (running) {
-                            logger.error("Error handling client", e);
+                            logger.error("クライアント処理中にエラーが発生しました", e);
                         }
                     }
                 }
             } catch (Exception e) {
                 if (running) {
-                    logger.error("Error starting server", e);
+                    logger.error("サーバー起動中にエラーが発生しました", e);
                 }
             } finally {
                 closeServerSocket();
@@ -143,7 +143,7 @@ public class TcpServer implements CommandLineRunner {
 
     @PreDestroy
     public void shutdown() {
-        logger.info("Shutting down TCP Server");
+        logger.info("TCPサーバーを停止しています");
         running = false;
         closeServerSocket();
     }
@@ -152,9 +152,9 @@ public class TcpServer implements CommandLineRunner {
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 serverSocket.close();
-                logger.info("ServerSocket closed successfully");
+                logger.info("ServerSocket が正常に閉じられました");
             } catch (Exception e) {
-                logger.error("Error closing ServerSocket", e);
+                logger.error("ServerSocket のクローズ中にエラーが発生しました", e);
             }
         }
     }

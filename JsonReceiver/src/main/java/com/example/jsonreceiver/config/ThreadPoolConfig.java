@@ -35,7 +35,7 @@ public class ThreadPoolConfig {
      */
     @Bean(name = "noticeProcessingExecutor")
     public ExecutorService noticeProcessingExecutor() {
-        logger.info("Creating NoticeType processing ThreadPool with size: {}", threadPoolSize);
+        logger.info("NoticeType 処理用のスレッドプールを作成します。サイズ: {}", threadPoolSize);
         executorService = Executors.newFixedThreadPool(threadPoolSize);
         return executorService;
     }
@@ -46,15 +46,15 @@ public class ThreadPoolConfig {
     @PreDestroy
     public void shutdown() {
         if (executorService != null && !executorService.isShutdown()) {
-            logger.info("Shutting down NoticeType processing ThreadPool (timeout: {}s)", shutdownTimeoutSeconds);
+            logger.info("NoticeType 処理用のスレッドプールをシャットダウンします (タイムアウト: {}秒)", shutdownTimeoutSeconds);
             executorService.shutdown();
             try {
                 if (!executorService.awaitTermination(shutdownTimeoutSeconds, TimeUnit.SECONDS)) {
-                    logger.warn("ThreadPool did not terminate in time, forcing shutdown");
+                    logger.warn("スレッドプールが時間内に終了せず、強制的にシャットダウンします");
                     executorService.shutdownNow();
                 }
             } catch (InterruptedException e) {
-                logger.error("ThreadPool shutdown interrupted", e);
+                logger.error("スレッドプールのシャットダウンが中断されました", e);
                 executorService.shutdownNow();
                 Thread.currentThread().interrupt();
             }

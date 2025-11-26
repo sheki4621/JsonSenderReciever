@@ -47,12 +47,12 @@ public class ThresholdService {
             // しきい値を取得
             Optional<ThresholdInfo> thresholdOpt = thresholdRepository.findByHostname(hostname);
             if (thresholdOpt.isEmpty()) {
-                logger.error("No threshold found for hostname: {}", hostname);
+                logger.error("ホスト名 {} のしきい値が見つかりません", hostname);
                 return;
             }
 
             ThresholdInfo threshold = thresholdOpt.get();
-            logger.info("Checking threshold for hostname: {} CPU={} Memory={}", hostname, cpuUsage, memoryUsage);
+            logger.info("ホスト名 {} のしきい値をチェック中 CPU={} Memory={}", hostname, cpuUsage, memoryUsage);
 
             // しきい値を超えているか判定
             InstanceType targetInstanceType = null;
@@ -63,16 +63,16 @@ public class ThresholdService {
 
             if (cpuExceedsUpper || memoryExceedsUpper) {
                 targetInstanceType = InstanceType.HIGH;
-                logger.info("Metrics exceed upper limit for hostname: {} (CPU: {}, Memory: {})",
+                logger.info("ホスト名 {} のメトリクスが上限を超えています (CPU: {}, Memory: {})",
                         hostname, cpuUsage, memoryUsage);
             } else if (cpuBelowLower || memoryBelowLower) {
                 targetInstanceType = InstanceType.LOW;
-                logger.info("Metrics below lower limit for hostname: {} (CPU: {}, Memory: {})",
+                logger.info("ホスト名 {} のメトリクスが下限を下回っています (CPU: {}, Memory: {})",
                         hostname, cpuUsage, memoryUsage);
             }
 
             if (targetInstanceType == null) {
-                logger.error("Metrics within threshold for hostname: {}", hostname);
+                logger.info("ホスト名 {} のメトリクスはしきい値内です", hostname);
                 return;
             }
 
@@ -89,7 +89,7 @@ public class ThresholdService {
 
             // 連続でしきい値を超えているかチェック
             if (history.size() < continueCount - 1) {
-                logger.warn("Insufficient history for hostname: {} (need {}, got {})",
+                logger.warn("ホスト名 {} の履歴データが不十分です (必要: {}件、取得: {}件)",
                         hostname, continueCount - 1, history.size());
                 return;
             }
@@ -115,28 +115,28 @@ public class ThresholdService {
             }
 
             if (allExceed) {
-                logger.info("Continuous threshold violation detected for hostname: {} (count: {})", hostname,
+                logger.info("ホスト名 {} の連続しきい値超過を検出しました (回数: {})", hostname,
                         continueCount);
                 // Check current instance type to avoid unnecessary change
                 try {
                     InstanceStatus currentStatus = instanceStatusRepository
                             .findByHostname(hostname).orElse(null);
                     if (currentStatus != null && currentStatus.getInstanceType() == targetInstanceType) {
-                        logger.warn("Instance type is already {} for hostname: {}. No change performed.",
+                        logger.warn("インスタンスタイプは既に {} です。ホスト名: {}。変更は実行されません。",
                                 targetInstanceType, hostname);
                         return;
                     }
                 } catch (java.io.IOException e) {
-                    logger.error("Failed to retrieve current instance status for hostname: {}", hostname, e);
+                    logger.error("ホスト名 {} の現在のインスタンスステータスの取得に失敗しました", hostname, e);
                     // Proceed with change despite the error
                 }
                 instanceTypeChangeService.changeInstanceType(hostname, targetInstanceType);
             } else {
-                logger.debug("Threshold violation not continuous for hostname: {}", hostname);
+                logger.debug("ホスト名 {} のしきい値超過は連続していません", hostname);
             }
 
         } catch (IOException e) {
-            logger.error("Failed to check threshold", e);
+            logger.error("しきい値チェックに失敗しました", e);
             throw new RuntimeException("Failed to check threshold", e);
         }
     }

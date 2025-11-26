@@ -30,7 +30,7 @@ public class InstanceStatusService {
      */
     public void processInstall(InstallJson installJson) {
         try {
-            logger.info("Processing INSTALL notification for instance: {}", installJson.getInstanceName());
+            logger.info("インスタンス {} の INSTALL 通知を処理しています", installJson.getInstanceName());
 
             // Agentのインストール（rshを想定しているが空実装）
             installAgent(installJson.getInstanceName());
@@ -43,7 +43,7 @@ public class InstanceStatusService {
                     existingInstanceType = existingOpt.get().getInstanceType();
                 }
             } catch (IOException e) {
-                logger.warn("Failed to retrieve existing instance type, using null", e);
+                logger.warn("既存のインスタンスタイプの取得に失敗、null を使用します", e);
             }
 
             // ステータスをINSTALLINGに変更
@@ -56,9 +56,9 @@ public class InstanceStatusService {
                     existingInstanceType);
 
             repository.save(status);
-            logger.info("Saved INSTALLING status for instance: {}", installJson.getInstanceName());
+            logger.info("インスタンス {} の INSTALLING ステータスを保存しました", installJson.getInstanceName());
         } catch (IOException e) {
-            logger.error("Failed to process INSTALL notification", e);
+            logger.error("INSTALL 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process INSTALL notification", e);
         }
     }
@@ -71,7 +71,7 @@ public class InstanceStatusService {
      */
     public void processUninstall(UninstallJson uninstallJson) {
         try {
-            logger.info("Processing UNINSTALL notification for instance: {}", uninstallJson.getInstanceName());
+            logger.info("インスタンス {} の UNINSTALL 通知を処理しています", uninstallJson.getInstanceName());
 
             // Agentのアンインストール（rshを想定しているが空実装）
             uninstallAgent(uninstallJson.getInstanceName());
@@ -84,7 +84,7 @@ public class InstanceStatusService {
                     existingInstanceType = existingOpt.get().getInstanceType();
                 }
             } catch (IOException e) {
-                logger.warn("Failed to retrieve existing instance type, using null", e);
+                logger.warn("既存のインスタンスタイプの取得に失敗、null を使用します", e);
             }
 
             // ステータスをUNINSTALLINGに変更
@@ -97,9 +97,9 @@ public class InstanceStatusService {
                     existingInstanceType);
 
             repository.save(status);
-            logger.info("Saved UNINSTALLING status for instance: {}", uninstallJson.getInstanceName());
+            logger.info("インスタンス {} の UNINSTALLING ステータスを保存しました", uninstallJson.getInstanceName());
         } catch (IOException e) {
-            logger.error("Failed to process UNINSTALL notification", e);
+            logger.error("UNINSTALL 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process UNINSTALL notification", e);
         }
     }
@@ -113,7 +113,7 @@ public class InstanceStatusService {
      */
     public void processUp(UpJson upJson) {
         try {
-            logger.info("Processing UP notification for instance: {}", upJson.getInstanceName());
+            logger.info("インスタンス {} の UP 通知を処理しています", upJson.getInstanceName());
 
             // 既存データを取得
             Optional<InstanceStatus> existingOpt = repository.findByHostname(upJson.getInstanceName());
@@ -143,9 +143,9 @@ public class InstanceStatusService {
                     existingInstanceType);
 
             repository.save(status);
-            logger.info("Saved UP status for instance: {}", upJson.getInstanceName());
+            logger.info("インスタンス {} の UP ステータスを保存しました", upJson.getInstanceName());
         } catch (IOException e) {
-            logger.error("Failed to process UP notification", e);
+            logger.error("UP 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process UP notification", e);
         }
     }
@@ -159,7 +159,7 @@ public class InstanceStatusService {
      */
     public void processDown(DownJson downJson) {
         try {
-            logger.info("Processing DOWN notification for instance: {}", downJson.getInstanceName());
+            logger.info("インスタンス {} の DOWN 通知を処理しています", downJson.getInstanceName());
 
             // 既存データを取得
             // UPの場合、前の状態がINSTALLINGだったらisInstalledをtrueに
@@ -179,7 +179,7 @@ public class InstanceStatusService {
                     }
                 }
             } catch (IOException e) {
-                logger.warn("Failed to retrieve existing status for DOWN", e);
+                logger.warn("DOWN の既存ステータスの取得に失敗しました", e);
             }
 
             InstanceStatus status = new InstanceStatus(
@@ -191,9 +191,9 @@ public class InstanceStatusService {
                     existingInstanceType);
 
             repository.save(status);
-            logger.info("Saved DOWN status for instance: {}", downJson.getInstanceName());
+            logger.info("インスタンス {} の DOWN ステータスを保存しました", downJson.getInstanceName());
         } catch (IOException e) {
-            logger.error("Failed to process DOWN notification", e);
+            logger.error("DOWN 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process DOWN notification", e);
         }
     }
@@ -205,7 +205,7 @@ public class InstanceStatusService {
      * @param instanceName インスタンス名
      */
     private void installAgent(String instanceName) {
-        logger.info("Installing agent on instance: {} (stub implementation)", instanceName);
+        logger.info("インスタンス {} にエージェントをインストールしています (スタブ実装)", instanceName);
         // TODO: rshを使用したAgent インストール処理のシェルを呼び出す予定
     }
 
@@ -216,7 +216,7 @@ public class InstanceStatusService {
      * @param instanceName インスタンス名
      */
     private void uninstallAgent(String instanceName) {
-        logger.info("Uninstalling agent from instance: {} (stub implementation)", instanceName);
+        logger.info("インスタンス {} からエージェントをアンインストールしています (スタブ実装)", instanceName);
         // TODO: rshを使用したAgentアンインストール処理のシェルを呼び出す予定
     }
 }

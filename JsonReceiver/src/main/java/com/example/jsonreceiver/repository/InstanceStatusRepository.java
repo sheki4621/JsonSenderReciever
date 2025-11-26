@@ -42,7 +42,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                         try {
                             instanceType = InstanceType.valueOf(parts[5]);
                         } catch (IllegalArgumentException e) {
-                            logger.warn("Invalid InstanceType value: {}", parts[5]);
+                            logger.warn("無効な InstanceType の値: {}", parts[5]);
                         }
                     }
                     InstanceStatus existingStatus = new InstanceStatus(
@@ -100,7 +100,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                     try {
                         instanceType = InstanceType.valueOf(parts[5]);
                     } catch (IllegalArgumentException e) {
-                        logger.warn("Invalid InstanceType value: {}", parts[5]);
+                        logger.warn("無効な InstanceType の値: {}", parts[5]);
                     }
                 }
                 InstanceStatus status = new InstanceStatus(
@@ -144,7 +144,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                     try {
                         existingInstanceType = InstanceType.valueOf(parts[5]);
                     } catch (IllegalArgumentException e) {
-                        logger.warn("Invalid InstanceType value: {}", parts[5]);
+                        logger.warn("無効な InstanceType の値: {}", parts[5]);
                     }
                 }
                 InstanceStatus existingStatus = new InstanceStatus(

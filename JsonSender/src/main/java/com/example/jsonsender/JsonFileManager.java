@@ -64,9 +64,9 @@ public class JsonFileManager {
         File dir = new File(appConfig.getJson().getOutputDir());
         if (!dir.exists()) {
             if (dir.mkdirs()) {
-                logger.info("Created JSON output directory: {}", dir.getAbsolutePath());
+                logger.info("JSON出力ディレクトリを作成しました: {}", dir.getAbsolutePath());
             } else {
-                logger.error("Failed to create JSON output directory: {}", dir.getAbsolutePath());
+                logger.error("JSON出力ディレクトリの作成に失敗しました: {}", dir.getAbsolutePath());
             }
         }
     }
@@ -85,11 +85,11 @@ public class JsonFileManager {
             Path path = Paths.get(appConfig.getJson().getOutputDir(), filename);
 
             objectMapper.writeValue(path.toFile(), node);
-            logger.warn("Saved failed JSON to file: {}", path);
+            logger.warn("送信失敗したJSONをファイルに保存しました: {}", path);
         } catch (IOException e) {
-            logger.error("Failed to save JSON to file", e);
+            logger.error("JSONファイルの保存に失敗しました", e);
         } catch (Exception e) {
-            logger.error("Failed to save JSON to file", e);
+            logger.error("JSONファイルの保存に失敗しました", e);
         }
     }
 
@@ -99,7 +99,7 @@ public class JsonFileManager {
                 try {
                     processFiles();
                 } catch (Exception e) {
-                    logger.error("Error in resend task", e);
+                    logger.error("再送信タスクでエラーが発生しました", e);
                 } finally {
                     isResending.set(false);
                 }
@@ -118,7 +118,7 @@ public class JsonFileManager {
             return;
         }
 
-        logger.info("Found {} failed JSON files to resend", files.length);
+        logger.info("再送信する失敗JSONファイルを{}件見つけました", files.length);
 
         // Sort by modification time (oldest first)
         Arrays.sort(files, Comparator.comparingLong(File::lastModified));
@@ -130,9 +130,9 @@ public class JsonFileManager {
             // Check for rotation (deletion of old files)
             if (isOldFile(file)) {
                 if (file.delete()) {
-                    logger.info("Deleted old file: {}", file.getName());
+                    logger.info("古いファイルを削除しました: {}", file.getName());
                 } else {
-                    logger.warn("Failed to delete old file: {}", file.getName());
+                    logger.warn("古いファイルの削除に失敗しました: {}", file.getName());
                 }
                 continue;
             }
@@ -158,26 +158,16 @@ public class JsonFileManager {
 
                 if (success) {
                     if (file.delete()) {
-                        logger.info("Resent and deleted file: {}", file.getName());
+                        logger.info("再送信してファイルを削除しました: {}", file.getName());
                     } else {
-                        logger.warn("Resent but failed to delete file: {}", file.getName());
+                        logger.warn("再送信しましたがファイルの削除に失敗しました: {}", file.getName());
                     }
                 } else {
-                    // If failed, stop processing to preserve order and retry later
-                    // Or continue? Requirement says "If sending fails, retry, and if that fails,
-                    // keep the accumulated JSON file."
-                    // Since we are in a loop, we can just break and retry in the next cycle of the
-                    // while loop.
                     break;
                 }
 
             } catch (IOException e) {
-                logger.error("Failed to read or parse file: {}", file.getName(), e);
-                // If file is corrupted, maybe move it or delete it?
-                // For safety, let's leave it or maybe rename it.
-                // For this task, I'll leave it but maybe we should skip it to avoid blocking
-                // others?
-                // I'll skip it for now.
+                logger.error("ファイルの読み込みまたは解析に失敗しました: {}", file.getName(), e);
             }
         }
     }

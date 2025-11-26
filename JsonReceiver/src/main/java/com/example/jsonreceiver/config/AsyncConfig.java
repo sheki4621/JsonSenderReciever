@@ -30,7 +30,7 @@ public class AsyncConfig {
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
         executor.initialize();
-        logger.info("Created TCP Server TaskExecutor");
+        logger.info("TCPサーバー用のTaskExecutorを作成しました");
         return executor;
     }
 }
