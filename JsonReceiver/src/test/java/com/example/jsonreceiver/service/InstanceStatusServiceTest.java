@@ -1,6 +1,7 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
+import com.example.jsoncommon.dto.*;
 import com.example.jsonreceiver.repository.*;
 import com.example.jsonreceiver.util.ShellExecutor;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,9 +69,7 @@ public class InstanceStatusServiceTest {
         @Test
         public void testProcessInstall() throws IOException {
                 // Arrange
-                InstallJson installJson = new InstallJson(
-                                UUID.randomUUID(),
-                                NoticeType.INSTALL,
+                InstallJson installJson = new InstallJson(UUID.randomUUID(),
                                 ZonedDateTime.now(),
                                 "1.0.0",
                                 "test-host");
@@ -94,9 +93,7 @@ public class InstanceStatusServiceTest {
         @Test
         public void testProcessInstallWithSystemInfo() throws IOException {
                 // Arrange
-                InstallJson installJson = new InstallJson(
-                                UUID.randomUUID(),
-                                NoticeType.INSTALL,
+                InstallJson installJson = new InstallJson(UUID.randomUUID(),
                                 ZonedDateTime.now(),
                                 "1.0.0",
                                 "test-host");
@@ -138,7 +135,6 @@ public class InstanceStatusServiceTest {
                 // Arrange
                 UninstallJson uninstallJson = new UninstallJson(
                                 UUID.randomUUID(),
-                                NoticeType.UNINSTALL,
                                 ZonedDateTime.now(),
                                 "1.0.0",
                                 "test-host");
@@ -162,9 +158,7 @@ public class InstanceStatusServiceTest {
         @Test
         public void testProcessUp() throws IOException {
                 // Arrange
-                UpJson upJson = new UpJson(
-                                UUID.randomUUID(),
-                                NoticeType.UP,
+                UpJson upJson = new UpJson(UUID.randomUUID(),
                                 ZonedDateTime.now(),
                                 "1.0.0",
                                 "test-host");
@@ -188,9 +182,7 @@ public class InstanceStatusServiceTest {
         @Test
         public void testProcessUpWithExistingData() throws IOException {
                 // Arrange
-                UpJson upJson = new UpJson(
-                                UUID.randomUUID(),
-                                NoticeType.UP,
+                UpJson upJson = new UpJson(UUID.randomUUID(),
                                 ZonedDateTime.now(),
                                 "1.1.0",
                                 "test-host");
@@ -230,7 +222,6 @@ public class InstanceStatusServiceTest {
                 // Arrange
                 DownJson downJson = new DownJson(
                                 UUID.randomUUID(),
-                                NoticeType.DOWN,
                                 ZonedDateTime.now(),
                                 "1.0.0",
                                 "test-host");

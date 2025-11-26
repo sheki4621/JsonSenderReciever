@@ -1,4 +1,4 @@
-package com.example.jsonreceiver.dto;
+package com.example.jsoncommon.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

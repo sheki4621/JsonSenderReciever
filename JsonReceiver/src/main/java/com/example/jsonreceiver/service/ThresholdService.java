@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.InstanceType;
-import com.example.jsonreceiver.dto.MetricsJson;
+import com.example.jsoncommon.dto.MetricsJson;
 import com.example.jsonreceiver.dto.ResourceInfo;
 import com.example.jsonreceiver.dto.ThresholdInfo;
 import com.example.jsonreceiver.repository.ResourceInfoRepository;

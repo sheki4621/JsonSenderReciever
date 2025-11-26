@@ -1,4 +1,4 @@
-package com.example.jsonsender.utils.notice;
+package com.example.jsoncommon.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

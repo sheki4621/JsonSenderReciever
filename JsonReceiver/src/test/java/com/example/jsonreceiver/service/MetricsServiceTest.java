@@ -1,8 +1,8 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsonreceiver.dto.Metrics;
-import com.example.jsonreceiver.dto.MetricsJson;
-import com.example.jsonreceiver.dto.NoticeType;
+import com.example.jsoncommon.dto.Metrics;
+import com.example.jsoncommon.dto.MetricsJson;
+import com.example.jsoncommon.dto.NoticeType;
 import com.example.jsonreceiver.repository.CsvRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

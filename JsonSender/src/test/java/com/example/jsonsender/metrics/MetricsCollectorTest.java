@@ -1,5 +1,6 @@
 package com.example.jsonsender.metrics;
 
+import com.example.jsoncommon.dto.Metrics;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

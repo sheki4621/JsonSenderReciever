@@ -1,6 +1,7 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
+import com.example.jsoncommon.dto.*;
 import com.example.jsonreceiver.repository.*; // includes InstanceStatusRepository
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

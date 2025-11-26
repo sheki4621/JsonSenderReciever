@@ -1,15 +1,13 @@
 package com.example.jsonsender;
 
+import com.example.jsoncommon.dto.*;
 import com.example.jsonsender.config.AppConfig;
-import com.example.jsonsender.metrics.Metrics;
 import com.example.jsonsender.utils.collector.Collector;
-import com.example.jsonsender.utils.notice.DownJson;
-import com.example.jsonsender.utils.notice.UpJson;
-import com.example.jsonsender.utils.notice.NoticeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.time.ZoneId;

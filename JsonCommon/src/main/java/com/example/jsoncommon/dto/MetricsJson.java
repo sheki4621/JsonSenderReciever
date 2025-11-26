@@ -1,4 +1,4 @@
-package com.example.jsonreceiver.dto;
+package com.example.jsoncommon.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -13,10 +13,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class InstallJson extends NoticeBaseJson {
+public class MetricsJson extends NoticeBaseJson {
+    @JsonProperty("Metrics")
+    private Metrics metrics;
 
-    public InstallJson(UUID id, NoticeType noticeType, ZonedDateTime timestamp, String agentVersion,
-            String instanceName) {
+    public MetricsJson(UUID id, NoticeType noticeType, ZonedDateTime timestamp, String agentVersion,
+            String instanceName, Metrics metrics) {
         super(id, noticeType, timestamp, agentVersion, instanceName);
+        this.metrics = metrics;
     }
 }

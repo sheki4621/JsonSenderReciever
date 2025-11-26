@@ -1,20 +1,16 @@
 package com.example.jsonsender;
 
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
-
-import com.example.jsonsender.metrics.Metrics;
-import com.example.jsonsender.metrics.MetricsJson;
-import com.example.jsonsender.utils.collector.Collector;
-import com.example.jsonsender.utils.notice.DownJson;
-import com.example.jsonsender.utils.notice.UpJson;
-import com.example.jsonsender.utils.notice.NoticeType;
+import com.example.jsoncommon.dto.*;
+import com.example.jsonsender.config.AppConfig;
 import com.example.jsonsender.utils.IdUtils;
+import com.example.jsonsender.utils.InstanceUtils;
 import com.example.jsonsender.utils.TimeUtils;
-
+import com.example.jsonsender.utils.collector.Collector;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 @Component
 public class Runner implements CommandLineRunner {

@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsonreceiver.dto.MetricsJson;
+import com.example.jsoncommon.dto.MetricsJson;
 import com.example.jsonreceiver.repository.CsvRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

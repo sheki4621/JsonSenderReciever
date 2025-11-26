@@ -1,24 +1,20 @@
 package com.example.jsonreceiver.config;
 
-import jakarta.annotation.PreDestroy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
- * NoticeType処理用のThreadPool設定クラス
- * application.propertiesで指定されたサイズの固定ThreadPoolを作成します。
+ * JsonReceiverのスレッドプール設定
+ * 各種非同期処理で使用するExecutorを定義
  */
 @Configuration
 public class ThreadPoolConfig {
-
-    private static final Logger logger = LoggerFactory.getLogger(ThreadPoolConfig.class);
 
     @Value("${notice.processing.thread-pool.size:10}")
     private int threadPoolSize;
@@ -26,38 +22,28 @@ public class ThreadPoolConfig {
     @Value("${notice.processing.thread-pool.shutdown-timeout-seconds:30}")
     private int shutdownTimeoutSeconds;
 
-    private ExecutorService executorService;
-
     /**
-     * NoticeType処理用のExecutorServiceを作成します
-     * 
-     * @return 固定サイズのThreadPoolExecutorService
+     * 情報収集用のTaskExecutor
+     * 単一スレッドで定期的な情報収集を実行
      */
-    @Bean(name = "noticeProcessingExecutor")
-    public ExecutorService noticeProcessingExecutor() {
-        logger.info("NoticeType 処理用のスレッドプールを作成します。サイズ: {}", threadPoolSize);
-        executorService = Executors.newFixedThreadPool(threadPoolSize);
-        return executorService;
+    @Bean(name = "infoCollectionExecutor")
+    public TaskExecutor infoCollectionExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(1);
+        executor.setThreadNamePrefix("info-collection-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(shutdownTimeoutSeconds);
+        executor.initialize();
+        return executor;
     }
 
     /**
-     * アプリケーション終了時にThreadPoolを適切にシャットダウンします
+     * NoticeType処理用の固定サイズThreadPool
+     * TcpServerConfigで使用するExecutorService
      */
-    @PreDestroy
-    public void shutdown() {
-        if (executorService != null && !executorService.isShutdown()) {
-            logger.info("NoticeType 処理用のスレッドプールをシャットダウンします (タイムアウト: {}秒)", shutdownTimeoutSeconds);
-            executorService.shutdown();
-            try {
-                if (!executorService.awaitTermination(shutdownTimeoutSeconds, TimeUnit.SECONDS)) {
-                    logger.warn("スレッドプールが時間内に終了せず、強制的にシャットダウンします");
-                    executorService.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                logger.error("スレッドプールのシャットダウンが中断されました", e);
-                executorService.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-        }
+    @Bean(name = "noticeProcessingExecutor", destroyMethod = "shutdown")
+    public ExecutorService noticeProcessingExecutor() {
+        return Executors.newFixedThreadPool(threadPoolSize);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.MetricsJson;
+import com.example.jsoncommon.dto.MetricsJson;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Repository;

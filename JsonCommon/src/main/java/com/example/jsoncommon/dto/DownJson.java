@@ -1,4 +1,4 @@
-package com.example.jsonsender.utils.notice;
+package com.example.jsoncommon.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,9 +12,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class UpJson extends NoticeBaseJson {
+public class DownJson extends NoticeBaseJson {
 
-    public UpJson(UUID id, ZonedDateTime timestamp, String agentVersion, String instanceName) {
-        super(id, NoticeType.UP, timestamp, agentVersion, instanceName);
+    public DownJson(UUID id, ZonedDateTime timestamp, String agentVersion, String instanceName) {
+        super(id, NoticeType.DOWN, timestamp, agentVersion, instanceName);
     }
 }
