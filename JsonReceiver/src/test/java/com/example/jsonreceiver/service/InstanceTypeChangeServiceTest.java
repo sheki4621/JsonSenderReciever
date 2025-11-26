@@ -91,7 +91,7 @@ public class InstanceTypeChangeServiceTest {
         verify(systemInfoRepository).findByHostname("test-host");
         verify(instanceTypeLinkRepository).findByElType("EL-A");
         verify(instanceTypeRepository).findByInstanceTypeId("1");
-        verify(instanceStatusRepository, atLeastOnce()).updateInstanceType("test-host", InstanceType.HIGH);
+        verify(instanceStatusRepository, atLeastOnce()).updateCurrentType("test-host", "HIGH");
     }
 
     @Test
@@ -119,7 +119,7 @@ public class InstanceTypeChangeServiceTest {
         verify(systemInfoRepository).findByHostname("test-host");
         verify(instanceTypeLinkRepository).findByElType("EL-A");
         verify(instanceTypeRepository).findByInstanceTypeId("1");
-        verify(instanceStatusRepository, atLeastOnce()).updateInstanceType("test-host", InstanceType.LOW);
+        verify(instanceStatusRepository, atLeastOnce()).updateCurrentType("test-host", "LOW");
     }
 
     @Test
@@ -207,7 +207,7 @@ public class InstanceTypeChangeServiceTest {
         verify(spyService, times(3)).checkInstanceTypeChangeCompletion("test-host");
 
         // Should NOT update instance status
-        verify(instanceStatusRepository, never()).updateInstanceType(anyString(), any());
+        verify(instanceStatusRepository, never()).updateCurrentType(anyString(), anyString());
     }
 
     @Test
@@ -247,6 +247,6 @@ public class InstanceTypeChangeServiceTest {
         verify(spyService, times(3)).checkInstanceTypeChangeCompletion("test-host");
 
         // Should update instance status
-        verify(instanceStatusRepository, times(1)).updateInstanceType("test-host", InstanceType.HIGH);
+        verify(instanceStatusRepository, times(1)).updateCurrentType("test-host", "HIGH");
     }
 }

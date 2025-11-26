@@ -171,11 +171,11 @@ public class InstanceTypeChangeService {
                 boolean isCompleted = checkInstanceTypeChangeCompletion(hostname);
 
                 if (isCompleted) {
-                    logger.info("ホスト名 {} のインスタンスタイプ変更が完了しました。InstanceStatus.csv を更新します",
+                    logger.info("ホスト名 {} のインスタンスタイプ変更が完了しました。monitor_target.csv を更新します",
                             hostname);
 
-                    // InstanceStatus.csvのInstanceTypeカラムを更新
-                    instanceStatusRepository.updateInstanceType(hostname, targetInstanceType);
+                    // monitor_target.csvのCURRENT_TYPEカラムを更新
+                    instanceStatusRepository.updateCurrentType(hostname, targetInstanceType.name());
 
                     logger.info("ホスト名 {} のインスタンスタイプを {} に更新しました",
                             hostname, targetInstanceType);

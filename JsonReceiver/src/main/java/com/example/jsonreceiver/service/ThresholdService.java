@@ -121,16 +121,21 @@ public class ThresholdService {
                 try {
                     InstanceStatus currentStatus = instanceStatusRepository
                             .findByHostname(hostname).orElse(null);
-                    if (currentStatus != null && currentStatus.getInstanceType() == targetInstanceType) {
-                        logger.warn("インスタンスタイプは既に {} です。ホスト名: {}。変更は実行されません。",
-                                targetInstanceType, hostname);
-                        return;
+                    if (currentStatus != null) {
+                        // currentTypeをInstanceTypeの文字列表現と比較
+                        String targetTypeString = targetInstanceType.name();
+                        if (targetTypeString.equals(currentStatus.getCurrentType())) {
+                            logger.warn("インスタンスタイプは既に {} です。ホスト名: {}。変更は実行されません。",
+                                    targetInstanceType, hostname);
+                            return;
+                        }
                     }
                 } catch (java.io.IOException e) {
                     logger.error("ホスト名 {} の現在のインスタンスステータスの取得に失敗しました", hostname, e);
                     // Proceed with change despite the error
                 }
                 instanceTypeChangeService.changeInstanceType(hostname, targetInstanceType);
+
             } else {
                 logger.debug("ホスト名 {} のしきい値超過は連続していません", hostname);
             }

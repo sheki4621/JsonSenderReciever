@@ -8,10 +8,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InstanceStatus {
-    private String hostname;
-    private InstanceStatusValue status;
-    private Boolean isInstalled;
-    private String agentVersion;
-    private String timestamp;
-    private InstanceType instanceType;
+    private String hostname; // HOSTNAME
+    private String machineType; // MACHINE_TYPE (SystemInfo.csvのElType)
+    private String region; // REGION
+    private String currentType; // CURRENT_TYPE (現在のインスタンスタイプ)
+    private String typeId; // TYPE_ID (InstanceTypeLink.csvのInstanceTypeId)
+    private String typeHigh; // TYPE_HIGH (InstanceType.csvのHighInstanceType)
+    private String typeSmallStandard; // TYPE_SMALL_STANDARD (InstanceType.csvのLowInstanceType)
+    private String typeMicro; // TYPE_MICRO (InstanceType.csvのVeryLowInstanceType)
+    private String lastUpdate; // LASTUPDATE (最終更新時刻)
+    private InstanceStatusValue agentStatus; // AGENT_STATUS (エージェント状態)
+    private String agentVersion; // AGENT_VERSION (エージェントバージョン)
 }

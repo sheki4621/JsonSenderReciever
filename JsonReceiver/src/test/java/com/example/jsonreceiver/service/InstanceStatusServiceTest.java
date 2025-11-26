@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
-import com.example.jsonreceiver.repository.InstanceStatusRepository;
+import com.example.jsonreceiver.repository.*;
 import com.example.jsonreceiver.util.ShellExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,12 +19,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import com.example.jsonreceiver.dto.InstanceType;
 
 public class InstanceStatusServiceTest {
 
         @Mock
         private InstanceStatusRepository repository;
+
+        @Mock
+        private SystemInfoRepository systemInfoRepository;
+
+        @Mock
+        private InstanceTypeLinkRepository instanceTypeLinkRepository;
+
+        @Mock
+        private InstanceTypeRepository instanceTypeRepository;
 
         @Mock
         private ShellExecutor shellExecutor;
@@ -34,16 +42,26 @@ public class InstanceStatusServiceTest {
         @BeforeEach
         public void setUp() throws Exception {
                 MockitoAnnotations.openMocks(this);
-                service = new InstanceStatusService(repository, shellExecutor);
+                service = new InstanceStatusService(
+                                repository,
+                                systemInfoRepository,
+                                instanceTypeLinkRepository,
+                                instanceTypeRepository,
+                                shellExecutor);
 
                 // シェルパスとタイムアウトを設定
                 ReflectionTestUtils.setField(service, "installAgentShellPath", "/path/to/install_agent.sh");
                 ReflectionTestUtils.setField(service, "uninstallAgentShellPath", "/path/to/uninstall_agent.sh");
                 ReflectionTestUtils.setField(service, "shellTimeoutSeconds", 30);
 
+                // デフォルトでSystemInfo、InstanceTypeLink、InstanceTypeが存在しないようにモック
+                when(systemInfoRepository.findByHostname(anyString())).thenReturn(Optional.empty());
+                when(instanceTypeLinkRepository.findByElType(anyString())).thenReturn(Optional.empty());
+                when(instanceTypeRepository.findByInstanceTypeId(anyString())).thenReturn(Optional.empty());
+
                 // シェル実行をデフォルトで成功するようにモック
                 when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
-                                .thenReturn("Shell execution successf ul");
+                                .thenReturn("Shell execution successful");
         }
 
         @Test
@@ -56,6 +74,8 @@ public class InstanceStatusServiceTest {
                                 "1.0.0",
                                 "test-host");
 
+                when(repository.findByHostname("test-host")).thenReturn(Optional.empty());
+
                 // Act
                 service.processInstall(installJson);
 
@@ -65,10 +85,51 @@ public class InstanceStatusServiceTest {
 
                 InstanceStatus savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
-                assertEquals(InstanceStatusValue.INSTALLING, savedStatus.getStatus());
-                assertFalse(savedStatus.getIsInstalled());
+                assertEquals(InstanceStatusValue.INSTALLING, savedStatus.getAgentStatus());
                 assertEquals("1.0.0", savedStatus.getAgentVersion());
-                assertNotNull(savedStatus.getTimestamp());
+                assertNotNull(savedStatus.getLastUpdate());
+        }
+
+        @Test
+        public void testProcessInstallWithSystemInfo() throws IOException {
+                // Arrange
+                InstallJson installJson = new InstallJson(
+                                UUID.randomUUID(),
+                                NoticeType.INSTALL,
+                                ZonedDateTime.now(),
+                                "1.0.0",
+                                "test-host");
+
+                // SystemInfoをモック
+                SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "ECS", "HEL-XXX-01");
+                when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
+
+                // InstanceTypeLinkをモック
+                InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
+                when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
+
+                // InstanceTypeInfoをモック
+                InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "c6i.8xlarge", 8, "c6i.2xlarge", 2, "c6i.micro",
+                                1);
+                when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
+
+                when(repository.findByHostname("test-host")).thenReturn(Optional.empty());
+
+                // Act
+                service.processInstall(installJson);
+
+                // Assert
+                ArgumentCaptor<InstanceStatus> captor = ArgumentCaptor.forClass(InstanceStatus.class);
+                verify(repository).save(captor.capture());
+
+                InstanceStatus savedStatus = captor.getValue();
+                assertEquals("test-host", savedStatus.getHostname());
+                assertEquals("ECS", savedStatus.getMachineType());
+                assertEquals("1", savedStatus.getTypeId());
+                assertEquals("c6i.8xlarge", savedStatus.getTypeHigh());
+                assertEquals("c6i.2xlarge", savedStatus.getTypeSmallStandard());
+                assertEquals("c6i.micro", savedStatus.getTypeMicro());
+                assertEquals(InstanceStatusValue.INSTALLING, savedStatus.getAgentStatus());
         }
 
         @Test
@@ -81,6 +142,8 @@ public class InstanceStatusServiceTest {
                                 "1.0.0",
                                 "test-host");
 
+                when(repository.findByHostname("test-host")).thenReturn(Optional.empty());
+
                 // Act
                 service.processUninstall(uninstallJson);
 
@@ -90,14 +153,13 @@ public class InstanceStatusServiceTest {
 
                 InstanceStatus savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
-                assertEquals(InstanceStatusValue.UNINSTALLING, savedStatus.getStatus());
-                assertFalse(savedStatus.getIsInstalled());
+                assertEquals(InstanceStatusValue.UNINSTALLING, savedStatus.getAgentStatus());
                 assertEquals("1.0.0", savedStatus.getAgentVersion());
-                assertNotNull(savedStatus.getTimestamp());
+                assertNotNull(savedStatus.getLastUpdate());
         }
 
         @Test
-        public void testProcessUpFromInstalling() throws IOException {
+        public void testProcessUp() throws IOException {
                 // Arrange
                 UpJson upJson = new UpJson(
                                 UUID.randomUUID(),
@@ -106,15 +168,7 @@ public class InstanceStatusServiceTest {
                                 "1.0.0",
                                 "test-host");
 
-                // 既存のINSTALLING状態を返す
-                InstanceStatus existingStatus = new InstanceStatus(
-                                "test-host",
-                                InstanceStatusValue.INSTALLING,
-                                false,
-                                "1.0.0",
-                                ZonedDateTime.now().toString(),
-                                null);
-                when(repository.findByHostname("test-host")).thenReturn(Optional.of(existingStatus));
+                when(repository.findByHostname("test-host")).thenReturn(Optional.empty());
 
                 // Act
                 service.processUp(upJson);
@@ -125,14 +179,13 @@ public class InstanceStatusServiceTest {
 
                 InstanceStatus savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
-                assertEquals(InstanceStatusValue.UP, savedStatus.getStatus());
-                assertTrue(savedStatus.getIsInstalled()); // INSTALLING -> UP なので true
+                assertEquals(InstanceStatusValue.UP, savedStatus.getAgentStatus());
                 assertEquals("1.0.0", savedStatus.getAgentVersion());
-                assertNotNull(savedStatus.getTimestamp());
+                assertNotNull(savedStatus.getLastUpdate());
         }
 
         @Test
-        public void testProcessUpFromOtherStatus() throws IOException {
+        public void testProcessUpWithExistingData() throws IOException {
                 // Arrange
                 UpJson upJson = new UpJson(
                                 UUID.randomUUID(),
@@ -141,14 +194,19 @@ public class InstanceStatusServiceTest {
                                 "1.1.0",
                                 "test-host");
 
-                // 既存のDOWN状態を返す
+                // 既存データを返す
                 InstanceStatus existingStatus = new InstanceStatus(
                                 "test-host",
-                                InstanceStatusValue.DOWN,
-                                true,
-                                "1.0.0",
+                                "ECS",
+                                "ap-northeast-1",
+                                "c6i.2xlarge",
+                                "1",
+                                "c6i.8xlarge",
+                                "c6i.2xlarge",
+                                "c6i.micro",
                                 ZonedDateTime.now().toString(),
-                                InstanceType.HIGH);
+                                InstanceStatusValue.INSTALLING,
+                                "1.0.0");
                 when(repository.findByHostname("test-host")).thenReturn(Optional.of(existingStatus));
 
                 // Act
@@ -160,42 +218,14 @@ public class InstanceStatusServiceTest {
 
                 InstanceStatus savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
-                assertEquals(InstanceStatusValue.UP, savedStatus.getStatus());
-                assertTrue(savedStatus.getIsInstalled()); // 既存のIsInstalled値を保持 (true)
+                assertEquals("ECS", savedStatus.getMachineType());
+                assertEquals("c6i.2xlarge", savedStatus.getCurrentType());
+                assertEquals(InstanceStatusValue.UP, savedStatus.getAgentStatus());
                 assertEquals("1.1.0", savedStatus.getAgentVersion());
-                assertEquals(InstanceType.HIGH, savedStatus.getInstanceType());
         }
 
         @Test
-        public void testProcessUpNewHost() throws IOException {
-                // Arrange
-                UpJson upJson = new UpJson(
-                                UUID.randomUUID(),
-                                NoticeType.UP,
-                                ZonedDateTime.now(),
-                                "1.0.0",
-                                "new-host");
-
-                // 新規ホスト（既存データなし）
-                when(repository.findByHostname("new-host")).thenReturn(Optional.empty());
-
-                // Act
-                service.processUp(upJson);
-
-                // Assert
-                ArgumentCaptor<InstanceStatus> captor = ArgumentCaptor.forClass(InstanceStatus.class);
-                verify(repository).save(captor.capture());
-
-                InstanceStatus savedStatus = captor.getValue();
-                assertEquals("new-host", savedStatus.getHostname());
-                assertEquals(InstanceStatusValue.UP, savedStatus.getStatus());
-                assertTrue(savedStatus.getIsInstalled()); // 新規の場合はtrueに
-                assertEquals("1.0.0", savedStatus.getAgentVersion());
-                assertNotNull(savedStatus.getTimestamp());
-        }
-
-        @Test
-        public void testProcessDownFromUninstalling() throws IOException {
+        public void testProcessDown() throws IOException {
                 // Arrange
                 DownJson downJson = new DownJson(
                                 UUID.randomUUID(),
@@ -204,15 +234,7 @@ public class InstanceStatusServiceTest {
                                 "1.0.0",
                                 "test-host");
 
-                // 既存のUNINSTALLING状態を返す
-                InstanceStatus existingStatus = new InstanceStatus(
-                                "test-host",
-                                InstanceStatusValue.UNINSTALLING,
-                                true,
-                                "1.0.0",
-                                ZonedDateTime.now().toString(),
-                                null);
-                when(repository.findByHostname("test-host")).thenReturn(Optional.of(existingStatus));
+                when(repository.findByHostname("test-host")).thenReturn(Optional.empty());
 
                 // Act
                 service.processDown(downJson);
@@ -223,43 +245,8 @@ public class InstanceStatusServiceTest {
 
                 InstanceStatus savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
-                assertEquals(InstanceStatusValue.DOWN, savedStatus.getStatus());
-                assertFalse(savedStatus.getIsInstalled()); // UNINSTALLING -> DOWN なので false
-                assertNotNull(savedStatus.getTimestamp());
-        }
-
-        @Test
-        public void testProcessDownFromOtherStatus() throws IOException {
-                // Arrange
-                DownJson downJson = new DownJson(
-                                UUID.randomUUID(),
-                                NoticeType.DOWN,
-                                ZonedDateTime.now(),
-                                "1.0.0",
-                                "test-host");
-
-                // 既存のUP状態を返す
-                InstanceStatus existingStatus = new InstanceStatus(
-                                "test-host",
-                                InstanceStatusValue.UP,
-                                true,
-                                "1.0.0",
-                                ZonedDateTime.now().toString(),
-                                InstanceType.HIGH);
-                when(repository.findByHostname("test-host")).thenReturn(Optional.of(existingStatus));
-
-                // Act
-                service.processDown(downJson);
-
-                // Assert
-                ArgumentCaptor<InstanceStatus> captor = ArgumentCaptor.forClass(InstanceStatus.class);
-                verify(repository).save(captor.capture());
-
-                InstanceStatus savedStatus = captor.getValue();
-                assertEquals("test-host", savedStatus.getHostname());
-                assertEquals(InstanceStatusValue.DOWN, savedStatus.getStatus());
-                assertTrue(savedStatus.getIsInstalled()); // 既存のIsInstalled値を保持
+                assertEquals(InstanceStatusValue.DOWN, savedStatus.getAgentStatus());
                 assertEquals("1.0.0", savedStatus.getAgentVersion());
-                assertNotNull(savedStatus.getTimestamp());
+                assertNotNull(savedStatus.getLastUpdate());
         }
 }

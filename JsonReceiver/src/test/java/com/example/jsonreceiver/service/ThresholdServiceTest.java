@@ -88,6 +88,7 @@ public class ThresholdServiceTest {
 
         when(thresholdRepository.findByHostname("test-host")).thenReturn(Optional.of(threshold));
         when(resourceInfoRepository.findLastNByHostname("test-host", 3 - 1)).thenReturn(history);
+        when(instanceStatusRepository.findByHostname("test-host")).thenReturn(Optional.empty());
 
         // Act
         thresholdService.checkThreshold(metricsJson);
@@ -96,6 +97,36 @@ public class ThresholdServiceTest {
         verify(thresholdRepository).findByHostname("test-host");
         verify(resourceInfoRepository).findLastNByHostname("test-host", 2);
         verify(instanceTypeChangeService).changeInstanceType("test-host", InstanceType.HIGH);
+    }
+
+    @Test
+    public void testCheckThreshold_CpuExceedsUpperLimit_SameInstanceType() throws IOException {
+        // Arrange
+        MetricsJson metricsJson = createMetricsJson("test-host", 85.0, 50.0);
+        ThresholdInfo threshold = new ThresholdInfo("test-host", 80.0, 20.0, 85.0, 25.0, 3);
+
+        List<ResourceInfo> history = Arrays.asList(
+                new ResourceInfo("test-host", "2025-11-26T00:02:00+09:00", 83.0, 50.0),
+                new ResourceInfo("test-host", "2025-11-26T00:01:00+09:00", 82.0, 50.0),
+                new ResourceInfo("test-host", "2025-11-26T00:00:00+09:00", 81.0, 50.0));
+
+        when(thresholdRepository.findByHostname("test-host")).thenReturn(Optional.of(threshold));
+        when(resourceInfoRepository.findLastNByHostname("test-host", 2)).thenReturn(history);
+
+        // 現在のインスタンスタイプが既にHIGHであることをシミュレート
+        InstanceStatus currentStatus = new InstanceStatus(
+                "test-host", "ECS", "ap-northeast-1", "HIGH", "1", "HIGH", "LOW", "MICRO",
+                ZonedDateTime.now().toString(), InstanceStatusValue.UP, "1.0.0");
+        when(instanceStatusRepository.findByHostname("test-host")).thenReturn(Optional.of(currentStatus));
+
+        // Act
+        thresholdService.checkThreshold(metricsJson);
+
+        // Assert
+        verify(thresholdRepository).findByHostname("test-host");
+        verify(resourceInfoRepository).findLastNByHostname("test-host", 2);
+        // 既にHIGHなので変更は実行されない
+        verify(instanceTypeChangeService, never()).changeInstanceType(anyString(), any(InstanceType.class));
     }
 
     @Test
@@ -111,6 +142,7 @@ public class ThresholdServiceTest {
 
         when(thresholdRepository.findByHostname("test-host")).thenReturn(Optional.of(threshold));
         when(resourceInfoRepository.findLastNByHostname("test-host", 2)).thenReturn(history);
+        when(instanceStatusRepository.findByHostname("test-host")).thenReturn(Optional.empty());
 
         // Act
         thresholdService.checkThreshold(metricsJson);

@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
-import com.example.jsonreceiver.repository.InstanceStatusRepository;
+import com.example.jsonreceiver.repository.*;
 import com.example.jsonreceiver.util.ShellExecutor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -24,6 +24,9 @@ public class InstanceStatusService {
     private static final Logger logger = LoggerFactory.getLogger(InstanceStatusService.class);
 
     private final InstanceStatusRepository repository;
+    private final SystemInfoRepository systemInfoRepository;
+    private final InstanceTypeLinkRepository instanceTypeLinkRepository;
+    private final InstanceTypeRepository instanceTypeRepository;
     private final ShellExecutor shellExecutor;
 
     @Value("${shell.agent.install.path:/path/to/install_agent.sh}")
@@ -48,25 +51,12 @@ public class InstanceStatusService {
             // Agentのインストール（rshを想定しているが空実装）
             installAgent(installJson.getInstanceName());
 
-            // 既存のInstanceTypeを取得
-            InstanceType existingInstanceType = null;
-            try {
-                Optional<InstanceStatus> existingOpt = repository.findByHostname(installJson.getInstanceName());
-                if (existingOpt.isPresent()) {
-                    existingInstanceType = existingOpt.get().getInstanceType();
-                }
-            } catch (IOException e) {
-                logger.warn("既存のインスタンスタイプの取得に失敗、null を使用します", e);
-            }
-
-            // ステータスをINSTALLINGに変更
-            InstanceStatus status = new InstanceStatus(
+            // InstanceStatusを構築して保存
+            InstanceStatus status = buildInstanceStatus(
                     installJson.getInstanceName(),
                     InstanceStatusValue.INSTALLING,
-                    false,
                     installJson.getAgentVersion(),
-                    installJson.getTimestamp().toString(),
-                    existingInstanceType);
+                    installJson.getTimestamp().toString());
 
             repository.save(status);
             logger.info("インスタンス {} の INSTALLING ステータスを保存しました", installJson.getInstanceName());
@@ -89,25 +79,12 @@ public class InstanceStatusService {
             // Agentのアンインストール（rshを想定しているが空実装）
             uninstallAgent(uninstallJson.getInstanceName());
 
-            // 既存のInstanceTypeを取得
-            InstanceType existingInstanceType = null;
-            try {
-                Optional<InstanceStatus> existingOpt = repository.findByHostname(uninstallJson.getInstanceName());
-                if (existingOpt.isPresent()) {
-                    existingInstanceType = existingOpt.get().getInstanceType();
-                }
-            } catch (IOException e) {
-                logger.warn("既存のインスタンスタイプの取得に失敗、null を使用します", e);
-            }
-
-            // ステータスをUNINSTALLINGに変更
-            InstanceStatus status = new InstanceStatus(
+            // InstanceStatusを構築して保存
+            InstanceStatus status = buildInstanceStatus(
                     uninstallJson.getInstanceName(),
                     InstanceStatusValue.UNINSTALLING,
-                    false,
                     uninstallJson.getAgentVersion(),
-                    uninstallJson.getTimestamp().toString(),
-                    existingInstanceType);
+                    uninstallJson.getTimestamp().toString());
 
             repository.save(status);
             logger.info("インスタンス {} の UNINSTALLING ステータスを保存しました", uninstallJson.getInstanceName());
@@ -120,7 +97,6 @@ public class InstanceStatusService {
     /**
      * UP通知を処理します
      * ステータスをUPに変更します
-     * 前のステータスがINSTALLINGの場合はIsInstalledをtrueに設定します
      * 
      * @param upJson UP通知JSON
      */
@@ -128,32 +104,12 @@ public class InstanceStatusService {
         try {
             logger.info("インスタンス {} の UP 通知を処理しています", upJson.getInstanceName());
 
-            // 既存データを取得
-            Optional<InstanceStatus> existingOpt = repository.findByHostname(upJson.getInstanceName());
-
-            boolean isInstalled = true; // デフォルトはtrue
-            InstanceType existingInstanceType = null;
-            if (existingOpt.isPresent()) {
-                InstanceStatus existing = existingOpt.get();
-                // INSTALLINGからUPの場合はIsInstalledをtrueに
-                if (existing.getStatus() == InstanceStatusValue.INSTALLING) {
-                    isInstalled = true;
-                } else {
-                    // その他の場合は既存値を保持
-                    isInstalled = existing.getIsInstalled();
-                }
-                // InstanceTypeを保持
-                existingInstanceType = existing.getInstanceType();
-            }
-
-            // ステータスをUPに変更
-            InstanceStatus status = new InstanceStatus(
+            // InstanceStatusを構築して保存
+            InstanceStatus status = buildInstanceStatus(
                     upJson.getInstanceName(),
                     InstanceStatusValue.UP,
-                    isInstalled,
                     upJson.getAgentVersion(),
-                    upJson.getTimestamp().toString(),
-                    existingInstanceType);
+                    upJson.getTimestamp().toString());
 
             repository.save(status);
             logger.info("インスタンス {} の UP ステータスを保存しました", upJson.getInstanceName());
@@ -166,7 +122,6 @@ public class InstanceStatusService {
     /**
      * DOWN通知を処理します
      * ステータスをDOWNに変更します
-     * 前のステータスがUNINSTALLINGの場合はIsInstalledをfalseに設定します
      * 
      * @param downJson DOWN通知JSON
      */
@@ -174,34 +129,12 @@ public class InstanceStatusService {
         try {
             logger.info("インスタンス {} の DOWN 通知を処理しています", downJson.getInstanceName());
 
-            // 既存データを取得
-            // UPの場合、前の状態がINSTALLINGだったらisInstalledをtrueに
-            InstanceType existingInstanceType = null;
-            boolean isInstalled = false; // デフォルトはfalse (DOWNなので)
-            try {
-                Optional<InstanceStatus> existingOpt = repository.findByHostname(downJson.getInstanceName());
-                if (existingOpt.isPresent()) {
-                    InstanceStatus existing = existingOpt.get();
-                    existingInstanceType = existing.getInstanceType();
-                    // 前のステータスがUNINSTALLINGの場合はisInstalledをfalseに
-                    if (existing.getStatus() == InstanceStatusValue.UNINSTALLING) {
-                        isInstalled = false;
-                    } else {
-                        // その他の場合は既存値を保持
-                        isInstalled = existing.getIsInstalled();
-                    }
-                }
-            } catch (IOException e) {
-                logger.warn("DOWN の既存ステータスの取得に失敗しました", e);
-            }
-
-            InstanceStatus status = new InstanceStatus(
+            // InstanceStatusを構築して保存
+            InstanceStatus status = buildInstanceStatus(
                     downJson.getInstanceName(),
                     InstanceStatusValue.DOWN,
-                    isInstalled,
                     downJson.getAgentVersion(),
-                    downJson.getTimestamp().toString(),
-                    existingInstanceType);
+                    downJson.getTimestamp().toString());
 
             repository.save(status);
             logger.info("インスタンス {} の DOWN ステータスを保存しました", downJson.getInstanceName());
@@ -209,6 +142,85 @@ public class InstanceStatusService {
             logger.error("DOWN 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process DOWN notification", e);
         }
+    }
+
+    /**
+     * InstanceStatusオブジェクトを構築します
+     * SystemInfo.csv、InstanceTypeLink.csv、InstanceType.csvから必要な情報を取得します
+     * 
+     * @param hostname     ホスト名
+     * @param agentStatus  エージェント状態
+     * @param agentVersion エージェントバージョン
+     * @param lastUpdate   最終更新時刻
+     * @return InstanceStatus
+     * @throws IOException IO例外
+     */
+    private InstanceStatus buildInstanceStatus(String hostname, InstanceStatusValue agentStatus,
+            String agentVersion, String lastUpdate) throws IOException {
+        String machineType = "";
+        String region = "";
+        String currentType = "";
+        String typeId = "";
+        String typeHigh = "";
+        String typeSmallStandard = "";
+        String typeMicro = "";
+
+        // 既存データから現在値を取得
+        Optional<InstanceStatus> existingOpt = repository.findByHostname(hostname);
+        if (existingOpt.isPresent()) {
+            InstanceStatus existing = existingOpt.get();
+            machineType = existing.getMachineType();
+            region = existing.getRegion();
+            currentType = existing.getCurrentType();
+            typeId = existing.getTypeId();
+            typeHigh = existing.getTypeHigh();
+            typeSmallStandard = existing.getTypeSmallStandard();
+            typeMicro = existing.getTypeMicro();
+        }
+
+        // SystemInfo.csvからElType（MACHINE_TYPE）を取得
+        try {
+            Optional<SystemInfo> systemInfoOpt = systemInfoRepository.findByHostname(hostname);
+            if (systemInfoOpt.isPresent()) {
+                machineType = systemInfoOpt.get().getElType();
+                logger.debug("ホスト {} の MACHINE_TYPE を取得: {}", hostname, machineType);
+
+                // InstanceTypeLink.csvからInstanceTypeId（TYPE_ID）を取得
+                Optional<InstanceTypeLink> linkOpt = instanceTypeLinkRepository.findByElType(machineType);
+                if (linkOpt.isPresent()) {
+                    typeId = linkOpt.get().getInstanceTypeId();
+                    logger.debug("MACHINE_TYPE {} の TYPE_ID を取得: {}", machineType, typeId);
+
+                    // InstanceType.csvから各インスタンスタイプを取得
+                    Optional<InstanceTypeInfo> typeInfoOpt = instanceTypeRepository.findByInstanceTypeId(typeId);
+                    if (typeInfoOpt.isPresent()) {
+                        InstanceTypeInfo typeInfo = typeInfoOpt.get();
+                        typeHigh = typeInfo.getHighInstanceType();
+                        typeSmallStandard = typeInfo.getLowInstanceType();
+                        typeMicro = typeInfo.getVeryLowInstanceType();
+                        logger.debug("TYPE_ID {} のインスタンスタイプを取得: HIGH={}, STANDARD={}, MICRO={}",
+                                typeId, typeHigh, typeSmallStandard, typeMicro);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            logger.warn("ホスト {} のシステム情報の取得に失敗しました。既存値または空文字列を使用します", hostname, e);
+        }
+
+        // REGIONは現在のところ取得元がないため、既存値または空文字列のまま
+
+        return new InstanceStatus(
+                hostname,
+                machineType,
+                region,
+                currentType,
+                typeId,
+                typeHigh,
+                typeSmallStandard,
+                typeMicro,
+                lastUpdate,
+                agentStatus,
+                agentVersion);
     }
 
     /**
