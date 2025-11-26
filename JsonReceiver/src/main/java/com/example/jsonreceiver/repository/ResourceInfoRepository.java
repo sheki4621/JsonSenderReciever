@@ -18,6 +18,7 @@ public class ResourceInfoRepository extends CsvRepositoryBase {
 
     /**
      * 指定ホスト名の最新N件のリソース情報を取得する
+     * 受信情報がソートされている保証がないため、念の為n*5件取得してソートし、最新n件を返す
      * 
      * @param hostname ホスト名
      * @param n        取得件数
@@ -26,14 +27,16 @@ public class ResourceInfoRepository extends CsvRepositoryBase {
      */
     public List<ResourceInfo> findLastNByHostname(String hostname, int n) throws IOException {
         List<String> lines = readFromCsv(FILE_NAME);
-        List<ResourceInfo> result = new ArrayList<>();
+        List<ResourceInfo> allMatching = new ArrayList<>();
 
         if (lines.isEmpty()) {
-            return result;
+            return allMatching;
         }
 
-        // ヘッダーをスキップして、該当ホスト名のレコードを逆順（最新から）で収集
-        for (int i = lines.size() - 1; i >= 1 && result.size() < n; i--) {
+        // ヘッダーをスキップして、該当ホスト名のレコードを最大 n*5 件取得
+        // n*5件を取得してソートすることで、最新n件を取得する確率を高める(本番はSQLでソートするので問題ない想定)
+        int maxRecords = n * 5;
+        for (int i = 1; i < lines.size() && allMatching.size() < maxRecords; i++) {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
             if (parts.length >= 4 && parts[0].equals(hostname)) {
@@ -43,10 +46,14 @@ public class ResourceInfoRepository extends CsvRepositoryBase {
                         Double.parseDouble(parts[2]), // cpuUsage
                         Double.parseDouble(parts[3]) // memoryUsage
                 );
-                result.add(info);
+                allMatching.add(info);
             }
         }
 
-        return result;
+        // タイムスタンプでソート（降順：最新が先頭）
+        allMatching.sort((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
+
+        // 最新n件を返す
+        return allMatching.size() <= n ? allMatching : allMatching.subList(0, n);
     }
 }
