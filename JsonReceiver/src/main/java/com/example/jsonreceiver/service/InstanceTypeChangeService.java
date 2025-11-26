@@ -178,7 +178,7 @@ public class InstanceTypeChangeService {
                     instanceStatusRepository.updateInstanceType(hostname, targetInstanceType);
 
                     logger.info("ホスト名 {} のインスタンスタイプを {} に更新しました",
-                            targetInstanceType, hostname);
+                            hostname, targetInstanceType);
                     return; // 完了
                 }
 

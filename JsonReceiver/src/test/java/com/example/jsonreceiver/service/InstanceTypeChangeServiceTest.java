@@ -57,8 +57,13 @@ public class InstanceTypeChangeServiceTest {
         ReflectionTestUtils.setField(service, "maxRetryCount", 3);
 
         // シェル実行をデフォルトで成功するようにモック
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
+        // インスタンスタイプ変更実行用のシェル
+        when(shellExecutor.executeShell(eq("/path/to/change.sh"), anyList(), anyInt()))
                 .thenReturn("Success");
+
+        // インスタンスタイプ変更完了確認用のシェル（"COMPLETED"を返す）
+        when(shellExecutor.executeShell(eq("/path/to/check.sh"), anyList(), anyInt()))
+                .thenReturn("COMPLETED");
     }
 
     @Test
@@ -77,7 +82,7 @@ public class InstanceTypeChangeServiceTest {
 
         // スレッドが実行されるまで待機
         try {
-            Thread.sleep(6000); // 5秒のcheck interval + 余裕
+            Thread.sleep(3000); // 初回の1秒 + 処理時間 + 余裕
         } catch (InterruptedException e) {
             // ignore
         }
@@ -105,7 +110,7 @@ public class InstanceTypeChangeServiceTest {
 
         // スレッドが実行されるまで待機
         try {
-            Thread.sleep(2000); // 1秒の初回delay + 余裕
+            Thread.sleep(3000); // 初回の1秒 + 処理時間 + 余裕
         } catch (InterruptedException e) {
             // ignore
         }
