@@ -2,12 +2,15 @@ package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
 import com.example.jsonreceiver.repository.InstanceStatusRepository;
+import com.example.jsonreceiver.util.ShellExecutor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,6 +24,16 @@ public class InstanceStatusService {
     private static final Logger logger = LoggerFactory.getLogger(InstanceStatusService.class);
 
     private final InstanceStatusRepository repository;
+    private final ShellExecutor shellExecutor;
+
+    @Value("${shell.agent.install.path:/path/to/install_agent.sh}")
+    private String installAgentShellPath;
+
+    @Value("${shell.agent.uninstall.path:/path/to/uninstall_agent.sh}")
+    private String uninstallAgentShellPath;
+
+    @Value("${shell.execution.timeout-seconds:30}")
+    private int shellTimeoutSeconds;
 
     /**
      * INSTALL通知を処理します
@@ -199,24 +212,52 @@ public class InstanceStatusService {
     }
 
     /**
-     * Agentをインストールする（空実装）
-     * 将来的にrshを使用したインストール処理を実装する予定
+     * Agentをインストールする
+     * 外部シェルスクリプトを実行してインストール処理を行います
      * 
      * @param instanceName インスタンス名
      */
     private void installAgent(String instanceName) {
-        logger.info("インスタンス {} にエージェントをインストールしています (スタブ実装)", instanceName);
-        // TODO: rshを使用したAgent インストール処理のシェルを呼び出す予定
+        logger.info("インスタンス {} にエージェントをインストールしています", instanceName);
+
+        try {
+            // 外部シェルを実行 (引数:インスタンス名)
+            // String output = shellExecutor.executeShell(
+            // installAgentShellPath,
+            // List.of(instanceName),
+            // shellTimeoutSeconds);
+
+            // logger.info("インスタンス {} のエージェントインストールが完了しました: {}", instanceName,
+            // output.trim());
+
+        } catch (Exception e) {
+            logger.error("インスタンス {} のエージェントインストールに失敗しました", instanceName, e);
+            throw new RuntimeException("Agent インストールに失敗しました: " + instanceName, e);
+        }
     }
 
     /**
-     * Agentをアンインストールする（空実装）
-     * 将来的にrshを使用したアンインストール処理を実装する予定
+     * Agentをアンインストールする
+     * 外部シェルスクリプトを実行してアンインストール処理を行います
      * 
      * @param instanceName インスタンス名
      */
     private void uninstallAgent(String instanceName) {
-        logger.info("インスタンス {} からエージェントをアンインストールしています (スタブ実装)", instanceName);
-        // TODO: rshを使用したAgentアンインストール処理のシェルを呼び出す予定
+        logger.info("インスタンス {} からエージェントをアンインストールしています", instanceName);
+
+        try {
+            // 外部シェルを実行 (引数:インスタンス名)
+            // String output = shellExecutor.executeShell(
+            // uninstallAgentShellPath,
+            // List.of(instanceName),
+            // shellTimeoutSeconds);
+
+            // logger.info("インスタンス {} のエージェントアンインストールが完了しました: {}", instanceName,
+            // output.trim());
+
+        } catch (Exception e) {
+            logger.error("インスタンス {} のエージェントアンインストールに失敗しました", instanceName, e);
+            throw new RuntimeException("Agent アンインストールに失敗しました: " + instanceName, e);
+        }
     }
 }

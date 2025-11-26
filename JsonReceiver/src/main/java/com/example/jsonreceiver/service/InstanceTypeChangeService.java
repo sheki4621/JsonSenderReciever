@@ -2,6 +2,7 @@ package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
 import com.example.jsonreceiver.repository.*;
+import com.example.jsonreceiver.util.ShellExecutor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,6 +31,7 @@ public class InstanceTypeChangeService {
     private final SystemInfoRepository systemInfoRepository;
     private final InstanceTypeLinkRepository instanceTypeLinkRepository;
     private final InstanceTypeRepository instanceTypeRepository;
+    private final ShellExecutor shellExecutor;
 
     private final ScheduledExecutorService monitoringExecutor = Executors.newScheduledThreadPool(5);
 
@@ -37,6 +40,15 @@ public class InstanceTypeChangeService {
 
     @Value("${instance-type-change.max-retry-count:10}")
     private int maxRetryCount;
+
+    @Value("${shell.instance-type-change.execute.path:/path/to/change_instance_type.sh}")
+    private String executeInstanceTypeChangeShellPath;
+
+    @Value("${shell.instance-type-change.check.path:/path/to/check_instance_type_change.sh}")
+    private String checkInstanceTypeChangeShellPath;
+
+    @Value("${shell.execution.timeout-seconds:30}")
+    private int shellTimeoutSeconds;
 
     /**
      * インスタンスタイプを変更します
@@ -110,15 +122,28 @@ public class InstanceTypeChangeService {
     }
 
     /**
-     * 外部シェルを呼び出してインスタンスタイプを変更します（空実装）
+     * 外部シェルを呼び出してインスタンスタイプを変更します
      * 
      * @param hostname     ホスト名
      * @param instanceType インスタンスタイプ
      */
     private void executeInstanceTypeChange(String hostname, String instanceType) {
-        logger.info("ホスト名 {} のインスタンスタイプ変更を実行します: {} (スタブ実装)",
+        logger.info("ホスト名 {} のインスタンスタイプ変更を実行します: {}",
                 hostname, instanceType);
-        // TODO: 外部シェルを呼び出してインスタンスタイプを変更
+
+        try {
+            // 外部シェルを実行 (引数: ホスト名, インスタンスタイプ)
+            String output = shellExecutor.executeShell(
+                    executeInstanceTypeChangeShellPath,
+                    List.of(hostname, instanceType),
+                    shellTimeoutSeconds);
+
+            logger.info("ホスト名 {} のインスタンスタイプ変更が開始されました: {}", hostname, output.trim());
+
+        } catch (Exception e) {
+            logger.error("ホスト名 {} のインスタンスタイプ変更に失敗しました", hostname, e);
+            throw new RuntimeException("インスタンスタイプ変更に失敗しました: " + hostname, e);
+        }
     }
 
     /**
@@ -176,14 +201,35 @@ public class InstanceTypeChangeService {
     }
 
     /**
-     * インスタンスタイプ変更完了を確認します（空実装）
+     * インスタンスタイプ変更完了を確認します
+     * 外部シェルを呼び出して確認します
      * 
      * @param hostname ホスト名
      * @return 変更完了の場合true
      */
     protected boolean checkInstanceTypeChangeCompletion(String hostname) {
-        logger.debug("ホスト名 {} のインスタンスタイプ変更完了をチェック中 (スタブ実装)", hostname);
-        // TODO: 外部シェルを呼び出してインスタンスタイプ変更完了を確認
-        return true;
+        logger.debug("ホスト名 {} のインスタンスタイプ変更完了をチェック中", hostname);
+
+        try {
+            // 外部シェルを実行 (引数: ホスト名)
+            String output = shellExecutor.executeShell(
+                    checkInstanceTypeChangeShellPath,
+                    List.of(hostname),
+                    shellTimeoutSeconds);
+
+            // 標準出力が "COMPLETED" なら完了、"IN_PROGRESS" なら進行中
+            String status = output.trim();
+            if ("COMPLETED".equals(status)) {
+                logger.info("ホスト名 {} のインスタンスタイプ変更が完了しています", hostname);
+                return true;
+            } else {
+                logger.debug("ホスト名 {} のインスタンスタイプ変更はまだ進行中です: {}", hostname, status);
+                return false;
+            }
+
+        } catch (Exception e) {
+            logger.warn("ホスト名 {} のインスタンスタイプ変更確認に失敗しました。未完了とみなします", hostname, e);
+            return false;
+        }
     }
 }

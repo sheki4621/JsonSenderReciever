@@ -2,11 +2,13 @@ package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
 import com.example.jsonreceiver.repository.InstanceStatusRepository;
+import com.example.jsonreceiver.util.ShellExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import com.example.jsonreceiver.dto.InstanceType;
 
@@ -23,12 +26,24 @@ public class InstanceStatusServiceTest {
         @Mock
         private InstanceStatusRepository repository;
 
+        @Mock
+        private ShellExecutor shellExecutor;
+
         private InstanceStatusService service;
 
         @BeforeEach
-        public void setUp() {
+        public void setUp() throws Exception {
                 MockitoAnnotations.openMocks(this);
-                service = new InstanceStatusService(repository);
+                service = new InstanceStatusService(repository, shellExecutor);
+
+                // シェルパスとタイムアウトを設定
+                ReflectionTestUtils.setField(service, "installAgentShellPath", "/path/to/install_agent.sh");
+                ReflectionTestUtils.setField(service, "uninstallAgentShellPath", "/path/to/uninstall_agent.sh");
+                ReflectionTestUtils.setField(service, "shellTimeoutSeconds", 30);
+
+                // シェル実行をデフォルトで成功するようにモック
+                when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
+                                .thenReturn("Shell execution successf ul");
         }
 
         @Test

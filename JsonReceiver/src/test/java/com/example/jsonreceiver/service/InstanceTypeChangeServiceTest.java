@@ -8,6 +8,7 @@ import com.example.jsonreceiver.repository.InstanceTypeLinkRepository;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
 import com.example.jsonreceiver.repository.SystemInfoRepository;
 import com.example.jsonreceiver.dto.InstanceTypeLink;
+import com.example.jsonreceiver.util.ShellExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -33,20 +34,31 @@ public class InstanceTypeChangeServiceTest {
     @Mock
     private InstanceTypeRepository instanceTypeRepository;
 
+    @Mock
+    private ShellExecutor shellExecutor;
+
     private InstanceTypeChangeService service;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         service = new InstanceTypeChangeService(
                 instanceStatusRepository,
                 systemInfoRepository,
                 instanceTypeLinkRepository,
-                instanceTypeRepository);
+                instanceTypeRepository,
+                shellExecutor);
 
         // 設定値を注入
+        ReflectionTestUtils.setField(service, "executeInstanceTypeChangeShellPath", "/path/to/change.sh");
+        ReflectionTestUtils.setField(service, "checkInstanceTypeChangeShellPath", "/path/to/check.sh");
+        ReflectionTestUtils.setField(service, "shellTimeoutSeconds", 30);
         ReflectionTestUtils.setField(service, "checkIntervalSeconds", 5);
-        ReflectionTestUtils.setField(service, "maxRetryCount", 10);
+        ReflectionTestUtils.setField(service, "maxRetryCount", 3);
+
+        // シェル実行をデフォルトで成功するようにモック
+        when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
+                .thenReturn("Success");
     }
 
     @Test

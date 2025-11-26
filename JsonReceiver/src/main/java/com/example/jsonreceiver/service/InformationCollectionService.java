@@ -4,6 +4,9 @@ import com.example.jsonreceiver.dto.InstanceTypeInfo;
 import com.example.jsonreceiver.dto.SystemInfo;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
 import com.example.jsonreceiver.repository.SystemInfoRepository;
+import com.example.jsonreceiver.util.ShellExecutor;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +29,23 @@ public class InformationCollectionService {
 
     private final InstanceTypeRepository instanceTypeRepository;
     private final SystemInfoRepository systemInfoRepository;
+    private final ShellExecutor shellExecutor;
+    private final ObjectMapper objectMapper;
 
     @Value("${info.collection.retry.max-attempts:3}")
     private int maxRetryAttempts;
 
     @Value("${info.collection.retry.interval-seconds:5}")
     private int retryIntervalSeconds;
+
+    @Value("${shell.system-info.path:/path/to/get_system_info.sh}")
+    private String systemInfoShellPath;
+
+    @Value("${shell.instance-type.path:/path/to/get_instance_type.sh}")
+    private String instanceTypeShellPath;
+
+    @Value("${shell.execution.timeout-seconds:30}")
+    private int shellTimeoutSeconds;
 
     /**
      * インスタンスタイプ一覧を収集します。
@@ -125,49 +139,87 @@ public class InformationCollectionService {
 
     /**
      * インスタンスタイプ一覧を取得する内部メソッド
-     * 将来的にシェルスクリプトを呼び出す処理に置き換える想定
+     * 外部シェルスクリプトを呼び出してJSON形式でインスタンスタイプ情報を取得します
      * 
      * @return インスタンスタイプ情報のリスト
      */
     private List<InstanceTypeInfo> fetchInstanceTypes() {
-        logger.debug("インスタンスタイプ一覧を取得中(サンプルデータ)");
+        logger.debug("インスタンスタイプ一覧を取得中");
 
-        // TODO: 将来的にシェルスクリプトを呼び出す処理に置き換える
-        List<InstanceTypeInfo> instanceTypes = new ArrayList<>();
-        instanceTypes.add(new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
-        instanceTypes.add(new InstanceTypeInfo("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1));
+        try {
+            // 外部シェルを実行
+            String output = shellExecutor.executeShell(
+                    instanceTypeShellPath,
+                    List.of(),
+                    shellTimeoutSeconds);
 
-        return instanceTypes;
+            // JSON出力をパース
+            List<InstanceTypeInfo> instanceTypes = objectMapper.readValue(
+                    output,
+                    new TypeReference<List<InstanceTypeInfo>>() {
+                    });
+
+            logger.info("インスタンスタイプ一覧を取得しました: {} 件", instanceTypes.size());
+            return instanceTypes;
+
+        } catch (Exception e) {
+            logger.warn("外部シェルによるインスタンスタイプ取得に失敗しました。サンプルデータを返します", e);
+
+            // フォールバック: サンプルデータを返す
+            List<InstanceTypeInfo> instanceTypes = new ArrayList<>();
+            instanceTypes.add(new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
+            instanceTypes.add(new InstanceTypeInfo("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1));
+            return instanceTypes;
+        }
     }
 
     /**
      * システム情報を取得する内部メソッド
-     * 将来的にシェルスクリプトを呼び出す処理に置き換える想定
+     * 外部シェルスクリプトを呼び出してJSON形式でシステム情報を取得します
      * 
      * @return システム情報のリスト
      */
     private List<SystemInfo> fetchSystemInfo() {
-        logger.debug("システム情報を取得中（サンプルデータ）");
+        logger.debug("システム情報を取得中");
 
-        // TODO: 将来的にシェルスクリプトを呼び出す処理に置き換える
-        List<SystemInfo> systemInfoList = new ArrayList<>();
-        systemInfoList.add(new SystemInfo(
-                "192.168.1.10",
-                "server01.example.com",
-                "EL-A",
-                "HEL-XXX-01"));
-        systemInfoList.add(new SystemInfo(
-                "192.168.1.20",
-                "server02.example.com",
-                "EL-B",
-                "HEL-YYY-02"));
-        systemInfoList.add(new SystemInfo(
-                "192.168.1.30",
-                "server03.example.com",
-                "EL-C",
-                "HEL-ZZZ-01"));
+        try {
+            // 外部シェルを実行
+            String output = shellExecutor.executeShell(
+                    systemInfoShellPath,
+                    List.of(),
+                    shellTimeoutSeconds);
 
-        return systemInfoList;
+            // JSON出力をパース
+            List<SystemInfo> systemInfoList = objectMapper.readValue(
+                    output,
+                    new TypeReference<List<SystemInfo>>() {
+                    });
+
+            logger.info("システム情報を取得しました: {} 件", systemInfoList.size());
+            return systemInfoList;
+
+        } catch (Exception e) {
+            logger.warn("外部シェルによるシステム情報取得に失敗しました。サンプルデータを返します", e);
+
+            // フォールバック: サンプルデータを返す
+            List<SystemInfo> systemInfoList = new ArrayList<>();
+            systemInfoList.add(new SystemInfo(
+                    "192.168.1.10",
+                    "server01.example.com",
+                    "EL-A",
+                    "HEL-XXX-01"));
+            systemInfoList.add(new SystemInfo(
+                    "192.168.1.20",
+                    "server02.example.com",
+                    "EL-B",
+                    "HEL-YYY-02"));
+            systemInfoList.add(new SystemInfo(
+                    "192.168.1.30",
+                    "server03.example.com",
+                    "EL-C",
+                    "HEL-ZZZ-01"));
+            return systemInfoList;
+        }
     }
 
     /**
