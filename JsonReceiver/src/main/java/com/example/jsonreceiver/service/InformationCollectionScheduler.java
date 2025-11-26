@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.InstanceTypeInfo;
-import com.example.jsonreceiver.dto.SystemInfo;
+import com.example.jsonreceiver.dto.AllInstance;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,15 +95,18 @@ public class InformationCollectionScheduler implements CommandLineRunner {
     /**
      * システム情報を収集してログ出力
      */
+    /**
+     * システム情報を収集してログ出力
+     */
     private void collectAndLogSystemInfo() {
         try {
             logger.info("=== システム情報の収集を開始 ===");
-            List<SystemInfo> systemInfoList = informationCollectionService.collectSystemInfo();
-            logger.info("システム情報を{}件取得しました", systemInfoList.size());
+            List<AllInstance> allInstanceList = informationCollectionService.collectSystemInfo();
+            logger.info("システム情報を{}件取得しました", allInstanceList.size());
 
-            for (SystemInfo info : systemInfoList) {
-                logger.info("  - IPアドレス: {}, ホスト名: {}, EL種別: {}, HEL名: {}",
-                        info.getIpAddress(), info.getHostname(), info.getElType(), info.getHelName());
+            for (AllInstance info : allInstanceList) {
+                logger.info("  - ホスト名: {}, 装置タイプ: {}, グループ名: {}",
+                        info.getHostname(), info.getMachineType(), info.getGroupName());
             }
 
         } catch (Exception e) {

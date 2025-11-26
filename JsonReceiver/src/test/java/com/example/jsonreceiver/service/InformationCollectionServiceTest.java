@@ -1,9 +1,9 @@
 package com.example.jsonreceiver.service;
 
+import com.example.jsonreceiver.dto.AllInstance;
 import com.example.jsonreceiver.dto.InstanceTypeInfo;
-import com.example.jsonreceiver.dto.SystemInfo;
+import com.example.jsonreceiver.repository.AllInstanceRepository;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
-import com.example.jsonreceiver.repository.SystemInfoRepository;
 import com.example.jsonreceiver.util.ShellExecutor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 /**
  * InformationCollectionServiceのテストクラス
  */
+@SuppressWarnings("null")
 class InformationCollectionServiceTest {
 
     private InformationCollectionService service;
@@ -30,7 +31,7 @@ class InformationCollectionServiceTest {
     private InstanceTypeRepository instanceTypeRepository;
 
     @Mock
-    private SystemInfoRepository systemInfoRepository;
+    private AllInstanceRepository allInstanceRepository;
 
     @Mock
     private ShellExecutor shellExecutor;
@@ -43,7 +44,7 @@ class InformationCollectionServiceTest {
         objectMapper = new ObjectMapper(); // 実際のObjectMapperを使用
         service = new InformationCollectionService(
                 instanceTypeRepository,
-                systemInfoRepository,
+                allInstanceRepository,
                 shellExecutor,
                 objectMapper);
         // リトライ設定を注入
@@ -83,27 +84,26 @@ class InformationCollectionServiceTest {
     @Test
     void testCollectSystemInfo_returnsNonEmptyList() throws Exception {
         // シェル実行時のJSONレスポンスをモック
-        String jsonResponse = "[{\"ipAddress\":\"192.168.1.10\",\"hostname\":\"server01.example.com\",\"elType\":\"EL-A\",\"helName\":\"HEL-XXX-01\"}]";
+        String jsonResponse = "[{\"hostname\":\"server01.example.com\",\"machineType\":\"ECS\",\"groupName\":\"GROUP-A\"}]";
         when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // システム情報の取得
-        List<SystemInfo> result = service.collectSystemInfo();
+        List<AllInstance> result = service.collectSystemInfo();
 
         // 結果が空でないことを確認
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
         // サンプルデータの構造を確認
-        SystemInfo first = result.get(0);
+        AllInstance first = result.get(0);
         assertNotNull(first);
-        assertNotNull(first.getIpAddress());
         assertNotNull(first.getHostname());
-        assertNotNull(first.getElType());
-        assertNotNull(first.getHelName());
-        assertFalse(first.getIpAddress().isEmpty());
+        assertNotNull(first.getMachineType());
+        assertNotNull(first.getGroupName());
+        assertEquals("server01.example.com", first.getHostname());
 
         // CSV出力が呼ばれたことを確認
-        verify(systemInfoRepository, times(1)).saveAll(anyList());
+        verify(allInstanceRepository, times(1)).saveAll(anyList());
         // シェルが実行されたことを確認
         verify(shellExecutor, times(1)).executeShell(anyString(), anyList(), anyInt());
     }
@@ -128,19 +128,18 @@ class InformationCollectionServiceTest {
     @Test
     void testCollectSystemInfo_containsValidData() throws Exception {
         // シェル実行時のJSONレスポンスをモック
-        String jsonResponse = "[{\"ipAddress\":\"192.168.1.10\",\"hostname\":\"server01.example.com\",\"elType\":\"EL-A\",\"helName\":\"HEL-XXX-01\"}]";
+        String jsonResponse = "[{\"hostname\":\"server01.example.com\",\"machineType\":\"ECS\",\"groupName\":\"GROUP-A\"}]";
         when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // システム情報の取得
-        List<SystemInfo> result = service.collectSystemInfo();
+        List<AllInstance> result = service.collectSystemInfo();
 
         // 期待されるサンプルデータが含まれることを確認
         assertTrue(result.stream()
-                .anyMatch(info -> info.getIpAddress() != null &&
-                        info.getIpAddress().matches("\\d+\\.\\d+\\.\\d+\\.\\d+")));
+                .anyMatch(info -> "server01.example.com".equals(info.getHostname())));
 
         // CSV出力が呼ばれたことを確認
-        verify(systemInfoRepository, times(1)).saveAll(result);
+        verify(allInstanceRepository, times(1)).saveAll(result);
     }
 
     @Test
@@ -165,20 +164,20 @@ class InformationCollectionServiceTest {
     @Test
     void testCollectSystemInfo_continuesOnCsvError() throws Exception {
         // シェル実行時のJSONレスポンスをモック
-        String jsonResponse = "[{\"ipAddress\":\"192.168.1.10\",\"hostname\":\"server01.example.com\",\"elType\":\"EL-A\",\"helName\":\"HEL-XXX-01\"}]";
+        String jsonResponse = "[{\"hostname\":\"server01.example.com\",\"machineType\":\"ECS\",\"groupName\":\"GROUP-A\"}]";
         when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // CSV出力時にエラーが発生するようモックを設定
         doThrow(new RuntimeException("CSV書き込みエラー"))
-                .when(systemInfoRepository).saveAll(anyList());
+                .when(allInstanceRepository).saveAll(anyList());
 
         // データは正常に取得できることを確認（CSV出力のエラーは無視される）
-        List<SystemInfo> result = service.collectSystemInfo();
+        List<AllInstance> result = service.collectSystemInfo();
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
         // CSV出力が試行されたことを確認
-        verify(systemInfoRepository, times(1)).saveAll(anyList());
+        verify(allInstanceRepository, times(1)).saveAll(anyList());
     }
 
     @Test
@@ -205,13 +204,13 @@ class InformationCollectionServiceTest {
                 .thenThrow(new RuntimeException("シェル実行エラー"));
 
         // フォールバックでサンプルデータが返されることを確認
-        List<SystemInfo> result = service.collectSystemInfo();
+        List<AllInstance> result = service.collectSystemInfo();
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.stream()
-                .anyMatch(info -> "192.168.1.10".equals(info.getIpAddress())));
+                .anyMatch(info -> "server01.example.com".equals(info.getHostname())));
 
         // CSV出力が試行されたことを確認
-        verify(systemInfoRepository, times(1)).saveAll(anyList());
+        verify(allInstanceRepository, times(1)).saveAll(anyList());
     }
 }

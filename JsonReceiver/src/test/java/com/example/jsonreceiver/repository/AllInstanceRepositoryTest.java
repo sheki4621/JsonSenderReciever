@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.SystemInfo;
+import com.example.jsonreceiver.dto.AllInstance;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,17 +16,17 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * SystemInfoRepositoryのテストクラス
+ * AllInstanceRepositoryのテストクラス
  */
-class SystemInfoRepositoryTest {
+class AllInstanceRepositoryTest {
 
-    private SystemInfoRepository repository;
+    private AllInstanceRepository repository;
     private static final String TEST_OUTPUT_DIR = "./test-csv";
-    private static final String FILE_NAME = "SystemInfo.csv";
+    private static final String FILE_NAME = "all_instance.csv";
 
     @BeforeEach
     void setUp() {
-        repository = new SystemInfoRepository();
+        repository = new AllInstanceRepository();
         // テスト用の出力ディレクトリを設定
         ReflectionTestUtils.setField(repository, "outputDir", TEST_OUTPUT_DIR);
     }
@@ -47,13 +47,13 @@ class SystemInfoRepositoryTest {
     @Test
     void testSaveAll_createsFileWithHeaders() throws IOException {
         // テストデータを作成
-        List<SystemInfo> systemInfoList = Arrays.asList(
-                new SystemInfo("192.168.1.10", "server01.example.com", "RHEL", "HEL-PROD-01"),
-                new SystemInfo("192.168.1.20", "server02.example.com", "CentOS", "HEL-PROD-02"),
-                new SystemInfo("192.168.1.30", "server03.example.com", "Ubuntu", "HEL-DEV-01"));
+        List<AllInstance> allInstanceList = Arrays.asList(
+                new AllInstance("server01.example.com", "ECS", "GROUP-A"),
+                new AllInstance("server02.example.com", "EDB", "GROUP-B"),
+                new AllInstance("server03.example.com", "ECS", "GROUP-A"));
 
         // saveAllメソッドを呼び出し
-        repository.saveAll(systemInfoList);
+        repository.saveAll(allInstanceList);
 
         // ファイルが作成されたことを確認
         Path filePath = Paths.get(TEST_OUTPUT_DIR, FILE_NAME);
@@ -64,28 +64,28 @@ class SystemInfoRepositoryTest {
         assertFalse(lines.isEmpty());
 
         // ヘッダーが存在することを確認
-        assertEquals("Ip,Hostname,ElType,HelName", lines.get(0));
+        assertEquals("HOSTNAME,MACHINE_TYPE,GROUP_NAME", lines.get(0));
 
         // データ行数を確認（ヘッダー + 3行）
         assertEquals(4, lines.size());
 
         // データの内容を確認
-        assertTrue(lines.stream().anyMatch(line -> line.contains("192.168.1.10")));
         assertTrue(lines.stream().anyMatch(line -> line.contains("server01.example.com")));
-        assertTrue(lines.stream().anyMatch(line -> line.contains("HEL-PROD-01")));
+        assertTrue(lines.stream().anyMatch(line -> line.contains("ECS")));
+        assertTrue(lines.stream().anyMatch(line -> line.contains("GROUP-A")));
     }
 
     @Test
     void testSaveAll_overwritesExistingFile() throws IOException {
         // 最初のデータセットを保存
-        List<SystemInfo> firstSet = Arrays.asList(
-                new SystemInfo("192.168.1.10", "server01.example.com", "RHEL", "HEL-PROD-01"),
-                new SystemInfo("192.168.1.20", "server02.example.com", "CentOS", "HEL-PROD-02"));
+        List<AllInstance> firstSet = Arrays.asList(
+                new AllInstance("server01.example.com", "ECS", "GROUP-A"),
+                new AllInstance("server02.example.com", "EDB", "GROUP-B"));
         repository.saveAll(firstSet);
 
         // 2回目のデータセットを保存（上書き）
-        List<SystemInfo> secondSet = Arrays.asList(
-                new SystemInfo("10.0.0.1", "newserver.example.com", "Ubuntu", "HEL-TEST-01"));
+        List<AllInstance> secondSet = Arrays.asList(
+                new AllInstance("newserver.example.com", "ECS", "GROUP-C"));
         repository.saveAll(secondSet);
 
         // ファイルの内容を確認
@@ -93,12 +93,12 @@ class SystemInfoRepositoryTest {
         List<String> lines = Files.readAllLines(filePath);
 
         // 古いデータが存在しないことを確認（上書きされている）
-        assertFalse(lines.stream().anyMatch(line -> line.contains("192.168.1.10")));
         assertFalse(lines.stream().anyMatch(line -> line.contains("server01.example.com")));
+        assertFalse(lines.stream().anyMatch(line -> line.contains("GROUP-B")));
 
         // 新しいデータが存在することを確認
-        assertTrue(lines.stream().anyMatch(line -> line.contains("10.0.0.1")));
         assertTrue(lines.stream().anyMatch(line -> line.contains("newserver.example.com")));
+        assertTrue(lines.stream().anyMatch(line -> line.contains("GROUP-C")));
 
         // データ行数を確認（ヘッダー + 1行）
         assertEquals(2, lines.size());
@@ -107,7 +107,7 @@ class SystemInfoRepositoryTest {
     @Test
     void testSaveAll_withEmptyList() throws IOException {
         // 空のリストで保存
-        List<SystemInfo> emptyList = Arrays.asList();
+        List<AllInstance> emptyList = Arrays.asList();
         repository.saveAll(emptyList);
 
         // ファイルが作成されることを確認
@@ -117,7 +117,7 @@ class SystemInfoRepositoryTest {
         // ヘッダーのみが存在することを確認
         List<String> lines = Files.readAllLines(filePath);
         assertEquals(1, lines.size());
-        assertEquals("Ip,Hostname,ElType,HelName", lines.get(0));
+        assertEquals("HOSTNAME,MACHINE_TYPE,GROUP_NAME", lines.get(0));
     }
 
     @Test
@@ -129,9 +129,9 @@ class SystemInfoRepositoryTest {
         }
 
         // データを保存
-        List<SystemInfo> systemInfoList = Arrays.asList(
-                new SystemInfo("192.168.1.10", "server01.example.com", "RHEL", "HEL-PROD-01"));
-        repository.saveAll(systemInfoList);
+        List<AllInstance> allInstanceList = Arrays.asList(
+                new AllInstance("server01.example.com", "ECS", "GROUP-A"));
+        repository.saveAll(allInstanceList);
 
         // ディレクトリとファイルが作成されたことを確認
         assertTrue(Files.exists(dirPath));

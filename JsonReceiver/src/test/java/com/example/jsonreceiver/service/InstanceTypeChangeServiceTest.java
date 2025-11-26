@@ -1,12 +1,12 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.InstanceTypeInfo;
-import com.example.jsonreceiver.dto.SystemInfo;
+import com.example.jsonreceiver.dto.AllInstance;
 import com.example.jsonreceiver.dto.InstanceType;
 import com.example.jsonreceiver.repository.InstanceStatusRepository;
 import com.example.jsonreceiver.repository.InstanceTypeLinkRepository;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
-import com.example.jsonreceiver.repository.SystemInfoRepository;
+import com.example.jsonreceiver.repository.AllInstanceRepository;
 import com.example.jsonreceiver.dto.InstanceTypeLink;
 import com.example.jsonreceiver.util.ShellExecutor;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +20,14 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("null")
 public class InstanceTypeChangeServiceTest {
 
     @Mock
     private InstanceStatusRepository instanceStatusRepository;
 
     @Mock
-    private SystemInfoRepository systemInfoRepository;
+    private AllInstanceRepository allInstanceRepository;
 
     @Mock
     private InstanceTypeLinkRepository instanceTypeLinkRepository;
@@ -44,7 +45,7 @@ public class InstanceTypeChangeServiceTest {
         MockitoAnnotations.openMocks(this);
         service = new InstanceTypeChangeService(
                 instanceStatusRepository,
-                systemInfoRepository,
+                allInstanceRepository,
                 instanceTypeLinkRepository,
                 instanceTypeRepository,
                 shellExecutor);
@@ -69,12 +70,12 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_HIGH() throws IOException {
         // Arrange
-        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
-        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
+        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
         InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
 
-        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
-        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
+        when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
 
         // Act
@@ -88,8 +89,8 @@ public class InstanceTypeChangeServiceTest {
         }
 
         // Assert
-        verify(systemInfoRepository).findByHostname("test-host");
-        verify(instanceTypeLinkRepository).findByElType("EL-A");
+        verify(allInstanceRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository).findByElType("ECS");
         verify(instanceTypeRepository).findByInstanceTypeId("1");
         verify(instanceStatusRepository, atLeastOnce()).updateCurrentType("test-host", "HIGH");
     }
@@ -97,12 +98,12 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_LOW() throws IOException {
         // Arrange
-        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
-        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
+        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
         InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
 
-        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
-        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
+        when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
 
         // Act
@@ -116,8 +117,8 @@ public class InstanceTypeChangeServiceTest {
         }
 
         // Assert
-        verify(systemInfoRepository).findByHostname("test-host");
-        verify(instanceTypeLinkRepository).findByElType("EL-A");
+        verify(allInstanceRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository).findByElType("ECS");
         verify(instanceTypeRepository).findByInstanceTypeId("1");
         verify(instanceStatusRepository, atLeastOnce()).updateCurrentType("test-host", "LOW");
     }
@@ -125,13 +126,13 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_SystemInfoNotFound() throws IOException {
         // Arrange
-        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.empty());
+        when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.empty());
 
         // Act
         service.changeInstanceType("test-host", InstanceType.HIGH);
 
         // Assert
-        verify(systemInfoRepository).findByHostname("test-host");
+        verify(allInstanceRepository).findByHostname("test-host");
         verify(instanceTypeLinkRepository, never()).findByElType(anyString());
         verify(instanceTypeRepository, never()).findByInstanceTypeId(anyString());
     }
@@ -139,46 +140,46 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_InstanceTypeLinkNotFound() throws IOException {
         // Arrange
-        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
-        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
-        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.empty());
+        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
+        when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
+        when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.empty());
 
         // Act
         service.changeInstanceType("test-host", InstanceType.HIGH);
 
         // Assert
-        verify(systemInfoRepository).findByHostname("test-host");
-        verify(instanceTypeLinkRepository).findByElType("EL-A");
+        verify(allInstanceRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository).findByElType("ECS");
         verify(instanceTypeRepository, never()).findByInstanceTypeId(anyString());
     }
 
     @Test
     public void testChangeInstanceType_InstanceTypeNotFound() throws IOException {
         // Arrange
-        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
-        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
-        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
-        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
+        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
+        when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
+        when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.empty());
 
         // Act
         service.changeInstanceType("test-host", InstanceType.HIGH);
 
         // Assert
-        verify(systemInfoRepository).findByHostname("test-host");
-        verify(instanceTypeLinkRepository).findByElType("EL-A");
+        verify(allInstanceRepository).findByHostname("test-host");
+        verify(instanceTypeLinkRepository).findByElType("ECS");
         verify(instanceTypeRepository).findByInstanceTypeId("1");
     }
 
     @Test
     public void testChangeInstanceType_MaxRetryReached() throws IOException {
         // Arrange
-        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
-        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
+        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
         InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
 
-        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
-        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
+        when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
 
         // Create spy
@@ -213,12 +214,12 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_SuccessAfterRetries() throws IOException {
         // Arrange
-        SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "EL-A", "HEL-01");
-        InstanceTypeLink link = new InstanceTypeLink("EL-A", "1");
+        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
+        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
         InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
 
-        when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
-        when(instanceTypeLinkRepository.findByElType("EL-A")).thenReturn(Optional.of(link));
+        when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
+        when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.of(typeInfo));
 
         // Create spy

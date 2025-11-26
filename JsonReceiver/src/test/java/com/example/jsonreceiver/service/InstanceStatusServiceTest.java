@@ -16,17 +16,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("null")
 public class InstanceStatusServiceTest {
 
         @Mock
         private InstanceStatusRepository repository;
 
         @Mock
-        private SystemInfoRepository systemInfoRepository;
+        private AllInstanceRepository allInstanceRepository;
 
         @Mock
         private InstanceTypeLinkRepository instanceTypeLinkRepository;
@@ -44,7 +45,7 @@ public class InstanceStatusServiceTest {
                 MockitoAnnotations.openMocks(this);
                 service = new InstanceStatusService(
                                 repository,
-                                systemInfoRepository,
+                                allInstanceRepository,
                                 instanceTypeLinkRepository,
                                 instanceTypeRepository,
                                 shellExecutor);
@@ -55,7 +56,7 @@ public class InstanceStatusServiceTest {
                 ReflectionTestUtils.setField(service, "shellTimeoutSeconds", 30);
 
                 // デフォルトでSystemInfo、InstanceTypeLink、InstanceTypeが存在しないようにモック
-                when(systemInfoRepository.findByHostname(anyString())).thenReturn(Optional.empty());
+                when(allInstanceRepository.findByHostname(anyString())).thenReturn(Optional.empty());
                 when(instanceTypeLinkRepository.findByElType(anyString())).thenReturn(Optional.empty());
                 when(instanceTypeRepository.findByInstanceTypeId(anyString())).thenReturn(Optional.empty());
 
@@ -100,9 +101,9 @@ public class InstanceStatusServiceTest {
                                 "1.0.0",
                                 "test-host");
 
-                // SystemInfoをモック
-                SystemInfo systemInfo = new SystemInfo("192.168.1.1", "test-host", "ECS", "HEL-XXX-01");
-                when(systemInfoRepository.findByHostname("test-host")).thenReturn(Optional.of(systemInfo));
+                // AllInstanceをモック
+                AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
+                when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
 
                 // InstanceTypeLinkをモック
                 InstanceTypeLink link = new InstanceTypeLink("ECS", "1");

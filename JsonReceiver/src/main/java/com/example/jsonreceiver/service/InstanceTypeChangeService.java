@@ -28,7 +28,7 @@ public class InstanceTypeChangeService {
     private static final Logger logger = LoggerFactory.getLogger(InstanceTypeChangeService.class);
 
     private final InstanceStatusRepository instanceStatusRepository;
-    private final SystemInfoRepository systemInfoRepository;
+    private final AllInstanceRepository allInstanceRepository;
     private final InstanceTypeLinkRepository instanceTypeLinkRepository;
     private final InstanceTypeRepository instanceTypeRepository;
     private final ShellExecutor shellExecutor;
@@ -62,25 +62,25 @@ public class InstanceTypeChangeService {
         logger.info("ホスト名 {} のインスタンスタイプを {} に変更します", hostname, targetInstanceType);
 
         try {
-            // 1. SystemInfo.csvからホスト名でElTypeを取得
-            Optional<SystemInfo> systemInfoOpt = systemInfoRepository.findByHostname(hostname);
-            if (systemInfoOpt.isEmpty()) {
-                logger.error("ホスト名 {} の SystemInfo が見つかりません", hostname);
+            // 1. all_instance.csvからホスト名でMACHINE_TYPEを取得
+            Optional<AllInstance> allInstanceOpt = allInstanceRepository.findByHostname(hostname);
+            if (allInstanceOpt.isEmpty()) {
+                logger.error("ホスト名 {} の AllInstance が見つかりません", hostname);
                 return;
             }
-            SystemInfo systemInfo = systemInfoOpt.get();
-            String elType = systemInfo.getElType();
-            logger.debug("ホスト名 {} の ElType を検出: {}", hostname, elType);
+            AllInstance allInstance = allInstanceOpt.get();
+            String machineType = allInstance.getMachineType();
+            logger.debug("ホスト名 {} の MACHINE_TYPE を検出: {}", hostname, machineType);
 
-            // 2. InstanceTypeLink.csvからElTypeでInstanceTypeIdを取得
-            Optional<InstanceTypeLink> linkOpt = instanceTypeLinkRepository.findByElType(elType);
+            // 2. InstanceTypeLink.csvからMACHINE_TYPEでInstanceTypeIdを取得
+            Optional<InstanceTypeLink> linkOpt = instanceTypeLinkRepository.findByElType(machineType);
             if (linkOpt.isEmpty()) {
-                logger.error("ElType {} に対する InstanceTypeLink が見つかりません", elType);
+                logger.error("MACHINE_TYPE {} に対する InstanceTypeLink が見つかりません", machineType);
                 return;
             }
             InstanceTypeLink link = linkOpt.get();
             String instanceTypeId = link.getInstanceTypeId();
-            logger.debug("ElType {} の InstanceTypeId を検出: {}", elType, instanceTypeId);
+            logger.debug("MACHINE_TYPE {} の InstanceTypeId を検出: {}", machineType, instanceTypeId);
 
             // 3. InstanceType.csvからInstanceTypeIdで対応するインスタンスタイプを取得
             Optional<InstanceTypeInfo> typeInfoOpt = instanceTypeRepository.findByInstanceTypeId(instanceTypeId);

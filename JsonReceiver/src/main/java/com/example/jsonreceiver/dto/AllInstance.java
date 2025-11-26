@@ -10,24 +10,19 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SystemInfo {
-    /**
-     * IPアドレス
-     */
-    private String ipAddress;
-
+public class AllInstance {
     /**
      * ホスト名
      */
     private String hostname;
 
     /**
-     * EL種別
+     * 装置タイプ(ECS, EDB...)
      */
-    private String elType;
+    private String machineType;
 
     /**
-     * HEL名
+     * グループ名
      */
-    private String helName;
+    private String groupName;
 }

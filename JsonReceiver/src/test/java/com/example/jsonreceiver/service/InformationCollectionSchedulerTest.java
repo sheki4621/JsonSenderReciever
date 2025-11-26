@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
+import com.example.jsonreceiver.dto.AllInstance;
 import com.example.jsonreceiver.dto.InstanceTypeInfo;
-import com.example.jsonreceiver.dto.SystemInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,8 +37,8 @@ class InformationCollectionSchedulerTest {
         // モックの戻り値を設定
         List<InstanceTypeInfo> mockInstanceTypes = Arrays.asList(
                 new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
-        List<SystemInfo> mockSystemInfo = Arrays.asList(
-                new SystemInfo("192.168.1.1", "host1", "RHEL", "HEL-01"));
+        List<AllInstance> mockSystemInfo = Arrays.asList(
+                new AllInstance("host1", "ECS", "GROUP-A"));
 
         when(informationCollectionService.collectInstanceTypes()).thenReturn(mockInstanceTypes);
         when(informationCollectionService.collectSystemInfo()).thenReturn(mockSystemInfo);
@@ -62,7 +62,7 @@ class InformationCollectionSchedulerTest {
 
         when(informationCollectionService.collectSystemInfo())
                 .thenReturn(Arrays.asList(
-                        new SystemInfo("192.168.1.1", "host1", "RHEL", "HEL-01")));
+                        new AllInstance("host1", "ECS", "GROUP-A")));
 
         // スケジューラを起動
         scheduler.run();

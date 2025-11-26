@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -24,7 +24,7 @@ public class InstanceStatusService {
     private static final Logger logger = LoggerFactory.getLogger(InstanceStatusService.class);
 
     private final InstanceStatusRepository repository;
-    private final SystemInfoRepository systemInfoRepository;
+    private final AllInstanceRepository allInstanceRepository;
     private final InstanceTypeLinkRepository instanceTypeLinkRepository;
     private final InstanceTypeRepository instanceTypeRepository;
     private final ShellExecutor shellExecutor;
@@ -178,11 +178,11 @@ public class InstanceStatusService {
             typeMicro = existing.getTypeMicro();
         }
 
-        // SystemInfo.csvからElType（MACHINE_TYPE）を取得
+        // all_instance.csvからMACHINE_TYPEを取得
         try {
-            Optional<SystemInfo> systemInfoOpt = systemInfoRepository.findByHostname(hostname);
-            if (systemInfoOpt.isPresent()) {
-                machineType = systemInfoOpt.get().getElType();
+            Optional<AllInstance> allInstanceOpt = allInstanceRepository.findByHostname(hostname);
+            if (allInstanceOpt.isPresent()) {
+                machineType = allInstanceOpt.get().getMachineType();
                 logger.debug("ホスト {} の MACHINE_TYPE を取得: {}", hostname, machineType);
 
                 // InstanceTypeLink.csvからInstanceTypeId（TYPE_ID）を取得
@@ -234,17 +234,18 @@ public class InstanceStatusService {
 
         try {
             // 外部シェルを実行 (引数:インスタンス名)
-            // String output = shellExecutor.executeShell(
-            // installAgentShellPath,
-            // List.of(instanceName),
-            // shellTimeoutSeconds);
+            String output = shellExecutor.executeShell(
+                    installAgentShellPath,
+                    List.of(instanceName),
+                    shellTimeoutSeconds);
 
-            // logger.info("インスタンス {} のエージェントインストールが完了しました: {}", instanceName,
-            // output.trim());
+            logger.info("インスタンス {} のエージェントインストールが完了しました: {}", instanceName,
+                    output.trim());
 
         } catch (Exception e) {
             logger.error("インスタンス {} のエージェントインストールに失敗しました", instanceName, e);
-            throw new RuntimeException("Agent インストールに失敗しました: " + instanceName, e);
+            // エラーをスローせず、ログ出力のみにとどめる（要件によるが、ここでは処理を継続させるため）
+            // throw new RuntimeException("Agent インストールに失敗しました: " + instanceName, e);
         }
     }
 
@@ -259,17 +260,18 @@ public class InstanceStatusService {
 
         try {
             // 外部シェルを実行 (引数:インスタンス名)
-            // String output = shellExecutor.executeShell(
-            // uninstallAgentShellPath,
-            // List.of(instanceName),
-            // shellTimeoutSeconds);
+            String output = shellExecutor.executeShell(
+                    uninstallAgentShellPath,
+                    List.of(instanceName),
+                    shellTimeoutSeconds);
 
-            // logger.info("インスタンス {} のエージェントアンインストールが完了しました: {}", instanceName,
-            // output.trim());
+            logger.info("インスタンス {} のエージェントアンインストールが完了しました: {}", instanceName,
+                    output.trim());
 
         } catch (Exception e) {
             logger.error("インスタンス {} のエージェントアンインストールに失敗しました", instanceName, e);
-            throw new RuntimeException("Agent アンインストールに失敗しました: " + instanceName, e);
+            // エラーをスローせず、ログ出力のみにとどめる
+            // throw new RuntimeException("Agent アンインストールに失敗しました: " + instanceName, e);
         }
     }
 }

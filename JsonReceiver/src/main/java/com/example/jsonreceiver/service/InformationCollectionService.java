@@ -1,9 +1,9 @@
 package com.example.jsonreceiver.service;
 
+import com.example.jsonreceiver.dto.AllInstance;
 import com.example.jsonreceiver.dto.InstanceTypeInfo;
-import com.example.jsonreceiver.dto.SystemInfo;
+import com.example.jsonreceiver.repository.AllInstanceRepository;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
-import com.example.jsonreceiver.repository.SystemInfoRepository;
 import com.example.jsonreceiver.util.ShellExecutor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +28,7 @@ public class InformationCollectionService {
     private static final Logger logger = LoggerFactory.getLogger(InformationCollectionService.class);
 
     private final InstanceTypeRepository instanceTypeRepository;
-    private final SystemInfoRepository systemInfoRepository;
+    private final AllInstanceRepository allInstanceRepository;
     private final ShellExecutor shellExecutor;
     private final ObjectMapper objectMapper;
 
@@ -78,19 +78,19 @@ public class InformationCollectionService {
      * @return システム情報のリスト
      * @throws RuntimeException すべてのリトライが失敗した場合
      */
-    public List<SystemInfo> collectSystemInfo() {
-        List<SystemInfo> systemInfoList = executeWithRetry("システム情報", this::fetchSystemInfo);
+    public List<AllInstance> collectSystemInfo() {
+        List<AllInstance> allInstanceList = executeWithRetry("システム情報", this::fetchSystemInfo);
 
         // CSV出力
         try {
-            systemInfoRepository.saveAll(systemInfoList);
+            allInstanceRepository.saveAll(allInstanceList);
             logger.debug("システム情報をCSVファイルに出力しました");
         } catch (Exception e) {
             logger.error("システム情報のCSV出力に失敗しました", e);
             // CSV出力に失敗しても、データの収集自体は成功しているため例外をスローしない
         }
 
-        return systemInfoList;
+        return allInstanceList;
     }
 
     /**
@@ -179,7 +179,7 @@ public class InformationCollectionService {
      * 
      * @return システム情報のリスト
      */
-    private List<SystemInfo> fetchSystemInfo() {
+    private List<AllInstance> fetchSystemInfo() {
         logger.debug("システム情報を取得中");
 
         try {
@@ -190,35 +190,32 @@ public class InformationCollectionService {
                     shellTimeoutSeconds);
 
             // JSON出力をパース
-            List<SystemInfo> systemInfoList = objectMapper.readValue(
+            List<AllInstance> allInstanceList = objectMapper.readValue(
                     output,
-                    new TypeReference<List<SystemInfo>>() {
+                    new TypeReference<List<AllInstance>>() {
                     });
 
-            logger.info("システム情報を取得しました: {} 件", systemInfoList.size());
-            return systemInfoList;
+            logger.info("システム情報を取得しました: {} 件", allInstanceList.size());
+            return allInstanceList;
 
         } catch (Exception e) {
             logger.warn("外部シェルによるシステム情報取得に失敗しました。サンプルデータを返します", e);
 
             // フォールバック: サンプルデータを返す
-            List<SystemInfo> systemInfoList = new ArrayList<>();
-            systemInfoList.add(new SystemInfo(
-                    "192.168.1.10",
+            List<AllInstance> allInstanceList = new ArrayList<>();
+            allInstanceList.add(new AllInstance(
                     "server01.example.com",
-                    "EL-A",
-                    "HEL-XXX-01"));
-            systemInfoList.add(new SystemInfo(
-                    "192.168.1.20",
+                    "ECS",
+                    "GROUP-A"));
+            allInstanceList.add(new AllInstance(
                     "server02.example.com",
-                    "EL-B",
-                    "HEL-YYY-02"));
-            systemInfoList.add(new SystemInfo(
-                    "192.168.1.30",
+                    "EDB",
+                    "GROUP-B"));
+            allInstanceList.add(new AllInstance(
                     "server03.example.com",
-                    "EL-C",
-                    "HEL-ZZZ-01"));
-            return systemInfoList;
+                    "ECS",
+                    "GROUP-A"));
+            return allInstanceList;
         }
     }
 
