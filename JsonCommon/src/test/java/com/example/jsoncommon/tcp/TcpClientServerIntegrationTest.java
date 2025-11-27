@@ -60,7 +60,7 @@ class TcpClientServerIntegrationTest {
         tcpClient = new TcpClient(objectMapper);
 
         UUID id = UUID.randomUUID();
-        Metrics metrics = new Metrics(75.5, 60.3);
+        Metrics metrics = new Metrics(75.5, 60.3, InstanceTypeChangeRequest.WITHIN);
         MetricsJson metricsJson = new MetricsJson(
                 id, NoticeType.METRICS, ZonedDateTime.now(), "1.0.0", "test-instance", metrics);
 

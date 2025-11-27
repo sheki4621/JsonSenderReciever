@@ -1,7 +1,6 @@
 package com.example.jsonreceiver.service;
 
 import com.example.jsonreceiver.dto.*;
-import com.example.jsoncommon.dto.*;
 import com.example.jsonreceiver.repository.*;
 import com.example.jsonreceiver.util.ShellExecutor;
 import lombok.RequiredArgsConstructor;

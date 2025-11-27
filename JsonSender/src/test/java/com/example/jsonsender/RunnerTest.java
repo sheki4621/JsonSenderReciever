@@ -2,23 +2,17 @@ package com.example.jsonsender;
 
 import com.example.jsoncommon.dto.*;
 import com.example.jsonsender.config.AppConfig;
-import com.example.jsonsender.utils.collector.Collector;
+import com.example.jsonsender.service.MetricsSendService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.time.ZoneId;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +22,7 @@ class RunnerTest {
     private TcpClient tcpClient;
 
     @Mock
-    private Collector<Metrics> metricsCollector;
+    private MetricsSendService metricsSendService;
 
     @Mock
     private AppConfig appConfig;
@@ -50,22 +44,27 @@ class RunnerTest {
         when(appConfig.getNoticeIntervalSec()).thenReturn(1);
         when(appConfig.getErrorRetryIntervalSec()).thenReturn(5);
 
-        runner = new Runner(tcpClient, metricsCollector, appConfig);
+        runner = new Runner(tcpClient, metricsSendService, appConfig);
     }
 
     @Test
     void testRunSendsUpNotification() throws Exception {
         // Arrange
-        // Throw InterruptedException to break the loop immediately after first
-        // iteration logic (or before)
-        // Actually, we want it to run at least once to send UP?
-        // UP is sent BEFORE the loop.
-        // So we can just throw InterruptedException immediately in
-        // metricsCollector.collect()
-        when(metricsCollector.collect()).thenThrow(new InterruptedException("Stop loop"));
+        // Throw Error to break the infinite loop in Runner.run()
+        // collect() does not declare InterruptedException, so we cannot throw it.
+        // catch(Exception) in Runner catches RuntimeException, so we use Error.
+        when(metricsSendService.collect()).thenAnswer(invocation -> {
+            throw new Error("Stop loop");
+        });
 
         // Act
-        runner.run();
+        try {
+            runner.run();
+        } catch (Error e) {
+            if (!"Stop loop".equals(e.getMessage())) {
+                throw e;
+            }
+        }
 
         // Assert
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);

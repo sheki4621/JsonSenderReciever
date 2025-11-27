@@ -1,4 +1,4 @@
-package com.example.jsonreceiver.repository;
+package com.example.jsoncommon.repository;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;

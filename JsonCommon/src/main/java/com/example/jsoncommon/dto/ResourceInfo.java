@@ -1,4 +1,4 @@
-package com.example.jsonreceiver.dto;
+package com.example.jsoncommon.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,4 +12,5 @@ public class ResourceInfo {
     private String timestamp;
     private Double cpuUsage;
     private Double memoryUsage;
+    private InstanceTypeChangeRequest instanceTypeChangeRequest;
 }

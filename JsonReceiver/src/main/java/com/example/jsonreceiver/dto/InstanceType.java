@@ -17,5 +17,10 @@ public enum InstanceType {
     /**
      * 低性能インスタンスタイプ
      */
+    MICRO,
+
+    /**
+     * 超低性能インスタンスタイプ
+     */
     VERYLOW
 }

@@ -1,11 +1,10 @@
 package com.example.jsonsender;
 
 import com.example.jsoncommon.dto.*;
-import com.example.jsonsender.config.AppConfig;
+import com.example.jsonsender.service.MetricsSendService;
+import com.example.jsonsender.utils.HostnameUtil;
 import com.example.jsonsender.utils.IdUtils;
-import com.example.jsonsender.utils.InstanceUtils;
 import com.example.jsonsender.utils.TimeUtils;
-import com.example.jsonsender.utils.collector.Collector;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +16,14 @@ public class Runner implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(Runner.class);
     private final TcpClient tcpClient;
-    private final Collector<Metrics> metricsCollector;
+    private final MetricsSendService metricsSendService;
     private final com.example.jsonsender.config.AppConfig appConfig;
 
     public Runner(TcpClient tcpClient,
-            Collector<Metrics> metricsCollector,
+            MetricsSendService metricsSendService,
             com.example.jsonsender.config.AppConfig appConfig) {
         this.tcpClient = tcpClient;
-        this.metricsCollector = metricsCollector;
+        this.metricsSendService = metricsSendService;
         this.appConfig = appConfig;
     }
 
@@ -35,18 +34,18 @@ public class Runner implements CommandLineRunner {
                 IdUtils.getId(),
                 TimeUtils.getNow(appConfig.getTimezone()),
                 appConfig.getAgentVersion(),
-                com.example.jsonsender.utils.InstanceUtils.getInstanceName());
+                HostnameUtil.getHostname());
         tcpClient.sendJson(appConfig.getDist().getHostname(), appConfig.getDist().getPort(), upNotice);
 
         while (true) {
             try {
-                Metrics metrics = metricsCollector.collect();
+                Metrics metrics = metricsSendService.collect();
                 MetricsJson metricsJson = new MetricsJson(
                         IdUtils.getId(),
                         NoticeType.METRICS,
                         TimeUtils.getNow(appConfig.getTimezone()),
                         appConfig.getAgentVersion(),
-                        com.example.jsonsender.utils.InstanceUtils.getInstanceName(),
+                        HostnameUtil.getHostname(),
                         metrics);
 
                 tcpClient.sendJson(appConfig.getDist().getHostname(), appConfig.getDist().getPort(), metricsJson);
@@ -71,7 +70,7 @@ public class Runner implements CommandLineRunner {
                 IdUtils.getId(),
                 TimeUtils.getNow(appConfig.getTimezone()),
                 appConfig.getAgentVersion(),
-                com.example.jsonsender.utils.InstanceUtils.getInstanceName());
+                HostnameUtil.getHostname());
         tcpClient.sendJsonDirectly(appConfig.getDist().getHostname(), appConfig.getDist().getPort(), downNotice);
     }
 }

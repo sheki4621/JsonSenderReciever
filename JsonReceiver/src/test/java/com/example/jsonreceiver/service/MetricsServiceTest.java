@@ -1,9 +1,10 @@
 package com.example.jsonreceiver.service;
 
+import com.example.jsoncommon.dto.InstanceTypeChangeRequest;
 import com.example.jsoncommon.dto.Metrics;
 import com.example.jsoncommon.dto.MetricsJson;
 import com.example.jsoncommon.dto.NoticeType;
-import com.example.jsonreceiver.repository.CsvRepository;
+import com.example.jsoncommon.repository.ResourceHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -19,23 +20,20 @@ import static org.mockito.Mockito.*;
 public class MetricsServiceTest {
 
     @Mock
-    private CsvRepository csvRepository;
-
-    @Mock
-    private ThresholdService thresholdService;
+    private ResourceHistoryRepository resourceHistoryRepository;
 
     private MetricsService metricsService;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        metricsService = new MetricsService(csvRepository, thresholdService);
+        metricsService = new MetricsService(resourceHistoryRepository);
     }
 
     @Test
     public void testProcessMetrics() throws IOException {
         // Arrange
-        Metrics metrics = new Metrics(75.0, 60.0);
+        Metrics metrics = new Metrics(75.0, 60.0, InstanceTypeChangeRequest.WITHIN);
         MetricsJson metricsJson = new MetricsJson(
                 UUID.randomUUID(),
                 NoticeType.METRICS,
@@ -48,14 +46,13 @@ public class MetricsServiceTest {
         metricsService.processMetrics(metricsJson);
 
         // Assert
-        verify(csvRepository).saveResourceInfo(metricsJson);
-        verify(thresholdService).checkThreshold(metricsJson);
+        verify(resourceHistoryRepository).save(metricsJson);
     }
 
     @Test
     public void testProcessMetrics_CsvRepositoryThrowsException() throws IOException {
         // Arrange
-        Metrics metrics = new Metrics(75.0, 60.0);
+        Metrics metrics = new Metrics(75.0, 60.0, InstanceTypeChangeRequest.WITHIN);
         MetricsJson metricsJson = new MetricsJson(
                 UUID.randomUUID(),
                 NoticeType.METRICS,
@@ -64,7 +61,7 @@ public class MetricsServiceTest {
                 "test-host",
                 metrics);
 
-        doThrow(new IOException("Test exception")).when(csvRepository).saveResourceInfo(any(MetricsJson.class));
+        doThrow(new IOException("Test exception")).when(resourceHistoryRepository).save(any(MetricsJson.class));
 
         // Act & Assert
         try {
@@ -73,7 +70,6 @@ public class MetricsServiceTest {
             // Expected
         }
 
-        verify(csvRepository).saveResourceInfo(metricsJson);
-        verify(thresholdService, never()).checkThreshold(any(MetricsJson.class));
+        verify(resourceHistoryRepository).save(metricsJson);
     }
 }

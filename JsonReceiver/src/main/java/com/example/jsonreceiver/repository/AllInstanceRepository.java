@@ -1,6 +1,7 @@
 package com.example.jsonreceiver.repository;
 
 import com.example.jsonreceiver.dto.AllInstance;
+import com.example.jsoncommon.repository.CsvRepositoryBase;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;

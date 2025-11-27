@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
+
 /**
  * ThreadPoolConfigのテスト
  */
@@ -23,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.*;
         "notice.processing.thread-pool.size=5"
 })
 class ThreadPoolConfigTest {
+
+    @MockBean
+    private com.example.jsoncommon.tcp.TcpClient tcpClient;
 
     @Autowired
     private ExecutorService noticeProcessingExecutor;

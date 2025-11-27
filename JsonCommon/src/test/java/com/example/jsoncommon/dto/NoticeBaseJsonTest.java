@@ -27,7 +27,7 @@ class NoticeBaseJsonTest {
         ZonedDateTime timestamp = ZonedDateTime.now();
         String agentVersion = "1.0.0";
         String instanceName = "test-instance";
-        Metrics metrics = new Metrics(75.5, 60.3);
+        Metrics metrics = new Metrics(75.5, 60.3, InstanceTypeChangeRequest.WITHIN);
 
         MetricsJson metricsJson = new MetricsJson(
                 id, NoticeType.METRICS, timestamp, agentVersion, instanceName, metrics);
@@ -43,6 +43,7 @@ class NoticeBaseJsonTest {
         assertTrue(json.contains("\"InstanceName\":\"test-instance\""));
         assertTrue(json.contains("\"CpuUsage\":75.5"));
         assertTrue(json.contains("\"MemoryUsage\":60.3"));
+        assertTrue(json.contains("\"InstanceTypeChangeRequest\":\"WITHIN\""));
     }
 
     @Test
@@ -50,7 +51,7 @@ class NoticeBaseJsonTest {
         // Arrange
         UUID id = UUID.randomUUID();
         String json = String.format(
-                "{\"Id\":\"%s\",\"NoticeType\":\"METRICS\",\"timestamp\":\"2023-11-26T10:00:00Z[UTC]\",\"AgentVersion\":\"1.0.0\",\"InstanceName\":\"test-instance\",\"Metrics\":{\"CpuUsage\":75.5,\"MemoryUsage\":60.3}}",
+                "{\"Id\":\"%s\",\"NoticeType\":\"METRICS\",\"timestamp\":\"2023-11-26T10:00:00Z[UTC]\",\"AgentVersion\":\"1.0.0\",\"InstanceName\":\"test-instance\",\"Metrics\":{\"CpuUsage\":75.5,\"MemoryUsage\":60.3,\"InstanceTypeChangeRequest\":\"WITHIN\"}}",
                 id.toString());
 
         // Act
@@ -65,6 +66,7 @@ class NoticeBaseJsonTest {
         assertNotNull(metricsJson.getMetrics());
         assertEquals(75.5, metricsJson.getMetrics().getCpuUsage());
         assertEquals(60.3, metricsJson.getMetrics().getMemoryUsage());
+        assertEquals(InstanceTypeChangeRequest.WITHIN, metricsJson.getMetrics().getInstanceTypeChangeRequest());
     }
 
     @Test

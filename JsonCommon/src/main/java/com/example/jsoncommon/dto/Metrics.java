@@ -14,4 +14,7 @@ public class Metrics {
 
     @JsonProperty("MemoryUsage")
     private Double memoryUsage;
+
+    @JsonProperty("InstanceTypeChangeRequest")
+    private InstanceTypeChangeRequest instanceTypeChangeRequest;
 }

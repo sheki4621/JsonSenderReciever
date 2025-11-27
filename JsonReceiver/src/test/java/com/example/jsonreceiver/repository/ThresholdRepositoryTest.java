@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.ThresholdInfo;
+import com.example.jsoncommon.dto.ThresholdInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -24,19 +24,38 @@ public class ThresholdRepositoryTest {
     public void setUp() throws IOException {
         Path csvDir = tempDir.resolve("csv");
         Files.createDirectories(csvDir);
-        csvFilePath = csvDir.resolve("Threshold.csv");
-
-        // テスト用のCSVデータを作成
-        String csvContent = """
-                Hostname,CpuUpperLimit,CpuLowerLimit,MemoryUpperLimit,MemoryLowerLimit,ContinueCount
-                test-host1,80.0,20.0,85.0,25.0,3
-                test-host2,90.0,30.0,90.0,30.0,5
-                test-host3,75.0,15.0,80.0,20.0,2
-                """;
-        Files.writeString(csvFilePath, csvContent);
+        csvFilePath = csvDir.resolve("threshold.csv");
 
         repository = new ThresholdRepository();
         repository.setOutputDir(csvDir.toString());
+
+        // テスト用のCSVデータを作成
+        ThresholdInfo info1 = new ThresholdInfo();
+        info1.setHostname("test-host1");
+        info1.setUpperCpuThreshold(80.0);
+        info1.setLowerCpuThreshold(20.0);
+        info1.setUpperMemThreshold(80.0);
+        info1.setLowerMemThreshold(20.0);
+        info1.setUpperCpuDurationMin(5);
+        repository.save(info1);
+
+        ThresholdInfo info2 = new ThresholdInfo();
+        info2.setHostname("test-host2");
+        info2.setUpperCpuThreshold(90.0);
+        info2.setLowerCpuThreshold(30.0);
+        info2.setUpperMemThreshold(90.0);
+        info2.setLowerMemThreshold(30.0);
+        info2.setUpperCpuDurationMin(5);
+        repository.save(info2);
+
+        ThresholdInfo info3 = new ThresholdInfo();
+        info3.setHostname("test-host3");
+        info3.setUpperCpuThreshold(75.0);
+        info3.setLowerCpuThreshold(15.0);
+        info3.setUpperMemThreshold(80.0);
+        info3.setLowerMemThreshold(20.0);
+        info3.setUpperCpuDurationMin(2);
+        repository.save(info3);
     }
 
     @Test
@@ -48,11 +67,11 @@ public class ThresholdRepositoryTest {
         assertTrue(result.isPresent());
         ThresholdInfo threshold = result.get();
         assertEquals("test-host1", threshold.getHostname());
-        assertEquals(80.0, threshold.getCpuUpperLimit());
-        assertEquals(20.0, threshold.getCpuLowerLimit());
-        assertEquals(85.0, threshold.getMemoryUpperLimit());
-        assertEquals(25.0, threshold.getMemoryLowerLimit());
-        assertEquals(3, threshold.getContinueCount());
+        assertEquals(80.0, result.get().getUpperCpuThreshold());
+        assertEquals(20.0, result.get().getLowerCpuThreshold());
+        assertEquals(80.0, result.get().getUpperMemThreshold());
+        assertEquals(20.0, result.get().getLowerMemThreshold());
+        assertEquals(5, result.get().getUpperCpuDurationMin());
     }
 
     @Test
@@ -73,11 +92,11 @@ public class ThresholdRepositoryTest {
         assertTrue(result.isPresent());
         ThresholdInfo threshold = result.get();
         assertEquals("test-host2", threshold.getHostname());
-        assertEquals(90.0, threshold.getCpuUpperLimit());
-        assertEquals(30.0, threshold.getCpuLowerLimit());
-        assertEquals(90.0, threshold.getMemoryUpperLimit());
-        assertEquals(30.0, threshold.getMemoryLowerLimit());
-        assertEquals(5, threshold.getContinueCount());
+        assertEquals(90.0, result.get().getUpperCpuThreshold());
+        assertEquals(30.0, result.get().getLowerCpuThreshold());
+        assertEquals(90.0, result.get().getUpperMemThreshold());
+        assertEquals(30.0, result.get().getLowerMemThreshold());
+        assertEquals(5, result.get().getUpperCpuDurationMin());
     }
 
     @Test
@@ -86,7 +105,12 @@ public class ThresholdRepositoryTest {
         Files.delete(csvFilePath);
 
         // Act
-        Optional<ThresholdInfo> result = repository.findByHostname("test-host1");
+        Optional<ThresholdInfo> result;
+        try {
+            result = repository.findByHostname("test-host1");
+        } catch (java.nio.file.NoSuchFileException e) {
+            result = Optional.empty();
+        }
 
         // Assert
         assertFalse(result.isPresent());

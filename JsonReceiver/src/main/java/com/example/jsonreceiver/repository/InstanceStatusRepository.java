@@ -1,9 +1,8 @@
 package com.example.jsonreceiver.repository;
 
+import com.example.jsoncommon.repository.CsvRepositoryBase;
 import com.example.jsonreceiver.dto.InstanceStatus;
 import com.example.jsonreceiver.dto.InstanceStatusValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.util.*;
 @Repository
 public class InstanceStatusRepository extends CsvRepositoryBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(InstanceStatusRepository.class);
     private static final String FILE_NAME = "monitor_target.csv";
     private static final String[] HEADERS = {
             "HOSTNAME", "MACHINE_TYPE", "REGION", "CURRENT_TYPE", "TYPE_ID",

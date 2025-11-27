@@ -2,42 +2,65 @@ package com.example.jsonsender.service;
 
 import com.example.jsoncommon.dto.ConditionLogic;
 import com.example.jsoncommon.dto.InstanceTypeChangeRequest;
+import com.example.jsoncommon.dto.Metrics;
+import com.example.jsoncommon.dto.ResourceInfo;
 import com.example.jsoncommon.dto.ThresholdInfo;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
-import com.example.jsoncommon.dto.ResourceInfo;
 import com.example.jsonsender.repository.ThresholdRepository;
 import com.example.jsonsender.utils.HostnameUtil;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * しきい値判定サービス
- * メトリクスがしきい値を超えているかチェックし、連続回数に基づいてインスタンスタイプ変更を実行します
- */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 @Service
 @RequiredArgsConstructor
-public class ThresholdService {
+public class MetricsSendService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ThresholdService.class);
+    private static final Logger logger = LoggerFactory.getLogger(MetricsSendService.class);
 
     private final ThresholdRepository thresholdRepository;
     private final ResourceHistoryRepository resourceHistoryRepository;
 
+    public Metrics collect() {
+        Double cpuUsage = getCpuUsage();
+        Double memoryUsage = getMemoryUsage();
+
+        InstanceTypeChangeRequest instanceTypeChangeRequest;
+        try {
+            instanceTypeChangeRequest = getInstanceTypeChangeRequest(cpuUsage, memoryUsage);
+        } catch (Exception e) {
+            logger.error("しきい値チェック中にエラーが発生しました: " + e.getMessage());
+            instanceTypeChangeRequest = null;
+        }
+
+        return new Metrics(cpuUsage, memoryUsage, instanceTypeChangeRequest);
+    }
+
+    protected Double getCpuUsage() {
+        // TODO: 提供されたら修正
+        return 23.4;
+    }
+
+    protected Double getMemoryUsage() {
+        // TODO: 提供されたら修正
+        return 34.5;
+    }
+
     /**
-     * しきい値チェックを実行します
+     * InstanceTypeChangeRequestを取得します
      * 
      * @param cpuUsage    CPU使用率
      * @param memoryUsage メモリ使用率
      */
-    public InstanceTypeChangeRequest checkThreshold(double cpuUsage, double memoryUsage) {
+    public InstanceTypeChangeRequest getInstanceTypeChangeRequest(double cpuUsage, double memoryUsage) {
         try {
             String hostname = HostnameUtil.getHostname();
 
@@ -46,8 +69,8 @@ public class ThresholdService {
             // しきい値を取得
             Optional<ThresholdInfo> thresholdOpt = thresholdRepository.findByHostname(hostname);
             if (thresholdOpt.isEmpty()) {
-                logger.error("ホスト名 {} のしきい値ファイルが見つかりません", hostname);
-                throw new IOException(String.format("ホスト名 %s のしきい値ファイルが見つかりません", hostname));
+                logger.error("しきい値ファイルが見つかりません: {}", thresholdRepository.getFilePath());
+                return null;
             }
 
             ThresholdInfo threshold = thresholdOpt.get();
@@ -69,8 +92,9 @@ public class ThresholdService {
                         threshold.getUpperCpuDurationMin());
                 ZonedDateTime beginTime = getBeginTimeCpuExceedsUpper(recentHistory, threshold.getUpperCpuThreshold());
                 logger.info("{}からCPU使用率がしきい値を上回った状態が継続しています。", beginTime);
+                // しきい値を超えた状態が指定分数以上継続している場合
                 if (beginTime != null
-                        && beginTime.isAfter(ZonedDateTime.now().minusMinutes(threshold.getUpperCpuDurationMin()))) {
+                        && beginTime.isBefore(ZonedDateTime.now().minusMinutes(threshold.getUpperCpuDurationMin()))) {
                     isCpuUpperRequest = true;
                 }
             }
@@ -86,8 +110,9 @@ public class ThresholdService {
                 ZonedDateTime beginTime = getBeginTimeMemoryExceedsUpper(recentHistory,
                         threshold.getUpperMemThreshold());
                 logger.info("{}からメモリ使用率がしきい値を上回った状態が継続しています。", beginTime);
+                // しきい値を超えた状態が指定分数以上継続している場合
                 if (beginTime != null
-                        && beginTime.isAfter(ZonedDateTime.now().minusMinutes(threshold.getUpperMemDurationMin()))) {
+                        && beginTime.isBefore(ZonedDateTime.now().minusMinutes(threshold.getUpperMemDurationMin()))) {
                     isMemoryUpperRequest = true;
                 }
             }
@@ -102,8 +127,9 @@ public class ThresholdService {
                         threshold.getLowerCpuDurationMin());
                 ZonedDateTime beginTime = getBeginTimeCpuBelowLower(recentHistory, threshold.getLowerCpuThreshold());
                 logger.info("{}からCPU使用率がしきい値を下回った状態が継続しています。", beginTime);
+                // しきい値を下回った状態が指定分数以上継続している場合
                 if (beginTime != null
-                        && beginTime.isAfter(ZonedDateTime.now().minusMinutes(threshold.getLowerCpuDurationMin()))) {
+                        && beginTime.isBefore(ZonedDateTime.now().minusMinutes(threshold.getLowerCpuDurationMin()))) {
                     isCpuLowerRequest = true;
                 }
             }
@@ -118,8 +144,9 @@ public class ThresholdService {
                         threshold.getLowerMemDurationMin());
                 ZonedDateTime beginTime = getBeginTimeMemoryBelowLower(recentHistory, threshold.getLowerMemThreshold());
                 logger.info("{}からメモリ使用率がしきい値を下回った状態が継続しています。", beginTime);
+                // しきい値を下回った状態が指定分数以上継続している場合
                 if (beginTime != null
-                        && beginTime.isAfter(ZonedDateTime.now().minusMinutes(threshold.getLowerMemDurationMin()))) {
+                        && beginTime.isBefore(ZonedDateTime.now().minusMinutes(threshold.getLowerMemDurationMin()))) {
                     isMemoryLowerRequest = true;
                 }
             }
