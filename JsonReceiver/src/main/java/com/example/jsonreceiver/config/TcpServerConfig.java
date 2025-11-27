@@ -46,8 +46,8 @@ public class TcpServerConfig {
     public CommandLineRunner startJsonReceiverTcpServer(
             JsonReceiverMessageHandler messageHandler,
             ObjectMapper objectMapper,
-            TaskExecutor jsonReceiverTcpServerExecutor,
-            ExecutorService jsonReceiverNoticeProcessingExecutor) {
+            @org.springframework.beans.factory.annotation.Qualifier("jsonReceiverTcpServerExecutor") TaskExecutor jsonReceiverTcpServerExecutor,
+            @org.springframework.beans.factory.annotation.Qualifier("jsonReceiverNoticeProcessingExecutor") ExecutorService jsonReceiverNoticeProcessingExecutor) {
 
         return args -> {
             log.info("JsonReceiver TCPサーバーをポート{}で起動します", serverPort);

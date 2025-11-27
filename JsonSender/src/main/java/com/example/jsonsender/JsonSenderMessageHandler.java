@@ -34,6 +34,9 @@ public class JsonSenderMessageHandler implements MessageHandler {
             case DOWN:
                 handleDown((DownJson) message);
                 break;
+            case THRESHOLD:
+                handleThreshold((ThresholdJson) message);
+                break;
             default:
                 log.warn("未知のメッセージタイプ: {}", message.getNoticeType());
         }
@@ -59,5 +62,10 @@ public class JsonSenderMessageHandler implements MessageHandler {
 
     private void handleDown(DownJson message) {
         log.info("DOWN通知を受信: instance={}", message.getInstanceName());
+    }
+
+    private void handleThreshold(ThresholdJson message) {
+        log.info("しきい値変更通知を受信: instance={}, config={}",
+                message.getInstanceName(), message.getThreshold());
     }
 }

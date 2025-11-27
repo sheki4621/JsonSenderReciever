@@ -5,5 +5,6 @@ public enum NoticeType {
     INSTALL,
     UNINSTALL,
     UP,
-    DOWN
+    DOWN,
+    THRESHOLD
 }
