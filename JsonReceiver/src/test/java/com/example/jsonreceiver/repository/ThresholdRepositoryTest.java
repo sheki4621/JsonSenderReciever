@@ -24,10 +24,9 @@ public class ThresholdRepositoryTest {
     public void setUp() throws IOException {
         Path csvDir = tempDir.resolve("csv");
         Files.createDirectories(csvDir);
-        csvFilePath = csvDir.resolve("threshold.csv");
-
         repository = new ThresholdRepository();
         repository.setOutputDir(csvDir.toString());
+        csvFilePath = csvDir.resolve(repository.getFilePath());
 
         // テスト用のCSVデータを作成
         ThresholdInfo info1 = new ThresholdInfo();

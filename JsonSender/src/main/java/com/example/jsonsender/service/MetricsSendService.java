@@ -7,7 +7,7 @@ import com.example.jsoncommon.dto.ResourceInfo;
 import com.example.jsoncommon.dto.ThresholdInfo;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
 import com.example.jsonsender.repository.ThresholdRepository;
-import com.example.jsonsender.utils.HostnameUtil;
+import com.example.jsoncommon.util.HostnameUtil;
 
 import lombok.RequiredArgsConstructor;
 

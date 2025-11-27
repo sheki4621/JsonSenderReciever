@@ -6,6 +6,7 @@ import com.example.jsoncommon.dto.ConditionLogic;
 import com.example.jsoncommon.dto.ScalingMode;
 import com.example.jsoncommon.dto.ThresholdInfo;
 import com.example.jsoncommon.repository.CsvRepositoryBase;
+import com.example.jsoncommon.util.HostnameUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,28 +15,26 @@ import java.util.Optional;
 @Repository
 public class ThresholdRepository extends CsvRepositoryBase {
 
-    private static final String FILE_NAME = "threshold.csv";
-
     public void save(ThresholdInfo thresholdInfo) throws IOException {
         String[] header = {
-                "hostname",
-                "scalingMode",
-                "upperChangeableEnable",
-                "upperCpuThreshold",
-                "upperCpuDurationMin",
-                "upperMemThreshold",
-                "upperMemDurationMin",
-                "upperConditionLogic",
-                "lowerChangeableEnable",
-                "lowerCpuThreshold",
-                "lowerCpuDurationMin",
-                "lowerMemThreshold",
-                "lowerMemDurationMin",
-                "lowerConditionLogic",
-                "microChangeableEnable",
-                "microForceOnStandby"
+                "HOSTNAME",
+                "SCALING_MODE",
+                "UPPER_CHANGEABLE_ENABLE",
+                "UPPER_CPU_THRESHOLD",
+                "UPPER_CPU_DURATION_MIN",
+                "UPPER_MEM_THRESHOLD",
+                "UPPER_MEM_DURATION_MIN",
+                "UPPER_CONDITION_LOGIC",
+                "LOWER_CHANGEABLE_ENABLE",
+                "LOWER_CPU_THRESHOLD",
+                "LOWER_CPU_DURATION_MIN",
+                "LOWER_MEM_THRESHOLD",
+                "LOWER_MEM_DURATION_MIN",
+                "LOWER_CONDITION_LOGIC",
+                "MICRO_CHANGEABLE_ENABLE",
+                "MICRO_FORCE_ON_STANBY"
         };
-        writeToCsv(FILE_NAME, header,
+        writeToCsv(getFilePath(), header,
                 thresholdInfo.getHostname(),
                 thresholdInfo.getScalingMode(),
                 thresholdInfo.getUpperChangeableEnable(),
@@ -62,7 +61,7 @@ public class ThresholdRepository extends CsvRepositoryBase {
      * @throws IOException IO例外
      */
     public Optional<ThresholdInfo> findByHostname(String hostname) throws IOException {
-        List<String> lines = readFromCsv(FILE_NAME);
+        List<String> lines = readFromCsv(getFilePath());
 
         if (lines.isEmpty()) {
             return Optional.empty();
@@ -97,5 +96,9 @@ public class ThresholdRepository extends CsvRepositoryBase {
         }
 
         return Optional.empty();
+    }
+
+    public String getFilePath() {
+        return String.format("threshold_%s.csv", HostnameUtil.getHostname());
     }
 }
