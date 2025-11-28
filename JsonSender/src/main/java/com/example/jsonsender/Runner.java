@@ -1,8 +1,8 @@
 package com.example.jsonsender;
 
-import com.example.jsonsender.TcpClient;
+import com.example.jsonsender.tcp.TcpClient;
 import com.example.jsoncommon.dto.*;
-import com.example.jsonsender.service.MetricsSendService;
+import com.example.jsonsender.metrics.MetricsSendService;
 import com.example.jsoncommon.util.HostnameUtil;
 import com.example.jsonsender.utils.IdUtils;
 import com.example.jsonsender.utils.TimeUtils;

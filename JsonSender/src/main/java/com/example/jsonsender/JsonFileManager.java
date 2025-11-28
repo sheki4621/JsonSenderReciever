@@ -1,5 +1,7 @@
 package com.example.jsonsender;
 
+import com.example.jsonsender.tcp.TcpClient;
+
 import com.example.jsonsender.config.AppConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
