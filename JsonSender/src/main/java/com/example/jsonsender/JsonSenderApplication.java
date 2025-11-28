@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import com.example.jsonsender.config.AppConfig;
 
 @SpringBootApplication
-@ComponentScan(basePackages = { "com.example.jsonreceiver", "com.example.jsoncommon" })
+@ComponentScan(basePackages = { "com.example.jsonsender", "com.example.jsoncommon" })
 @EnableConfigurationProperties(AppConfig.class)
 public class JsonSenderApplication {
 

@@ -21,8 +21,8 @@ public class ThresholdChangeService {
     private final TcpClient tcpClient;
     private final InstanceStatusRepository instanceStatusRepository; // Added injection
 
-    @Value("${tcp.server.port:8888}")
-    private int serverPort;
+    @Value("${tcp.client.target-port:8888}")
+    private int targetPort;
 
     /**
      * しきい値変更通知を送信します。
@@ -33,7 +33,8 @@ public class ThresholdChangeService {
     public void sendThresholdUpdate(String instanceName, ThresholdConfig config) {
         log.info("しきい値変更通知を送信します: instance={}, config={}", instanceName, config);
 
-        String serverHost = instanceName; // TODO: IPアドレスに変換する必要ある？
+        String serverHost = "localhost"; // TODO: IPアドレスに変換する必要ある？一旦localhost
+
         ThresholdJson message = new ThresholdJson(config);
         message.setId(UUID.randomUUID());
         message.setTimestamp(ZonedDateTime.now());
@@ -53,7 +54,7 @@ public class ThresholdChangeService {
         }
 
         try {
-            tcpClient.sendJson(serverHost, serverPort, message, new TcpConfig());
+            tcpClient.sendJson(serverHost, targetPort, message, new TcpConfig());
             log.info("しきい値変更通知を送信しました");
         } catch (Exception e) {
             log.error("しきい値変更通知の送信に失敗しました", e);

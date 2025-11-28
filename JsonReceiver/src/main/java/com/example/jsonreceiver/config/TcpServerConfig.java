@@ -4,6 +4,8 @@ import com.example.jsoncommon.tcp.TcpServer;
 import com.example.jsonreceiver.JsonReceiverMessageHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -46,8 +48,8 @@ public class TcpServerConfig {
     public CommandLineRunner startJsonReceiverTcpServer(
             JsonReceiverMessageHandler messageHandler,
             ObjectMapper objectMapper,
-            @org.springframework.beans.factory.annotation.Qualifier("jsonReceiverTcpServerExecutor") TaskExecutor jsonReceiverTcpServerExecutor,
-            @org.springframework.beans.factory.annotation.Qualifier("jsonReceiverNoticeProcessingExecutor") ExecutorService jsonReceiverNoticeProcessingExecutor) {
+            @Qualifier("jsonReceiverTcpServerExecutor") TaskExecutor jsonReceiverTcpServerExecutor,
+            @Qualifier("jsonReceiverNoticeProcessingExecutor") ExecutorService jsonReceiverNoticeProcessingExecutor) {
 
         return args -> {
             log.info("JsonReceiver TCPサーバーをポート{}で起動します", serverPort);

@@ -121,6 +121,46 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
     }
 
     /**
+     * 全てのインスタンスステータスを取得する
+     * 
+     * @return インスタンスステータスのリスト
+     * @throws IOException IO例外
+     */
+    public List<InstanceStatus> findAll() throws IOException {
+        List<String> lines = readFromCsv(FILE_NAME);
+        List<InstanceStatus> statuses = new ArrayList<>();
+
+        if (lines.isEmpty()) {
+            return statuses;
+        }
+
+        // ヘッダーをスキップして検索
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i);
+            String[] parts = line.split(",", -1);
+            if (parts.length >= 11) {
+                InstanceStatus status = new InstanceStatus(
+                        parts[0], // hostname
+                        parts[1], // machineType
+                        parts[2], // region
+                        parts[3], // currentType
+                        parts[4], // typeId
+                        parts[5], // typeHigh
+                        parts[6], // typeSmallStandard
+                        parts[7], // typeMicro
+                        parts[8], // lastUpdate
+                        !parts[9].isEmpty() ? InstanceStatusValue.valueOf(parts[9]) : null, // agentStatus
+                        parts[10], // agentVersion
+                        parts.length >= 12 ? parts[11] : "" // agentLastNoticeTime
+                );
+                statuses.add(status);
+            }
+        }
+
+        return statuses;
+    }
+
+    /**
      * ホスト名でCURRENT_TYPEカラムを更新する
      * 
      * @param hostname    ホスト名

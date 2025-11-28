@@ -2,6 +2,8 @@ package com.example.jsonsender;
 
 import com.example.jsoncommon.dto.*;
 import com.example.jsoncommon.tcp.MessageHandler;
+import com.example.jsonsender.service.ThresholdService;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
@@ -13,15 +15,17 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JsonSenderMessageHandler implements MessageHandler {
 
-    // @Autowired
-    // private ThresholdService threasholdService;
+    private final ThresholdService thresholdService;
+
+    public JsonSenderMessageHandler(ThresholdService thresholdService) {
+        this.thresholdService = thresholdService;
+    }
 
     @Override
     public void handleMessage(NoticeBaseJson message) {
         log.info("JsonReceiverからメッセージを受信しました: type={}, id={}, instance={}",
                 message.getNoticeType(), message.getId(), message.getInstanceName());
 
-        // 現時点では受信ログのみ。将来的に必要に応じて処理を追加
         switch (message.getNoticeType()) {
             case THRESHOLD:
                 handleThreshold((ThresholdJson) message);
@@ -34,7 +38,6 @@ public class JsonSenderMessageHandler implements MessageHandler {
     private void handleThreshold(ThresholdJson message) {
         log.info("しきい値変更通知を受信: instance={}, config={}",
                 message.getInstanceName(), message.getThreshold());
-        // threasholdService.updateThreshold(message.getInstanceName(),
-        // message.getThreshold());
+        thresholdService.updateThreshold(message.getInstanceName(), message.getThreshold());
     }
 }

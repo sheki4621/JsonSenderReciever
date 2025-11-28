@@ -12,33 +12,48 @@ public class ThresholdConfig {
     @JsonProperty("Hostname")
     private String hostname;
 
+    @JsonProperty("ScalingMode")
+    private ScalingMode scalingMode;
+
+    @JsonProperty("UpperChangeableEnable")
+    private Boolean upperChangeableEnable;
+
     @JsonProperty("UpperCpuThreshold")
-    private int upperCpuThreshold;
+    private Double upperCpuThreshold;
 
     @JsonProperty("UpperCpuDuration_min")
     private int upperCpuDurationMin;
 
     @JsonProperty("UpperMemThreshold")
-    private int upperMemThreshold;
+    private Double upperMemThreshold;
 
     @JsonProperty("UpperMemDurationMin")
     private int upperMemDurationMin;
 
     @JsonProperty("UpperConditionLogic")
-    private String upperConditionLogic;
+    private ConditionLogic upperConditionLogic;
+
+    @JsonProperty("LowerChangeableEnable")
+    private Boolean lowerChangeableEnable;
 
     @JsonProperty("LowerCpuThreshold")
-    private int lowerCpuThreshold;
+    private Double lowerCpuThreshold;
 
     @JsonProperty("LowerCpuDuration_min")
     private int lowerCpuDurationMin;
 
     @JsonProperty("LowerMemThreshold")
-    private int lowerMemThreshold;
+    private Double lowerMemThreshold;
 
     @JsonProperty("LowerMemDuration_min")
     private int lowerMemDurationMin;
 
-    @JsonProperty("LpperConditionLogic")
-    private String lowerConditionLogic;
+    @JsonProperty("LowerConditionLogic")
+    private ConditionLogic lowerConditionLogic;
+
+    @JsonProperty("MicroChangeableEnable")
+    private Boolean microChangeableEnable;
+
+    @JsonProperty("MicroForceOnStandby")
+    private Boolean microForceOnStandby;
 }

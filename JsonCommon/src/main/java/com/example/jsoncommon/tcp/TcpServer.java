@@ -102,6 +102,7 @@ public class TcpServer implements Runnable {
             case "METRICS" -> objectMapper.treeToValue(jsonNode, MetricsJson.class);
             case "UP" -> objectMapper.treeToValue(jsonNode, UpJson.class);
             case "DOWN" -> objectMapper.treeToValue(jsonNode, DownJson.class);
+            case "THRESHOLD" -> objectMapper.treeToValue(jsonNode, ThresholdJson.class);
             default -> null;
         };
     }

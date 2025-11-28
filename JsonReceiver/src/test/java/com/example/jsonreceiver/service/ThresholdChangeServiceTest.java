@@ -34,7 +34,7 @@ class ThresholdChangeServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         thresholdChangeService = new ThresholdChangeService(tcpClient, instanceStatusRepository);
-        ReflectionTestUtils.setField(thresholdChangeService, "serverPort", 8888);
+        ReflectionTestUtils.setField(thresholdChangeService, "targetPort", 8888);
     }
 
     @Test
@@ -42,7 +42,7 @@ class ThresholdChangeServiceTest {
         String instanceName = "test-instance";
         ThresholdConfig config = new ThresholdConfig();
         config.setHostname("test-host");
-        config.setUpperCpuThreshold(80);
+        config.setUpperCpuThreshold(80.0);
 
         InstanceStatus mockStatus = new InstanceStatus();
         mockStatus.setAgentVersion("2.0");
@@ -51,7 +51,7 @@ class ThresholdChangeServiceTest {
         thresholdChangeService.sendThresholdUpdate(instanceName, config);
 
         ArgumentCaptor<ThresholdJson> captor = ArgumentCaptor.forClass(ThresholdJson.class);
-        verify(tcpClient).sendJson(eq(instanceName), eq(8888), captor.capture(),
+        verify(tcpClient).sendJson(eq("localhost"), eq(8888), captor.capture(),
                 org.mockito.ArgumentMatchers.any(TcpConfig.class));
 
         ThresholdJson sentMessage = captor.getValue();
