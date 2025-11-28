@@ -44,7 +44,8 @@ public class InstanceStatusRepositoryTest {
                                 "c6i.micro",
                                 ZonedDateTime.now().toString(),
                                 InstanceStatusValue.UP,
-                                "1.0.0");
+                                "1.0.0",
+                                "");
 
                 // Act
                 repository.save(status);
@@ -54,7 +55,7 @@ public class InstanceStatusRepositoryTest {
                 List<String> lines = Files.readAllLines(csvFilePath);
                 assertTrue(lines.size() >= 2, "CSV should have header and at least one data line");
                 assertEquals(
-                                "HOSTNAME,MACHINE_TYPE,REGION,CURRENT_TYPE,TYPE_ID,TYPE_HIGH,TYPE_SMALL_STANDARD,TYPE_MICRO,LASTUPDATE,AGENT_STATUS,AGENT_VERSION",
+                                "HOSTNAME,MACHINE_TYPE,REGION,CURRENT_TYPE,TYPE_ID,TYPE_HIGH,TYPE_SMALL_STANDARD,TYPE_MICRO,LASTUPDATE,AGENT_STATUS,AGENT_VERSION,AGENT_LAST_NOTICE_TIME",
                                 lines.get(0));
                 assertTrue(lines.get(1)
                                 .startsWith("test-host,ECS,ap-northeast-1,c6i.4xlarge,1,c6i.8xlarge,c6i.2xlarge,c6i.micro,"));
@@ -74,7 +75,8 @@ public class InstanceStatusRepositoryTest {
                                 "t2.micro",
                                 ZonedDateTime.now().toString(),
                                 InstanceStatusValue.UP,
-                                "1.0.0");
+                                "1.0.0",
+                                "");
                 InstanceStatus status2 = new InstanceStatus(
                                 "host2",
                                 "EDB",
@@ -86,7 +88,8 @@ public class InstanceStatusRepositoryTest {
                                 "t3.micro",
                                 ZonedDateTime.now().toString(),
                                 InstanceStatusValue.DOWN,
-                                "1.1.0");
+                                "1.1.0",
+                                "");
                 repository.save(status1);
                 repository.save(status2);
 
@@ -125,7 +128,8 @@ public class InstanceStatusRepositoryTest {
                                 "c6i.micro",
                                 ZonedDateTime.now().toString(),
                                 InstanceStatusValue.INSTALLING,
-                                "1.0.0");
+                                "1.0.0",
+                                "");
                 repository.save(initialStatus);
 
                 // Act - Update the same host
@@ -140,7 +144,8 @@ public class InstanceStatusRepositoryTest {
                                 "c6i.micro",
                                 ZonedDateTime.now().toString(),
                                 InstanceStatusValue.UP,
-                                "1.1.0");
+                                "1.1.0",
+                                "");
                 repository.save(updatedStatus);
 
                 // Assert
@@ -165,7 +170,8 @@ public class InstanceStatusRepositoryTest {
                                 "c6i.micro",
                                 ZonedDateTime.now().toString(),
                                 InstanceStatusValue.UP,
-                                "1.0.0");
+                                "1.0.0",
+                                "");
                 repository.save(initialStatus);
 
                 // Act

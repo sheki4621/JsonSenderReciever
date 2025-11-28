@@ -19,4 +19,5 @@ public class InstanceStatus {
     private String lastUpdate; // LASTUPDATE (最終更新時刻)
     private InstanceStatusValue agentStatus; // AGENT_STATUS (エージェント状態)
     private String agentVersion; // AGENT_VERSION (エージェントバージョン)
+    private String agentLastNoticeTime; // AGENT_LAST_NOTICE_TIME (最終通知受信時刻)
 }

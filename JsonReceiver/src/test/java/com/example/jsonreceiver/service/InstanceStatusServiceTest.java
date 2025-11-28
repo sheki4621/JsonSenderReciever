@@ -199,7 +199,8 @@ public class InstanceStatusServiceTest {
                                 "c6i.micro",
                                 ZonedDateTime.now().toString(),
                                 InstanceStatusValue.INSTALLING,
-                                "1.0.0");
+                                "1.0.0",
+                                "");
                 when(repository.findByHostname("test-host")).thenReturn(Optional.of(existingStatus));
 
                 // Act

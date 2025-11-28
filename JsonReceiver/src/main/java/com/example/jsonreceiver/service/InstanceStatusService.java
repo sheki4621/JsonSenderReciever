@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.io.IOException;
 import java.util.Optional;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * InstanceStatus処理サービス
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class InstanceStatusService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceStatusService.class);
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final InstanceStatusRepository repository;
     private final AllInstanceRepository allInstanceRepository;
@@ -61,6 +64,12 @@ public class InstanceStatusService {
 
             repository.save(status);
             logger.info("インスタンス {} の INSTALLING ステータスを保存しました", installJson.getInstanceName());
+
+            // AGENT_LAST_NOTICE_TIMEを更新
+            String currentTime = ZonedDateTime.now().format(TIMESTAMP_FORMATTER);
+            repository.updateAgentLastNoticeTime(installJson.getInstanceName(), currentTime);
+            logger.info("ホスト名 {} のAGENT_LAST_NOTICE_TIMEを更新しました: {}",
+                    installJson.getInstanceName(), currentTime);
         } catch (IOException e) {
             logger.error("INSTALL 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process INSTALL notification", e);
@@ -89,6 +98,12 @@ public class InstanceStatusService {
 
             repository.save(status);
             logger.info("インスタンス {} の UNINSTALLING ステータスを保存しました", uninstallJson.getInstanceName());
+
+            // AGENT_LAST_NOTICE_TIMEを更新
+            String currentTime = ZonedDateTime.now().format(TIMESTAMP_FORMATTER);
+            repository.updateAgentLastNoticeTime(uninstallJson.getInstanceName(), currentTime);
+            logger.info("ホスト名 {} のAGENT_LAST_NOTICE_TIMEを更新しました: {}",
+                    uninstallJson.getInstanceName(), currentTime);
         } catch (IOException e) {
             logger.error("UNINSTALL 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process UNINSTALL notification", e);
@@ -114,6 +129,12 @@ public class InstanceStatusService {
 
             repository.save(status);
             logger.info("インスタンス {} の UP ステータスを保存しました", upJson.getInstanceName());
+
+            // AGENT_LAST_NOTICE_TIMEを更新
+            String currentTime = ZonedDateTime.now().format(TIMESTAMP_FORMATTER);
+            repository.updateAgentLastNoticeTime(upJson.getInstanceName(), currentTime);
+            logger.info("ホスト名 {} のAGENT_LAST_NOTICE_TIMEを更新しました: {}",
+                    upJson.getInstanceName(), currentTime);
         } catch (IOException e) {
             logger.error("UP 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process UP notification", e);
@@ -139,6 +160,12 @@ public class InstanceStatusService {
 
             repository.save(status);
             logger.info("インスタンス {} の DOWN ステータスを保存しました", downJson.getInstanceName());
+
+            // AGENT_LAST_NOTICE_TIMEを更新
+            String currentTime = ZonedDateTime.now().format(TIMESTAMP_FORMATTER);
+            repository.updateAgentLastNoticeTime(downJson.getInstanceName(), currentTime);
+            logger.info("ホスト名 {} のAGENT_LAST_NOTICE_TIMEを更新しました: {}",
+                    downJson.getInstanceName(), currentTime);
         } catch (IOException e) {
             logger.error("DOWN 通知の処理に失敗しました", e);
             throw new RuntimeException("Failed to process DOWN notification", e);
@@ -221,7 +248,9 @@ public class InstanceStatusService {
                 typeMicro,
                 lastUpdate,
                 agentStatus,
-                agentVersion);
+                agentVersion,
+                "" // agentLastNoticeTimeは空文字列（別途更新）
+        );
     }
 
     /**

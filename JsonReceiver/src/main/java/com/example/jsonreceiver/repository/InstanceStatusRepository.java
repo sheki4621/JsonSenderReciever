@@ -15,7 +15,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
     private static final String[] HEADERS = {
             "HOSTNAME", "MACHINE_TYPE", "REGION", "CURRENT_TYPE", "TYPE_ID",
             "TYPE_HIGH", "TYPE_SMALL_STANDARD", "TYPE_MICRO",
-            "LASTUPDATE", "AGENT_STATUS", "AGENT_VERSION"
+            "LASTUPDATE", "AGENT_STATUS", "AGENT_VERSION", "AGENT_LAST_NOTICE_TIME"
     };
 
     /**
@@ -47,7 +47,8 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                             parts[7], // typeMicro
                             parts[8], // lastUpdate
                             !parts[9].isEmpty() ? InstanceStatusValue.valueOf(parts[9]) : null, // agentStatus
-                            parts[10] // agentVersion
+                            parts[10], // agentVersion
+                            parts.length >= 12 ? parts[11] : "" // agentLastNoticeTime
                     );
                     statusMap.put(parts[0], existingStatus);
                 }
@@ -71,7 +72,8 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                     nullToEmpty(s.getTypeMicro()),
                     nullToEmpty(s.getLastUpdate()),
                     s.getAgentStatus() != null ? s.getAgentStatus().name() : "",
-                    nullToEmpty(s.getAgentVersion())
+                    nullToEmpty(s.getAgentVersion()),
+                    nullToEmpty(s.getAgentLastNoticeTime())
             });
         }
 
@@ -108,7 +110,8 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                         parts[7], // typeMicro
                         parts[8], // lastUpdate
                         !parts[9].isEmpty() ? InstanceStatusValue.valueOf(parts[9]) : null, // agentStatus
-                        parts[10] // agentVersion
+                        parts[10], // agentVersion
+                        parts.length >= 12 ? parts[11] : "" // agentLastNoticeTime
                 );
                 return Optional.of(status);
             }
@@ -139,7 +142,36 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                     status.getTypeMicro(),
                     status.getLastUpdate(),
                     status.getAgentStatus(),
-                    status.getAgentVersion());
+                    status.getAgentVersion(),
+                    status.getAgentLastNoticeTime());
+            save(updatedStatus);
+        }
+    }
+
+    /**
+     * ホスト名でAGENT_LAST_NOTICE_TIMEカラムを更新する
+     * 
+     * @param hostname            ホスト名
+     * @param agentLastNoticeTime 最終通知受信時刻
+     * @throws IOException IO例外
+     */
+    public void updateAgentLastNoticeTime(String hostname, String agentLastNoticeTime) throws IOException {
+        Optional<InstanceStatus> statusOpt = findByHostname(hostname);
+        if (statusOpt.isPresent()) {
+            InstanceStatus status = statusOpt.get();
+            InstanceStatus updatedStatus = new InstanceStatus(
+                    status.getHostname(),
+                    status.getMachineType(),
+                    status.getRegion(),
+                    status.getCurrentType(),
+                    status.getTypeId(),
+                    status.getTypeHigh(),
+                    status.getTypeSmallStandard(),
+                    status.getTypeMicro(),
+                    status.getLastUpdate(),
+                    status.getAgentStatus(),
+                    status.getAgentVersion(),
+                    agentLastNoticeTime);
             save(updatedStatus);
         }
     }
