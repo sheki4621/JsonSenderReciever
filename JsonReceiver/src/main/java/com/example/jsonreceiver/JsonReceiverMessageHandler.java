@@ -31,12 +31,7 @@ public class JsonReceiverMessageHandler implements MessageHandler {
                 case METRICS:
                     handleMetrics((MetricsJson) message);
                     break;
-                case INSTALL:
-                    handleInstall((InstallJson) message);
-                    break;
-                case UNINSTALL:
-                    handleUninstall((UninstallJson) message);
-                    break;
+
                 case UP:
                     handleUp((UpJson) message);
                     break;
@@ -56,16 +51,6 @@ public class JsonReceiverMessageHandler implements MessageHandler {
                 message.getMetrics().getCpuUsage(),
                 message.getMetrics().getMemoryUsage());
         metricsService.processMetrics(message);
-    }
-
-    private void handleInstall(InstallJson message) throws IOException {
-        log.info("インストール通知を処理: instance={}", message.getInstanceName());
-        instanceStatusService.processInstall(message);
-    }
-
-    private void handleUninstall(UninstallJson message) throws IOException {
-        log.info("アンインストール通知を処理: instance={}", message.getInstanceName());
-        instanceStatusService.processUninstall(message);
     }
 
     private void handleUp(UpJson message) throws IOException {

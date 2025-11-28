@@ -43,74 +43,6 @@ public class InstanceStatusService {
     private int shellTimeoutSeconds;
 
     /**
-     * INSTALL通知を処理します
-     * ステータスをINSTALLINGに変更し、Agentをインストール（空実装）します
-     * 
-     * @param installJson INSTALL通知JSON
-     */
-    public void processInstall(InstallJson installJson) {
-        try {
-            logger.info("インスタンス {} の INSTALL 通知を処理しています", installJson.getInstanceName());
-
-            // Agentのインストール（rshを想定しているが空実装）
-            installAgent(installJson.getInstanceName());
-
-            // InstanceStatusを構築して保存
-            InstanceStatus status = buildInstanceStatus(
-                    installJson.getInstanceName(),
-                    InstanceStatusValue.INSTALLING,
-                    installJson.getAgentVersion(),
-                    installJson.getTimestamp().toString());
-
-            repository.save(status);
-            logger.info("インスタンス {} の INSTALLING ステータスを保存しました", installJson.getInstanceName());
-
-            // AGENT_LAST_NOTICE_TIMEを更新
-            String currentTime = ZonedDateTime.now().format(TIMESTAMP_FORMATTER);
-            repository.updateAgentLastNoticeTime(installJson.getInstanceName(), currentTime);
-            logger.info("ホスト名 {} のAGENT_LAST_NOTICE_TIMEを更新しました: {}",
-                    installJson.getInstanceName(), currentTime);
-        } catch (IOException e) {
-            logger.error("INSTALL 通知の処理に失敗しました", e);
-            throw new RuntimeException("Failed to process INSTALL notification", e);
-        }
-    }
-
-    /**
-     * UNINSTALL通知を処理します
-     * ステータスをUNINSTALLINGに変更し、Agentをアンインストール（空実装）します
-     * 
-     * @param uninstallJson UNINSTALL通知JSON
-     */
-    public void processUninstall(UninstallJson uninstallJson) {
-        try {
-            logger.info("インスタンス {} の UNINSTALL 通知を処理しています", uninstallJson.getInstanceName());
-
-            // Agentのアンインストール（rshを想定しているが空実装）
-            uninstallAgent(uninstallJson.getInstanceName());
-
-            // InstanceStatusを構築して保存
-            InstanceStatus status = buildInstanceStatus(
-                    uninstallJson.getInstanceName(),
-                    InstanceStatusValue.UNINSTALLING,
-                    uninstallJson.getAgentVersion(),
-                    uninstallJson.getTimestamp().toString());
-
-            repository.save(status);
-            logger.info("インスタンス {} の UNINSTALLING ステータスを保存しました", uninstallJson.getInstanceName());
-
-            // AGENT_LAST_NOTICE_TIMEを更新
-            String currentTime = ZonedDateTime.now().format(TIMESTAMP_FORMATTER);
-            repository.updateAgentLastNoticeTime(uninstallJson.getInstanceName(), currentTime);
-            logger.info("ホスト名 {} のAGENT_LAST_NOTICE_TIMEを更新しました: {}",
-                    uninstallJson.getInstanceName(), currentTime);
-        } catch (IOException e) {
-            logger.error("UNINSTALL 通知の処理に失敗しました", e);
-            throw new RuntimeException("Failed to process UNINSTALL notification", e);
-        }
-    }
-
-    /**
      * UP通知を処理します
      * ステータスをUPに変更します
      * 
@@ -259,7 +191,7 @@ public class InstanceStatusService {
      * 
      * @param instanceName インスタンス名
      */
-    private void installAgent(String instanceName) {
+    public void installAgent(String instanceName) {
         logger.info("インスタンス {} にエージェントをインストールしています", instanceName);
 
         try {
@@ -285,7 +217,7 @@ public class InstanceStatusService {
      * 
      * @param instanceName インスタンス名
      */
-    private void uninstallAgent(String instanceName) {
+    public void uninstallAgent(String instanceName) {
         logger.info("インスタンス {} からエージェントをアンインストールしています", instanceName);
 
         try {

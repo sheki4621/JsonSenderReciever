@@ -89,6 +89,7 @@ public class ResourceHistoryRepository extends CsvRepositoryBase {
 
     /**
      * 指定ホスト名の直近N件のリソース情報を取得する
+     * TODO: いらないかも
      * 
      * @param hostname ホスト名
      * @param n        取得件数

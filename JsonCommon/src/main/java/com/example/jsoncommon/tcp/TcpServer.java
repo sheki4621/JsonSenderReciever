@@ -100,8 +100,6 @@ public class TcpServer implements Runnable {
     private NoticeBaseJson parseMessage(JsonNode jsonNode, String noticeTypeStr) throws Exception {
         return switch (noticeTypeStr) {
             case "METRICS" -> objectMapper.treeToValue(jsonNode, MetricsJson.class);
-            case "INSTALL" -> objectMapper.treeToValue(jsonNode, InstallJson.class);
-            case "UNINSTALL" -> objectMapper.treeToValue(jsonNode, UninstallJson.class);
             case "UP" -> objectMapper.treeToValue(jsonNode, UpJson.class);
             case "DOWN" -> objectMapper.treeToValue(jsonNode, DownJson.class);
             default -> null;

@@ -1,5 +1,6 @@
 package com.example.jsonsender;
 
+import com.example.jsonsender.TcpClient;
 import com.example.jsoncommon.dto.*;
 import com.example.jsonsender.service.MetricsSendService;
 import com.example.jsoncommon.util.HostnameUtil;

@@ -102,32 +102,4 @@ class NoticeBaseJsonTest {
         assertNotNull(downJson);
         assertEquals(NoticeType.DOWN, downJson.getNoticeType());
     }
-
-    @Test
-    void testInstallJsonCreation() {
-        // Arrange
-        UUID id = UUID.randomUUID();
-        ZonedDateTime timestamp = ZonedDateTime.now();
-
-        // Act
-        InstallJson installJson = new InstallJson(id, timestamp, "1.0.0", "test-instance");
-
-        // Assert
-        assertNotNull(installJson);
-        assertEquals(NoticeType.INSTALL, installJson.getNoticeType());
-    }
-
-    @Test
-    void testUninstallJsonCreation() {
-        // Arrange
-        UUID id = UUID.randomUUID();
-        ZonedDateTime timestamp = ZonedDateTime.now();
-
-        // Act
-        UninstallJson uninstallJson = new UninstallJson(id, timestamp, "1.0.0", "test-instance");
-
-        // Assert
-        assertNotNull(uninstallJson);
-        assertEquals(NoticeType.UNINSTALL, uninstallJson.getNoticeType());
-    }
 }

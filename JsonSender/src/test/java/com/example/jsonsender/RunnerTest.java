@@ -3,6 +3,7 @@ package com.example.jsonsender;
 import com.example.jsoncommon.dto.*;
 import com.example.jsonsender.config.AppConfig;
 import com.example.jsonsender.service.MetricsSendService;
+import com.example.jsonsender.TcpClient;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

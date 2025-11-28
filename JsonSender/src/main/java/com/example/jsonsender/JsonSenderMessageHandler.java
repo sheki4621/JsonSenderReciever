@@ -4,7 +4,6 @@ import com.example.jsoncommon.dto.*;
 import com.example.jsoncommon.tcp.MessageHandler;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
