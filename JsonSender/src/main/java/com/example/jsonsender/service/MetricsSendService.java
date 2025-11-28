@@ -3,7 +3,7 @@ package com.example.jsonsender.service;
 import com.example.jsoncommon.dto.ConditionLogic;
 import com.example.jsoncommon.dto.InstanceTypeChangeRequest;
 import com.example.jsoncommon.dto.Metrics;
-import com.example.jsoncommon.dto.ResourceInfo;
+import com.example.jsoncommon.dto.ResourceHistory;
 import com.example.jsoncommon.dto.ThresholdInfo;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
 import com.example.jsonsender.repository.ThresholdRepository;
@@ -88,7 +88,7 @@ public class MetricsSendService {
                 logger.info("CPU使用率がしきい値を上回りました CPU使用率: {}, しきい値(UPPER_CPU_THRESHOLD): {}", cpuUsage,
                         threshold.getUpperCpuThreshold());
 
-                List<ResourceInfo> recentHistory = resourceHistoryRepository.findRecentByHostname(hostname,
+                List<ResourceHistory> recentHistory = resourceHistoryRepository.findRecentByHostname(hostname,
                         threshold.getUpperCpuDurationMin());
                 ZonedDateTime beginTime = getBeginTimeCpuExceedsUpper(recentHistory, threshold.getUpperCpuThreshold());
                 logger.info("{}からCPU使用率がしきい値を上回った状態が継続しています。", beginTime);
@@ -105,7 +105,7 @@ public class MetricsSendService {
                 logger.info("メモリ使用率がしきい値を上回りました メモリ使用率: {}, しきい値(UPPER_MEM_THRESHOLD): {}", memoryUsage,
                         threshold.getUpperMemThreshold());
 
-                List<ResourceInfo> recentHistory = resourceHistoryRepository.findRecentByHostname(hostname,
+                List<ResourceHistory> recentHistory = resourceHistoryRepository.findRecentByHostname(hostname,
                         threshold.getUpperMemDurationMin());
                 ZonedDateTime beginTime = getBeginTimeMemoryExceedsUpper(recentHistory,
                         threshold.getUpperMemThreshold());
@@ -123,7 +123,7 @@ public class MetricsSendService {
                 logger.info("CPU使用率がしきい値を下回りました CPU使用率: {}, しきい値(LOWER_CPU_THRESHOLD): {}", cpuUsage,
                         threshold.getLowerCpuThreshold());
 
-                List<ResourceInfo> recentHistory = resourceHistoryRepository.findRecentByHostname(hostname,
+                List<ResourceHistory> recentHistory = resourceHistoryRepository.findRecentByHostname(hostname,
                         threshold.getLowerCpuDurationMin());
                 ZonedDateTime beginTime = getBeginTimeCpuBelowLower(recentHistory, threshold.getLowerCpuThreshold());
                 logger.info("{}からCPU使用率がしきい値を下回った状態が継続しています。", beginTime);
@@ -140,7 +140,7 @@ public class MetricsSendService {
                 logger.info("メモリ使用率がしきい値を下回りました メモリ使用率: {}, しきい値(LOWER_MEM_THRESHOLD): {}", memoryUsage,
                         threshold.getLowerMemThreshold());
 
-                List<ResourceInfo> recentHistory = resourceHistoryRepository.findRecentByHostname(hostname,
+                List<ResourceHistory> recentHistory = resourceHistoryRepository.findRecentByHostname(hostname,
                         threshold.getLowerMemDurationMin());
                 ZonedDateTime beginTime = getBeginTimeMemoryBelowLower(recentHistory, threshold.getLowerMemThreshold());
                 logger.info("{}からメモリ使用率がしきい値を下回った状態が継続しています。", beginTime);
@@ -199,14 +199,14 @@ public class MetricsSendService {
      * @param upperCpuThreshold 上限しきい値
      * @return CPU使用率がしきい値を上回っている状態が始まった時刻(null: しきい値を上回っていない)
      */
-    private ZonedDateTime getBeginTimeCpuExceedsUpper(List<ResourceInfo> history, Double upperCpuThreshold) {
+    private ZonedDateTime getBeginTimeCpuExceedsUpper(List<ResourceHistory> history, Double upperCpuThreshold) {
         if (history == null || history.isEmpty()) {
             return null;
         }
 
         ZonedDateTime beginTime = null;
         for (int i = 0; i < history.size(); i++) {
-            ResourceInfo resourceInfo = history.get(i);
+            ResourceHistory resourceInfo = history.get(i);
             if (resourceInfo.getCpuUsage() != null && resourceInfo.getCpuUsage() > upperCpuThreshold) {
                 beginTime = ZonedDateTime.parse(resourceInfo.getTimestamp());
             } else {
@@ -223,14 +223,14 @@ public class MetricsSendService {
      * @param upperMemoryThreshold 上限しきい値
      * @return メモリ使用率がしきい値を上回っている状態が始まった時刻(null: しきい値を上回っていない)
      */
-    private ZonedDateTime getBeginTimeMemoryExceedsUpper(List<ResourceInfo> history, Double upperMemoryThreshold) {
+    private ZonedDateTime getBeginTimeMemoryExceedsUpper(List<ResourceHistory> history, Double upperMemoryThreshold) {
         if (history == null || history.isEmpty()) {
             return null;
         }
 
         ZonedDateTime beginTime = null;
         for (int i = 0; i < history.size(); i++) {
-            ResourceInfo resourceInfo = history.get(i);
+            ResourceHistory resourceInfo = history.get(i);
             if (resourceInfo.getMemoryUsage() != null && resourceInfo.getMemoryUsage() > upperMemoryThreshold) {
                 beginTime = ZonedDateTime.parse(resourceInfo.getTimestamp());
             } else {
@@ -247,14 +247,14 @@ public class MetricsSendService {
      * @param lowerCpuThreshold 下限しきい値
      * @return CPU使用率がしきい値を下回っている状態が始まった時刻(null: しきい値を下回っていない)
      */
-    private ZonedDateTime getBeginTimeCpuBelowLower(List<ResourceInfo> history, Double lowerCpuThreshold) {
+    private ZonedDateTime getBeginTimeCpuBelowLower(List<ResourceHistory> history, Double lowerCpuThreshold) {
         if (history == null || history.isEmpty()) {
             return null;
         }
 
         ZonedDateTime beginTime = null;
         for (int i = 0; i < history.size(); i++) {
-            ResourceInfo resourceInfo = history.get(i);
+            ResourceHistory resourceInfo = history.get(i);
             if (resourceInfo.getCpuUsage() != null && resourceInfo.getCpuUsage() < lowerCpuThreshold) {
                 beginTime = ZonedDateTime.parse(resourceInfo.getTimestamp());
             } else {
@@ -271,14 +271,14 @@ public class MetricsSendService {
      * @param lowerMemoryThreshold 下限しきい値
      * @return メモリ使用率がしきい値を下回っている状態が始まった時刻(null: しきい値を下回っていない)
      */
-    private ZonedDateTime getBeginTimeMemoryBelowLower(List<ResourceInfo> history, Double lowerMemoryThreshold) {
+    private ZonedDateTime getBeginTimeMemoryBelowLower(List<ResourceHistory> history, Double lowerMemoryThreshold) {
         if (history == null || history.isEmpty()) {
             return null;
         }
 
         ZonedDateTime beginTime = null;
         for (int i = 0; i < history.size(); i++) {
-            ResourceInfo resourceInfo = history.get(i);
+            ResourceHistory resourceInfo = history.get(i);
             if (resourceInfo.getMemoryUsage() != null && resourceInfo.getMemoryUsage() < lowerMemoryThreshold) {
                 beginTime = ZonedDateTime.parse(resourceInfo.getTimestamp());
             } else {
