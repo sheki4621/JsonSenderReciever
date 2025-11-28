@@ -1,7 +1,7 @@
 package com.example.jsonsender.repository;
 
 import com.example.jsoncommon.dto.ConditionLogic;
-import com.example.jsoncommon.dto.ThresholdInfo;
+import com.example.jsoncommon.dto.ThresholdCsv;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class ThresholdRepositoryTest {
     @Test
     void testSaveThresholdInfo() throws IOException {
         // Given: しきい値情報を作成
-        ThresholdInfo thresholdInfo = new ThresholdInfo(
+        ThresholdCsv thresholdInfo = new ThresholdCsv(
                 "test-host",
                 null, // scalingMode
                 true, // upperChangeableEnable
@@ -75,7 +75,7 @@ class ThresholdRepositoryTest {
     @Test
     void testFindByHostname_Success() throws IOException {
         // Given: しきい値情報を保存
-        ThresholdInfo savedInfo = new ThresholdInfo(
+        ThresholdCsv savedInfo = new ThresholdCsv(
                 "test-host",
                 null, // scalingMode
                 true, // upperChangeableEnable
@@ -96,11 +96,11 @@ class ThresholdRepositoryTest {
         repository.save(savedInfo);
 
         // When: ホスト名で検索
-        Optional<ThresholdInfo> result = repository.findByHostname("test-host");
+        Optional<ThresholdCsv> result = repository.findByHostname("test-host");
 
         // Then: しきい値情報が取得できることを確認
         assertTrue(result.isPresent(), "しきい値情報が見つかりませんでした");
-        ThresholdInfo info = result.get();
+        ThresholdCsv info = result.get();
         assertEquals("test-host", info.getHostname());
         assertEquals(80.0, info.getUpperCpuThreshold());
         assertEquals(85.0, info.getUpperMemThreshold());
@@ -113,7 +113,7 @@ class ThresholdRepositoryTest {
     @Test
     void testFindByHostname_NotFound() throws IOException {
         // Given: しきい値情報を保存
-        ThresholdInfo savedInfo = new ThresholdInfo(
+        ThresholdCsv savedInfo = new ThresholdCsv(
                 "test-host",
                 null, // scalingMode
                 true, // upperChangeableEnable
@@ -134,7 +134,7 @@ class ThresholdRepositoryTest {
         repository.save(savedInfo);
 
         // When: 存在しないホスト名で検索
-        Optional<ThresholdInfo> result = repository.findByHostname("non-existent-host");
+        Optional<ThresholdCsv> result = repository.findByHostname("non-existent-host");
 
         // Then: Optional.empty()が返されることを確認
         assertFalse(result.isPresent(), "存在しないホスト名でしきい値情報が見つかりました");
@@ -143,7 +143,7 @@ class ThresholdRepositoryTest {
     @Test
     void testFindByHostname_FileNotExists() throws IOException {
         // When: ファイルが存在しない状態で検索
-        Optional<ThresholdInfo> result = repository.findByHostname("test-host");
+        Optional<ThresholdCsv> result = repository.findByHostname("test-host");
 
         // Then: Optional.empty()が返されることを確認
         assertFalse(result.isPresent(), "ファイルが存在しない場合、しきい値情報が見つからないべきです");

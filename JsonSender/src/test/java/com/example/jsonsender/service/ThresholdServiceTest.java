@@ -2,8 +2,8 @@ package com.example.jsonsender.service;
 
 import com.example.jsoncommon.dto.ConditionLogic;
 import com.example.jsoncommon.dto.ScalingMode;
-import com.example.jsoncommon.dto.ThresholdConfig;
-import com.example.jsoncommon.dto.ThresholdInfo;
+import com.example.jsoncommon.dto.Threshold;
+import com.example.jsoncommon.dto.ThresholdCsv;
 import com.example.jsonsender.repository.ThresholdRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,9 +30,9 @@ class ThresholdServiceTest {
     }
 
     @Test
-    void updateThreshold_shouldSaveThresholdInfo() throws IOException {
+    void updateThreshold_shouldSaveThresholdCsv() throws IOException {
         String hostname = "test-host";
-        ThresholdConfig config = new ThresholdConfig(
+        Threshold threshold = new Threshold(
                 hostname,
                 ScalingMode.AUTO,
                 true, // upperChangeableEnable
@@ -51,12 +51,12 @@ class ThresholdServiceTest {
                 false // microForceOnStandby
         );
 
-        thresholdService.updateThreshold(hostname, config);
+        thresholdService.updateThreshold(hostname, threshold);
 
-        ArgumentCaptor<ThresholdInfo> captor = ArgumentCaptor.forClass(ThresholdInfo.class);
+        ArgumentCaptor<ThresholdCsv> captor = ArgumentCaptor.forClass(ThresholdCsv.class);
         verify(thresholdRepository).save(captor.capture());
 
-        ThresholdInfo savedInfo = captor.getValue();
+        ThresholdCsv savedInfo = captor.getValue();
         assertEquals(hostname, savedInfo.getHostname());
         assertEquals(ScalingMode.AUTO, savedInfo.getScalingMode());
         assertEquals(90.0, savedInfo.getUpperCpuThreshold());

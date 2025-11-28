@@ -1,13 +1,13 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsonreceiver.dto.InstanceTypeInfo;
-import com.example.jsonreceiver.dto.AllInstance;
+import com.example.jsonreceiver.dto.InstanceTypeInfoCsv;
+import com.example.jsonreceiver.dto.AllInstanceCsv;
 import com.example.jsonreceiver.dto.InstanceType;
 import com.example.jsonreceiver.repository.InstanceStatusRepository;
 import com.example.jsonreceiver.repository.InstanceTypeLinkRepository;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
 import com.example.jsonreceiver.repository.AllInstanceRepository;
-import com.example.jsonreceiver.dto.InstanceTypeLink;
+import com.example.jsonreceiver.dto.InstanceTypeLinkCsv;
 import com.example.jsonreceiver.util.ShellExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,9 +70,9 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_HIGH() throws IOException {
         // Arrange
-        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
-        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
-        InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
+        AllInstanceCsv allInstance = new AllInstanceCsv("test-host", "ECS", "GROUP-A");
+        InstanceTypeLinkCsv link = new InstanceTypeLinkCsv("ECS", "1");
+        InstanceTypeInfoCsv typeInfo = new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
 
         when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
         when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
@@ -98,9 +98,9 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_LOW() throws IOException {
         // Arrange
-        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
-        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
-        InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
+        AllInstanceCsv allInstance = new AllInstanceCsv("test-host", "ECS", "GROUP-A");
+        InstanceTypeLinkCsv link = new InstanceTypeLinkCsv("ECS", "1");
+        InstanceTypeInfoCsv typeInfo = new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
 
         when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
         when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
@@ -140,7 +140,7 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_InstanceTypeLinkNotFound() throws IOException {
         // Arrange
-        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
+        AllInstanceCsv allInstance = new AllInstanceCsv("test-host", "ECS", "GROUP-A");
         when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
         when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.empty());
 
@@ -156,8 +156,8 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_InstanceTypeNotFound() throws IOException {
         // Arrange
-        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
-        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
+        AllInstanceCsv allInstance = new AllInstanceCsv("test-host", "ECS", "GROUP-A");
+        InstanceTypeLinkCsv link = new InstanceTypeLinkCsv("ECS", "1");
         when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
         when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
         when(instanceTypeRepository.findByInstanceTypeId("1")).thenReturn(Optional.empty());
@@ -174,9 +174,9 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_MaxRetryReached() throws IOException {
         // Arrange
-        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
-        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
-        InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
+        AllInstanceCsv allInstance = new AllInstanceCsv("test-host", "ECS", "GROUP-A");
+        InstanceTypeLinkCsv link = new InstanceTypeLinkCsv("ECS", "1");
+        InstanceTypeInfoCsv typeInfo = new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
 
         when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
         when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));
@@ -214,9 +214,9 @@ public class InstanceTypeChangeServiceTest {
     @Test
     public void testChangeInstanceType_SuccessAfterRetries() throws IOException {
         // Arrange
-        AllInstance allInstance = new AllInstance("test-host", "ECS", "GROUP-A");
-        InstanceTypeLink link = new InstanceTypeLink("ECS", "1");
-        InstanceTypeInfo typeInfo = new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
+        AllInstanceCsv allInstance = new AllInstanceCsv("test-host", "ECS", "GROUP-A");
+        InstanceTypeLinkCsv link = new InstanceTypeLinkCsv("ECS", "1");
+        InstanceTypeInfoCsv typeInfo = new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1);
 
         when(allInstanceRepository.findByHostname("test-host")).thenReturn(Optional.of(allInstance));
         when(instanceTypeLinkRepository.findByElType("ECS")).thenReturn(Optional.of(link));

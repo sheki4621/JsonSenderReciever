@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsonreceiver.dto.AllInstance;
-import com.example.jsonreceiver.dto.InstanceTypeInfo;
+import com.example.jsonreceiver.dto.AllInstanceCsv;
+import com.example.jsonreceiver.dto.InstanceTypeInfoCsv;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +35,10 @@ class InformationCollectionSchedulerTest {
     @Test
     void testRun_startsCollectionThread() throws Exception {
         // モックの戻り値を設定
-        List<InstanceTypeInfo> mockInstanceTypes = Arrays.asList(
-                new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
-        List<AllInstance> mockSystemInfo = Arrays.asList(
-                new AllInstance("host1", "ECS", "GROUP-A"));
+        List<InstanceTypeInfoCsv> mockInstanceTypes = Arrays.asList(
+                new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
+        List<AllInstanceCsv> mockSystemInfo = Arrays.asList(
+                new AllInstanceCsv("host1", "ECS", "GROUP-A"));
 
         when(informationCollectionService.collectInstanceTypes()).thenReturn(mockInstanceTypes);
         when(informationCollectionService.collectSystemInfo()).thenReturn(mockSystemInfo);
@@ -58,11 +58,11 @@ class InformationCollectionSchedulerTest {
         // 1回目は例外をスロー、2回目以降は成功するように設定
         when(informationCollectionService.collectInstanceTypes())
                 .thenThrow(new RuntimeException("Test exception"))
-                .thenReturn(Arrays.asList(new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1)));
+                .thenReturn(Arrays.asList(new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1)));
 
         when(informationCollectionService.collectSystemInfo())
                 .thenReturn(Arrays.asList(
-                        new AllInstance("host1", "ECS", "GROUP-A")));
+                        new AllInstanceCsv("host1", "ECS", "GROUP-A")));
 
         // スケジューラを起動
         scheduler.run();

@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.InstanceTypeLink;
+import com.example.jsonreceiver.dto.InstanceTypeLinkCsv;
 import com.example.jsoncommon.repository.CsvRepositoryBase;
 import org.springframework.stereotype.Repository;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public class InstanceTypeLinkRepository extends CsvRepositoryBase {
 
-    private static final String FILE_NAME = "InstanceTypeLink.csv";
+    private static final String FILE_NAME = "InstanceTypeLinkCsv.csv";
     private static final String[] HEADERS = { "ElType", "InstanceTypeId" };
 
     public void save(String elType, String instanceTypeId) throws IOException {
@@ -24,7 +24,7 @@ public class InstanceTypeLinkRepository extends CsvRepositoryBase {
      * @return インスタンスタイプリンク情報（存在しない場合はOptional.empty()）
      * @throws IOException IO例外
      */
-    public Optional<InstanceTypeLink> findByElType(String elType) throws IOException {
+    public Optional<InstanceTypeLinkCsv> findByElType(String elType) throws IOException {
         List<String> lines = readFromCsv(FILE_NAME);
 
         if (lines.isEmpty()) {
@@ -36,7 +36,7 @@ public class InstanceTypeLinkRepository extends CsvRepositoryBase {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
             if (parts.length >= 2 && parts[0].equals(elType)) {
-                InstanceTypeLink link = new InstanceTypeLink(
+                InstanceTypeLinkCsv link = new InstanceTypeLinkCsv(
                         parts[0], // elType
                         parts[1] // instanceTypeId
                 );

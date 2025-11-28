@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class ThresholdJson extends NoticeBaseJson {
     @JsonProperty("Threshold")
-    private ThresholdConfig threshold;
+    private Threshold threshold;
 
-    public ThresholdJson(ThresholdConfig threshold) {
+    public ThresholdJson(Threshold threshold) {
         this.threshold = threshold;
         this.setNoticeType(NoticeType.THRESHOLD);
     }

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceHistory {
+public class ResourceHistoryCsv {
     private String hostname;
     private String timestamp;
     private Double cpuUsage;

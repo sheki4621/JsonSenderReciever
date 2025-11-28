@@ -56,7 +56,7 @@ public class InstanceStatusServiceTest {
                 ReflectionTestUtils.setField(service, "uninstallAgentShellPath", "/path/to/uninstall_agent.sh");
                 ReflectionTestUtils.setField(service, "shellTimeoutSeconds", 30);
 
-                // デフォルトでSystemInfo、InstanceTypeLink、InstanceTypeが存在しないようにモック
+                // デフォルトでSystemInfo、InstanceTypeLinkCsv、InstanceTypeが存在しないようにモック
                 when(allInstanceRepository.findByHostname(anyString())).thenReturn(Optional.empty());
                 when(instanceTypeLinkRepository.findByElType(anyString())).thenReturn(Optional.empty());
                 when(instanceTypeRepository.findByInstanceTypeId(anyString())).thenReturn(Optional.empty());
@@ -80,10 +80,10 @@ public class InstanceStatusServiceTest {
                 service.processUp(upJson);
 
                 // Assert
-                ArgumentCaptor<InstanceStatus> captor = ArgumentCaptor.forClass(InstanceStatus.class);
+                ArgumentCaptor<InstanceStatusCsv> captor = ArgumentCaptor.forClass(InstanceStatusCsv.class);
                 verify(repository).save(captor.capture());
 
-                InstanceStatus savedStatus = captor.getValue();
+                InstanceStatusCsv savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
                 assertEquals(InstanceStatusValue.UP, savedStatus.getAgentStatus());
                 assertEquals("1.0.0", savedStatus.getAgentVersion());
@@ -99,7 +99,7 @@ public class InstanceStatusServiceTest {
                                 "test-host");
 
                 // 既存データを返す
-                InstanceStatus existingStatus = new InstanceStatus(
+                InstanceStatusCsv existingStatus = new InstanceStatusCsv(
                                 "test-host",
                                 "ECS",
                                 "ap-northeast-1",
@@ -118,10 +118,10 @@ public class InstanceStatusServiceTest {
                 service.processUp(upJson);
 
                 // Assert
-                ArgumentCaptor<InstanceStatus> captor = ArgumentCaptor.forClass(InstanceStatus.class);
+                ArgumentCaptor<InstanceStatusCsv> captor = ArgumentCaptor.forClass(InstanceStatusCsv.class);
                 verify(repository).save(captor.capture());
 
-                InstanceStatus savedStatus = captor.getValue();
+                InstanceStatusCsv savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
                 assertEquals("ECS", savedStatus.getMachineType());
                 assertEquals("c6i.2xlarge", savedStatus.getCurrentType());
@@ -144,10 +144,10 @@ public class InstanceStatusServiceTest {
                 service.processDown(downJson);
 
                 // Assert
-                ArgumentCaptor<InstanceStatus> captor = ArgumentCaptor.forClass(InstanceStatus.class);
+                ArgumentCaptor<InstanceStatusCsv> captor = ArgumentCaptor.forClass(InstanceStatusCsv.class);
                 verify(repository).save(captor.capture());
 
-                InstanceStatus savedStatus = captor.getValue();
+                InstanceStatusCsv savedStatus = captor.getValue();
                 assertEquals("test-host", savedStatus.getHostname());
                 assertEquals(InstanceStatusValue.DOWN, savedStatus.getAgentStatus());
                 assertEquals("1.0.0", savedStatus.getAgentVersion());

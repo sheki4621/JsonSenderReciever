@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.InstanceTypeLink;
+import com.example.jsonreceiver.dto.InstanceTypeLinkCsv;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -24,7 +24,7 @@ public class InstanceTypeLinkRepositoryTest {
     public void setUp() throws IOException {
         Path csvDir = tempDir.resolve("csv");
         Files.createDirectories(csvDir);
-        csvFilePath = csvDir.resolve("InstanceTypeLink.csv");
+        csvFilePath = csvDir.resolve("InstanceTypeLinkCsv.csv");
 
         // テスト用のCSVデータを作成
         String csvContent = """
@@ -42,11 +42,11 @@ public class InstanceTypeLinkRepositoryTest {
     @Test
     public void testFindByElType_Found() throws IOException {
         // Act
-        Optional<InstanceTypeLink> result = repository.findByElType("t2.micro");
+        Optional<InstanceTypeLinkCsv> result = repository.findByElType("t2.micro");
 
         // Assert
         assertTrue(result.isPresent());
-        InstanceTypeLink link = result.get();
+        InstanceTypeLinkCsv link = result.get();
         assertEquals("t2.micro", link.getElType());
         assertEquals("1", link.getInstanceTypeId());
     }
@@ -54,7 +54,7 @@ public class InstanceTypeLinkRepositoryTest {
     @Test
     public void testFindByElType_NotFound() throws IOException {
         // Act
-        Optional<InstanceTypeLink> result = repository.findByElType("non-existent");
+        Optional<InstanceTypeLinkCsv> result = repository.findByElType("non-existent");
 
         // Assert
         assertFalse(result.isPresent());
@@ -63,11 +63,11 @@ public class InstanceTypeLinkRepositoryTest {
     @Test
     public void testFindByElType_MultipleRecords() throws IOException {
         // Act
-        Optional<InstanceTypeLink> result = repository.findByElType("t2.medium");
+        Optional<InstanceTypeLinkCsv> result = repository.findByElType("t2.medium");
 
         // Assert
         assertTrue(result.isPresent());
-        InstanceTypeLink link = result.get();
+        InstanceTypeLinkCsv link = result.get();
         assertEquals("t2.medium", link.getElType());
         assertEquals("3", link.getInstanceTypeId());
     }
@@ -78,7 +78,7 @@ public class InstanceTypeLinkRepositoryTest {
         Files.delete(csvFilePath);
 
         // Act
-        Optional<InstanceTypeLink> result = repository.findByElType("t2.micro");
+        Optional<InstanceTypeLinkCsv> result = repository.findByElType("t2.micro");
 
         // Assert
         assertFalse(result.isPresent());

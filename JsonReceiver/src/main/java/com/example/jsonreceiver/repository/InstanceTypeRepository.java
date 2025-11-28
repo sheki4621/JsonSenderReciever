@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.InstanceTypeInfo;
+import com.example.jsonreceiver.dto.InstanceTypeInfoCsv;
 import com.example.jsoncommon.repository.CsvRepositoryBase;
 import org.springframework.stereotype.Repository;
 
@@ -25,9 +25,9 @@ public class InstanceTypeRepository extends CsvRepositoryBase {
      * @param instanceTypes インスタンスタイプ情報のリスト
      * @throws IOException IO例外
      */
-    public void saveAll(List<InstanceTypeInfo> instanceTypes) throws IOException {
+    public void saveAll(List<InstanceTypeInfoCsv> instanceTypes) throws IOException {
         List<Object[]> values = new ArrayList<>();
-        for (InstanceTypeInfo info : instanceTypes) {
+        for (InstanceTypeInfoCsv info : instanceTypes) {
             values.add(new Object[] {
                     info.getInstanceTypeId(),
                     info.getHighInstanceType(),
@@ -48,7 +48,7 @@ public class InstanceTypeRepository extends CsvRepositoryBase {
      * @return インスタンスタイプ情報（存在しない場合はOptional.empty()）
      * @throws IOException IO例外
      */
-    public Optional<InstanceTypeInfo> findByInstanceTypeId(String instanceTypeId) throws IOException {
+    public Optional<InstanceTypeInfoCsv> findByInstanceTypeId(String instanceTypeId) throws IOException {
         List<String> lines = readFromCsv(FILE_NAME);
 
         if (lines.isEmpty()) {
@@ -60,7 +60,7 @@ public class InstanceTypeRepository extends CsvRepositoryBase {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
             if (parts.length >= 7 && parts[0].equals(instanceTypeId)) {
-                InstanceTypeInfo info = new InstanceTypeInfo(
+                InstanceTypeInfoCsv info = new InstanceTypeInfoCsv(
                         parts[0], // instanceTypeId
                         parts[1], // highInstanceType
                         Integer.parseInt(parts[2]), // highCpuCore

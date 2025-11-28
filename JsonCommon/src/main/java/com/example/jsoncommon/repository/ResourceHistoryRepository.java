@@ -2,7 +2,7 @@ package com.example.jsoncommon.repository;
 
 import com.example.jsoncommon.dto.InstanceTypeChangeRequest;
 import com.example.jsoncommon.dto.MetricsJson;
-import com.example.jsoncommon.dto.ResourceHistory;
+import com.example.jsoncommon.dto.ResourceHistoryCsv;
 
 import org.springframework.stereotype.Repository;
 import java.io.IOException;
@@ -34,11 +34,11 @@ public class ResourceHistoryRepository extends CsvRepositoryBase {
      * @return リソース情報のリスト（最新のものから順）
      * @throws IOException IO例外
      */
-    public List<ResourceHistory> findRecentByHostname(String hostname, int minutes) throws IOException {
+    public List<ResourceHistoryCsv> findRecentByHostname(String hostname, int minutes) throws IOException {
         String filename = String.format("resource_history_%s.csv", hostname);
 
         List<String> lines = readFromCsv(filename);
-        List<ResourceHistory> allMatching = new ArrayList<>();
+        List<ResourceHistoryCsv> allMatching = new ArrayList<>();
 
         if (lines.isEmpty()) {
             return allMatching;
@@ -66,7 +66,7 @@ public class ResourceHistoryRepository extends CsvRepositoryBase {
                         break;
                     }
 
-                    ResourceHistory info = new ResourceHistory(
+                    ResourceHistoryCsv info = new ResourceHistoryCsv(
                             parts[0], // hostname
                             parts[1], // timestamp
                             Double.parseDouble(parts[2]), // cpuUsage
@@ -96,11 +96,11 @@ public class ResourceHistoryRepository extends CsvRepositoryBase {
      * @return リソース情報のリスト（最新のものから順）
      * @throws IOException IO例外
      */
-    public List<ResourceHistory> findLastNByHostname(String hostname, int n) throws IOException {
+    public List<ResourceHistoryCsv> findLastNByHostname(String hostname, int n) throws IOException {
         String filename = String.format("resource_history_%s.csv", hostname);
 
         List<String> lines = readFromCsv(filename);
-        List<ResourceHistory> allMatching = new ArrayList<>();
+        List<ResourceHistoryCsv> allMatching = new ArrayList<>();
 
         if (lines.isEmpty()) {
             return allMatching;
@@ -118,7 +118,7 @@ public class ResourceHistoryRepository extends CsvRepositoryBase {
 
             if (parts.length >= 5 && parts[0].equals(hostname)) {
                 try {
-                    ResourceHistory info = new ResourceHistory(
+                    ResourceHistoryCsv info = new ResourceHistoryCsv(
                             parts[0], // hostname
                             parts[1], // timestamp
                             Double.parseDouble(parts[2]), // cpuUsage

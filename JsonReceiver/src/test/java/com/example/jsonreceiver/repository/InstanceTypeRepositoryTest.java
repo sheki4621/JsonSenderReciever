@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.InstanceTypeInfo;
+import com.example.jsonreceiver.dto.InstanceTypeInfoCsv;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,10 +47,10 @@ class InstanceTypeRepositoryTest {
     @Test
     void testSaveAll_createsFileWithHeaders() throws IOException {
         // テストデータを作成
-        List<InstanceTypeInfo> instanceTypes = Arrays.asList(
-                new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1),
-                new InstanceTypeInfo("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1),
-                new InstanceTypeInfo("3", "m5.2xlarge", 8, "m5.large", 2, "m5.small", 1));
+        List<InstanceTypeInfoCsv> instanceTypes = Arrays.asList(
+                new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1),
+                new InstanceTypeInfoCsv("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1),
+                new InstanceTypeInfoCsv("3", "m5.2xlarge", 8, "m5.large", 2, "m5.small", 1));
 
         // saveAllメソッドを呼び出し
         repository.saveAll(instanceTypes);
@@ -80,15 +80,15 @@ class InstanceTypeRepositoryTest {
     @Test
     void testSaveAll_overwritesExistingFile() throws IOException {
         // 最初のデータセットを保存
-        List<InstanceTypeInfo> firstSet = Arrays.asList(
-                new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1),
-                new InstanceTypeInfo("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1));
+        List<InstanceTypeInfoCsv> firstSet = Arrays.asList(
+                new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1),
+                new InstanceTypeInfoCsv("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1));
         repository.saveAll(firstSet);
 
         // 2回目のデータセットを保存（上書き）
-        List<InstanceTypeInfo> secondSet = Arrays.asList(
-                new InstanceTypeInfo("3", "m5.2xlarge", 8, "m5.large", 2, "m5.small", 1),
-                new InstanceTypeInfo("4", "c5.4xlarge", 16, "c5.xlarge", 4, "c5.large", 2));
+        List<InstanceTypeInfoCsv> secondSet = Arrays.asList(
+                new InstanceTypeInfoCsv("3", "m5.2xlarge", 8, "m5.large", 2, "m5.small", 1),
+                new InstanceTypeInfoCsv("4", "c5.4xlarge", 16, "c5.xlarge", 4, "c5.large", 2));
         repository.saveAll(secondSet);
 
         // ファイルの内容を確認
@@ -110,7 +110,7 @@ class InstanceTypeRepositoryTest {
     @Test
     void testSaveAll_withEmptyList() throws IOException {
         // 空のリストで保存
-        List<InstanceTypeInfo> emptyList = Arrays.asList();
+        List<InstanceTypeInfoCsv> emptyList = Arrays.asList();
         repository.saveAll(emptyList);
 
         // ファイルが作成されることを確認
@@ -134,8 +134,8 @@ class InstanceTypeRepositoryTest {
         }
 
         // データを保存
-        List<InstanceTypeInfo> instanceTypes = Arrays.asList(
-                new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
+        List<InstanceTypeInfoCsv> instanceTypes = Arrays.asList(
+                new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
         repository.saveAll(instanceTypes);
 
         // ディレクトリとファイルが作成されたことを確認

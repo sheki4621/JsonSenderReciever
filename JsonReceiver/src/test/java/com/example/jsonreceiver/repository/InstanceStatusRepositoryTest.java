@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.InstanceStatus;
+import com.example.jsonreceiver.dto.InstanceStatusCsv;
 import com.example.jsonreceiver.dto.InstanceStatusValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class InstanceStatusRepositoryTest {
         @Test
         public void testSaveInstanceStatus() throws IOException {
                 // Arrange
-                InstanceStatus status = new InstanceStatus(
+                InstanceStatusCsv status = new InstanceStatusCsv(
                                 "test-host",
                                 "ECS",
                                 "ap-northeast-1",
@@ -64,7 +64,7 @@ public class InstanceStatusRepositoryTest {
         @Test
         public void testFindByHostname() throws IOException {
                 // Arrange
-                InstanceStatus status1 = new InstanceStatus(
+                InstanceStatusCsv status1 = new InstanceStatusCsv(
                                 "host1",
                                 "ECS",
                                 "us-east-1",
@@ -77,7 +77,7 @@ public class InstanceStatusRepositoryTest {
                                 InstanceStatusValue.UP,
                                 "1.0.0",
                                 "");
-                InstanceStatus status2 = new InstanceStatus(
+                InstanceStatusCsv status2 = new InstanceStatusCsv(
                                 "host2",
                                 "EDB",
                                 "us-west-2",
@@ -94,7 +94,7 @@ public class InstanceStatusRepositoryTest {
                 repository.save(status2);
 
                 // Act
-                Optional<InstanceStatus> found = repository.findByHostname("host1");
+                Optional<InstanceStatusCsv> found = repository.findByHostname("host1");
 
                 // Assert
                 assertTrue(found.isPresent());
@@ -108,7 +108,7 @@ public class InstanceStatusRepositoryTest {
         @Test
         public void testFindByHostnameNotFound() throws IOException {
                 // Act
-                Optional<InstanceStatus> found = repository.findByHostname("non-existent");
+                Optional<InstanceStatusCsv> found = repository.findByHostname("non-existent");
 
                 // Assert
                 assertFalse(found.isPresent());
@@ -117,7 +117,7 @@ public class InstanceStatusRepositoryTest {
         @Test
         public void testUpdateExistingInstance() throws IOException {
                 // Arrange
-                InstanceStatus initialStatus = new InstanceStatus(
+                InstanceStatusCsv initialStatus = new InstanceStatusCsv(
                                 "test-host",
                                 "ECS",
                                 "ap-northeast-1",
@@ -133,7 +133,7 @@ public class InstanceStatusRepositoryTest {
                 repository.save(initialStatus);
 
                 // Act - Update the same host
-                InstanceStatus updatedStatus = new InstanceStatus(
+                InstanceStatusCsv updatedStatus = new InstanceStatusCsv(
                                 "test-host",
                                 "ECS",
                                 "ap-northeast-1",
@@ -149,7 +149,7 @@ public class InstanceStatusRepositoryTest {
                 repository.save(updatedStatus);
 
                 // Assert
-                Optional<InstanceStatus> found = repository.findByHostname("test-host");
+                Optional<InstanceStatusCsv> found = repository.findByHostname("test-host");
                 assertTrue(found.isPresent());
                 assertEquals(InstanceStatusValue.UP, found.get().getAgentStatus());
                 assertEquals("1.1.0", found.get().getAgentVersion());
@@ -159,7 +159,7 @@ public class InstanceStatusRepositoryTest {
         @Test
         public void testUpdateCurrentType() throws IOException {
                 // Arrange
-                InstanceStatus initialStatus = new InstanceStatus(
+                InstanceStatusCsv initialStatus = new InstanceStatusCsv(
                                 "test-host",
                                 "ECS",
                                 "ap-northeast-1",
@@ -178,7 +178,7 @@ public class InstanceStatusRepositoryTest {
                 repository.updateCurrentType("test-host", "c6i.8xlarge");
 
                 // Assert
-                Optional<InstanceStatus> found = repository.findByHostname("test-host");
+                Optional<InstanceStatusCsv> found = repository.findByHostname("test-host");
                 assertTrue(found.isPresent());
                 assertEquals("c6i.8xlarge", found.get().getCurrentType());
                 assertEquals(InstanceStatusValue.UP, found.get().getAgentStatus());

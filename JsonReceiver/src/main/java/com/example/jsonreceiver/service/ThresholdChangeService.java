@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsoncommon.dto.ThresholdConfig;
+import com.example.jsoncommon.dto.Threshold;
 import com.example.jsoncommon.dto.ThresholdJson;
 import com.example.jsoncommon.tcp.TcpClient;
 import com.example.jsoncommon.tcp.TcpConfig;
@@ -30,7 +30,7 @@ public class ThresholdChangeService {
      * @param instanceName インスタンス名
      * @param config       しきい値設定
      */
-    public void sendThresholdUpdate(String instanceName, ThresholdConfig config) {
+    public void sendThresholdUpdate(String instanceName, Threshold config) {
         log.info("しきい値変更通知を送信します: instance={}, config={}", instanceName, config);
 
         String serverHost = "localhost"; // TODO: IPアドレスに変換する必要ある？一旦localhost

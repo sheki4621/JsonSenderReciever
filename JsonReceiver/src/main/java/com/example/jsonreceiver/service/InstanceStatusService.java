@@ -53,7 +53,7 @@ public class InstanceStatusService {
             logger.info("インスタンス {} の UP 通知を処理しています", upJson.getInstanceName());
 
             // InstanceStatusを構築して保存
-            InstanceStatus status = buildInstanceStatus(
+            InstanceStatusCsv status = buildInstanceStatus(
                     upJson.getInstanceName(),
                     InstanceStatusValue.UP,
                     upJson.getAgentVersion(),
@@ -84,7 +84,7 @@ public class InstanceStatusService {
             logger.info("インスタンス {} の DOWN 通知を処理しています", downJson.getInstanceName());
 
             // InstanceStatusを構築して保存
-            InstanceStatus status = buildInstanceStatus(
+            InstanceStatusCsv status = buildInstanceStatus(
                     downJson.getInstanceName(),
                     InstanceStatusValue.DOWN,
                     downJson.getAgentVersion(),
@@ -106,16 +106,16 @@ public class InstanceStatusService {
 
     /**
      * InstanceStatusオブジェクトを構築します
-     * SystemInfo.csv、InstanceTypeLink.csv、InstanceType.csvから必要な情報を取得します
+     * SystemInfo.csv、InstanceTypeLinkCsv.csv、InstanceType.csvから必要な情報を取得します
      * 
      * @param hostname     ホスト名
      * @param agentStatus  エージェント状態
      * @param agentVersion エージェントバージョン
      * @param lastUpdate   最終更新時刻
-     * @return InstanceStatus
+     * @return InstanceStatusCsv
      * @throws IOException IO例外
      */
-    private InstanceStatus buildInstanceStatus(String hostname, InstanceStatusValue agentStatus,
+    private InstanceStatusCsv buildInstanceStatus(String hostname, InstanceStatusValue agentStatus,
             String agentVersion, String lastUpdate) throws IOException {
         String machineType = "";
         String region = "";
@@ -126,9 +126,9 @@ public class InstanceStatusService {
         String typeMicro = "";
 
         // 既存データから現在値を取得
-        Optional<InstanceStatus> existingOpt = repository.findByHostname(hostname);
+        Optional<InstanceStatusCsv> existingOpt = repository.findByHostname(hostname);
         if (existingOpt.isPresent()) {
-            InstanceStatus existing = existingOpt.get();
+            InstanceStatusCsv existing = existingOpt.get();
             machineType = existing.getMachineType();
             region = existing.getRegion();
             currentType = existing.getCurrentType();
@@ -140,21 +140,21 @@ public class InstanceStatusService {
 
         // all_instance.csvからMACHINE_TYPEを取得
         try {
-            Optional<AllInstance> allInstanceOpt = allInstanceRepository.findByHostname(hostname);
+            Optional<AllInstanceCsv> allInstanceOpt = allInstanceRepository.findByHostname(hostname);
             if (allInstanceOpt.isPresent()) {
                 machineType = allInstanceOpt.get().getMachineType();
                 logger.debug("ホスト {} の MACHINE_TYPE を取得: {}", hostname, machineType);
 
-                // InstanceTypeLink.csvからInstanceTypeId（TYPE_ID）を取得
-                Optional<InstanceTypeLink> linkOpt = instanceTypeLinkRepository.findByElType(machineType);
+                // InstanceTypeLinkCsv.csvからInstanceTypeId（TYPE_ID）を取得
+                Optional<InstanceTypeLinkCsv> linkOpt = instanceTypeLinkRepository.findByElType(machineType);
                 if (linkOpt.isPresent()) {
                     typeId = linkOpt.get().getInstanceTypeId();
                     logger.debug("MACHINE_TYPE {} の TYPE_ID を取得: {}", machineType, typeId);
 
                     // InstanceType.csvから各インスタンスタイプを取得
-                    Optional<InstanceTypeInfo> typeInfoOpt = instanceTypeRepository.findByInstanceTypeId(typeId);
+                    Optional<InstanceTypeInfoCsv> typeInfoOpt = instanceTypeRepository.findByInstanceTypeId(typeId);
                     if (typeInfoOpt.isPresent()) {
-                        InstanceTypeInfo typeInfo = typeInfoOpt.get();
+                        InstanceTypeInfoCsv typeInfo = typeInfoOpt.get();
                         typeHigh = typeInfo.getHighInstanceType();
                         typeSmallStandard = typeInfo.getLowInstanceType();
                         typeMicro = typeInfo.getVeryLowInstanceType();
@@ -169,7 +169,7 @@ public class InstanceStatusService {
 
         // REGIONは現在のところ取得元がないため、既存値または空文字列のまま
 
-        return new InstanceStatus(
+        return new InstanceStatusCsv(
                 hostname,
                 machineType,
                 region,

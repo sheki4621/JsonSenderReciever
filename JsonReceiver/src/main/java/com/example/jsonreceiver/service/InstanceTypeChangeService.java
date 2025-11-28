@@ -52,7 +52,7 @@ public class InstanceTypeChangeService {
 
     /**
      * インスタンスタイプを変更します
-     * SystemInfo.csv → InstanceTypeLink.csv → InstanceType.csvからインスタンスタイプを取得し、
+     * SystemInfo.csv → InstanceTypeLinkCsv.csv → InstanceType.csvからインスタンスタイプを取得し、
      * 外部シェルを呼び出してインスタンスタイプを変更します（外部呼び出しは空実装）
      * 
      * @param hostname           ホスト名
@@ -63,32 +63,32 @@ public class InstanceTypeChangeService {
 
         try {
             // 1. all_instance.csvからホスト名でMACHINE_TYPEを取得
-            Optional<AllInstance> allInstanceOpt = allInstanceRepository.findByHostname(hostname);
+            Optional<AllInstanceCsv> allInstanceOpt = allInstanceRepository.findByHostname(hostname);
             if (allInstanceOpt.isEmpty()) {
-                logger.error("ホスト名 {} の AllInstance が見つかりません", hostname);
+                logger.error("ホスト名 {} の AllInstanceCsv が見つかりません", hostname);
                 return;
             }
-            AllInstance allInstance = allInstanceOpt.get();
+            AllInstanceCsv allInstance = allInstanceOpt.get();
             String machineType = allInstance.getMachineType();
             logger.debug("ホスト名 {} の MACHINE_TYPE を検出: {}", hostname, machineType);
 
-            // 2. InstanceTypeLink.csvからMACHINE_TYPEでInstanceTypeIdを取得
-            Optional<InstanceTypeLink> linkOpt = instanceTypeLinkRepository.findByElType(machineType);
+            // 2. InstanceTypeLinkCsv.csvからMACHINE_TYPEでInstanceTypeIdを取得
+            Optional<InstanceTypeLinkCsv> linkOpt = instanceTypeLinkRepository.findByElType(machineType);
             if (linkOpt.isEmpty()) {
-                logger.error("MACHINE_TYPE {} に対する InstanceTypeLink が見つかりません", machineType);
+                logger.error("MACHINE_TYPE {} に対する InstanceTypeLinkCsv が見つかりません", machineType);
                 return;
             }
-            InstanceTypeLink link = linkOpt.get();
+            InstanceTypeLinkCsv link = linkOpt.get();
             String instanceTypeId = link.getInstanceTypeId();
             logger.debug("MACHINE_TYPE {} の InstanceTypeId を検出: {}", machineType, instanceTypeId);
 
             // 3. InstanceType.csvからInstanceTypeIdで対応するインスタンスタイプを取得
-            Optional<InstanceTypeInfo> typeInfoOpt = instanceTypeRepository.findByInstanceTypeId(instanceTypeId);
+            Optional<InstanceTypeInfoCsv> typeInfoOpt = instanceTypeRepository.findByInstanceTypeId(instanceTypeId);
             if (typeInfoOpt.isEmpty()) {
                 logger.error("InstanceTypeId {} に対する InstanceType が見つかりません", instanceTypeId);
                 return;
             }
-            InstanceTypeInfo typeInfo = typeInfoOpt.get();
+            InstanceTypeInfoCsv typeInfo = typeInfoOpt.get();
 
             // 4. targetInstanceTypeに応じて適切なインスタンスタイプを選択
             String actualInstanceType;

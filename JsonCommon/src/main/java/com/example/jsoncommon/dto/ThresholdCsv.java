@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ThresholdInfo {
-    public ThresholdInfo(String string, ConditionLogic valueOf, double double1, double double2, int int1, int int2,
+public class ThresholdCsv {
+    public ThresholdCsv(String string, ConditionLogic valueOf, double double1, double double2, int int1, int int2,
             ConditionLogic valueOf2, double double3, double double4, int int3, int int4, boolean boolean1,
             boolean boolean2, boolean boolean3, boolean boolean4) {
     }

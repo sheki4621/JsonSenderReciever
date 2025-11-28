@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.repository;
 
 import com.example.jsoncommon.repository.CsvRepositoryBase;
-import com.example.jsonreceiver.dto.InstanceStatus;
+import com.example.jsonreceiver.dto.InstanceStatusCsv;
 import com.example.jsonreceiver.dto.InstanceStatusValue;
 import org.springframework.stereotype.Repository;
 
@@ -25,9 +25,9 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
      * @param status インスタンスステータス
      * @throws IOException IO例外
      */
-    public void save(InstanceStatus status) throws IOException {
+    public void save(InstanceStatusCsv status) throws IOException {
         // 既存データを読み込む
-        Map<String, InstanceStatus> statusMap = new LinkedHashMap<>();
+        Map<String, InstanceStatusCsv> statusMap = new LinkedHashMap<>();
         List<String> lines = readFromCsv(FILE_NAME);
 
         if (!lines.isEmpty()) {
@@ -36,7 +36,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
                 String line = lines.get(i);
                 String[] parts = line.split(",", -1);
                 if (parts.length >= 11) {
-                    InstanceStatus existingStatus = new InstanceStatus(
+                    InstanceStatusCsv existingStatus = new InstanceStatusCsv(
                             parts[0], // hostname
                             parts[1], // machineType
                             parts[2], // region
@@ -60,7 +60,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
 
         // 全データを上書き保存
         List<Object[]> values = new ArrayList<>();
-        for (InstanceStatus s : statusMap.values()) {
+        for (InstanceStatusCsv s : statusMap.values()) {
             values.add(new Object[] {
                     s.getHostname(),
                     nullToEmpty(s.getMachineType()),
@@ -87,7 +87,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
      * @return インスタンスステータス（存在しない場合はOptional.empty()）
      * @throws IOException IO例外
      */
-    public Optional<InstanceStatus> findByHostname(String hostname) throws IOException {
+    public Optional<InstanceStatusCsv> findByHostname(String hostname) throws IOException {
         List<String> lines = readFromCsv(FILE_NAME);
 
         if (lines.isEmpty()) {
@@ -99,7 +99,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
             if (parts.length >= 11 && parts[0].equals(hostname)) {
-                InstanceStatus status = new InstanceStatus(
+                InstanceStatusCsv status = new InstanceStatusCsv(
                         parts[0], // hostname
                         parts[1], // machineType
                         parts[2], // region
@@ -126,9 +126,9 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
      * @return インスタンスステータスのリスト
      * @throws IOException IO例外
      */
-    public List<InstanceStatus> findAll() throws IOException {
+    public List<InstanceStatusCsv> findAll() throws IOException {
         List<String> lines = readFromCsv(FILE_NAME);
-        List<InstanceStatus> statuses = new ArrayList<>();
+        List<InstanceStatusCsv> statuses = new ArrayList<>();
 
         if (lines.isEmpty()) {
             return statuses;
@@ -139,7 +139,7 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
             if (parts.length >= 11) {
-                InstanceStatus status = new InstanceStatus(
+                InstanceStatusCsv status = new InstanceStatusCsv(
                         parts[0], // hostname
                         parts[1], // machineType
                         parts[2], // region
@@ -168,10 +168,10 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
      * @throws IOException IO例外
      */
     public void updateCurrentType(String hostname, String currentType) throws IOException {
-        Optional<InstanceStatus> statusOpt = findByHostname(hostname);
+        Optional<InstanceStatusCsv> statusOpt = findByHostname(hostname);
         if (statusOpt.isPresent()) {
-            InstanceStatus status = statusOpt.get();
-            InstanceStatus updatedStatus = new InstanceStatus(
+            InstanceStatusCsv status = statusOpt.get();
+            InstanceStatusCsv updatedStatus = new InstanceStatusCsv(
                     status.getHostname(),
                     status.getMachineType(),
                     status.getRegion(),
@@ -196,10 +196,10 @@ public class InstanceStatusRepository extends CsvRepositoryBase {
      * @throws IOException IO例外
      */
     public void updateAgentLastNoticeTime(String hostname, String agentLastNoticeTime) throws IOException {
-        Optional<InstanceStatus> statusOpt = findByHostname(hostname);
+        Optional<InstanceStatusCsv> statusOpt = findByHostname(hostname);
         if (statusOpt.isPresent()) {
-            InstanceStatus status = statusOpt.get();
-            InstanceStatus updatedStatus = new InstanceStatus(
+            InstanceStatusCsv status = statusOpt.get();
+            InstanceStatusCsv updatedStatus = new InstanceStatusCsv(
                     status.getHostname(),
                     status.getMachineType(),
                     status.getRegion(),

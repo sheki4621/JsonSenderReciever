@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstanceTypeInfo {
+public class InstanceTypeInfoCsv {
     /**
      * インスタンスタイプID
      */

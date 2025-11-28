@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsoncommon.dto.ThresholdInfo;
+import com.example.jsoncommon.dto.ThresholdCsv;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -29,7 +29,7 @@ public class ThresholdRepositoryTest {
         csvFilePath = csvDir.resolve(repository.getFilePath());
 
         // テスト用のCSVデータを作成
-        ThresholdInfo info1 = new ThresholdInfo();
+        ThresholdCsv info1 = new ThresholdCsv();
         info1.setHostname("test-host1");
         info1.setUpperCpuThreshold(80.0);
         info1.setLowerCpuThreshold(20.0);
@@ -38,7 +38,7 @@ public class ThresholdRepositoryTest {
         info1.setUpperCpuDurationMin(5);
         repository.save(info1);
 
-        ThresholdInfo info2 = new ThresholdInfo();
+        ThresholdCsv info2 = new ThresholdCsv();
         info2.setHostname("test-host2");
         info2.setUpperCpuThreshold(90.0);
         info2.setLowerCpuThreshold(30.0);
@@ -47,7 +47,7 @@ public class ThresholdRepositoryTest {
         info2.setUpperCpuDurationMin(5);
         repository.save(info2);
 
-        ThresholdInfo info3 = new ThresholdInfo();
+        ThresholdCsv info3 = new ThresholdCsv();
         info3.setHostname("test-host3");
         info3.setUpperCpuThreshold(75.0);
         info3.setLowerCpuThreshold(15.0);
@@ -60,11 +60,11 @@ public class ThresholdRepositoryTest {
     @Test
     public void testFindByHostname_Found() throws IOException {
         // Act
-        Optional<ThresholdInfo> result = repository.findByHostname("test-host1");
+        Optional<ThresholdCsv> result = repository.findByHostname("test-host1");
 
         // Assert
         assertTrue(result.isPresent());
-        ThresholdInfo threshold = result.get();
+        ThresholdCsv threshold = result.get();
         assertEquals("test-host1", threshold.getHostname());
         assertEquals(80.0, result.get().getUpperCpuThreshold());
         assertEquals(20.0, result.get().getLowerCpuThreshold());
@@ -76,7 +76,7 @@ public class ThresholdRepositoryTest {
     @Test
     public void testFindByHostname_NotFound() throws IOException {
         // Act
-        Optional<ThresholdInfo> result = repository.findByHostname("non-existent");
+        Optional<ThresholdCsv> result = repository.findByHostname("non-existent");
 
         // Assert
         assertFalse(result.isPresent());
@@ -85,11 +85,11 @@ public class ThresholdRepositoryTest {
     @Test
     public void testFindByHostname_MultipleRecords() throws IOException {
         // Act
-        Optional<ThresholdInfo> result = repository.findByHostname("test-host2");
+        Optional<ThresholdCsv> result = repository.findByHostname("test-host2");
 
         // Assert
         assertTrue(result.isPresent());
-        ThresholdInfo threshold = result.get();
+        ThresholdCsv threshold = result.get();
         assertEquals("test-host2", threshold.getHostname());
         assertEquals(90.0, result.get().getUpperCpuThreshold());
         assertEquals(30.0, result.get().getLowerCpuThreshold());
@@ -104,7 +104,7 @@ public class ThresholdRepositoryTest {
         Files.delete(csvFilePath);
 
         // Act
-        Optional<ThresholdInfo> result;
+        Optional<ThresholdCsv> result;
         try {
             result = repository.findByHostname("test-host1");
         } catch (java.nio.file.NoSuchFileException e) {

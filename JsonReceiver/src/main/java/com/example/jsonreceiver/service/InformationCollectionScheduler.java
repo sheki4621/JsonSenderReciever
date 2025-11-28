@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsonreceiver.dto.InstanceTypeInfo;
-import com.example.jsonreceiver.dto.AllInstance;
+import com.example.jsonreceiver.dto.InstanceTypeInfoCsv;
+import com.example.jsonreceiver.dto.AllInstanceCsv;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,10 +75,10 @@ public class InformationCollectionScheduler implements CommandLineRunner {
     private void collectAndLogInstanceTypes() {
         try {
             logger.info("=== インスタンスタイプ一覧の収集を開始 ===");
-            List<InstanceTypeInfo> instanceTypes = informationCollectionService.collectInstanceTypes();
+            List<InstanceTypeInfoCsv> instanceTypes = informationCollectionService.collectInstanceTypes();
             logger.info("インスタンスタイプを{}件取得しました", instanceTypes.size());
 
-            for (InstanceTypeInfo info : instanceTypes) {
+            for (InstanceTypeInfoCsv info : instanceTypes) {
                 logger.info("  - ID: {}, High: {} ({}コア), Low: {} ({}コア), VeryLow: {} ({}コア)",
                         info.getInstanceTypeId(),
                         info.getHighInstanceType(), info.getHighCpuCore(),
@@ -101,10 +101,10 @@ public class InformationCollectionScheduler implements CommandLineRunner {
     private void collectAndLogSystemInfo() {
         try {
             logger.info("=== システム情報の収集を開始 ===");
-            List<AllInstance> allInstanceList = informationCollectionService.collectSystemInfo();
+            List<AllInstanceCsv> allInstanceList = informationCollectionService.collectSystemInfo();
             logger.info("システム情報を{}件取得しました", allInstanceList.size());
 
-            for (AllInstance info : allInstanceList) {
+            for (AllInstanceCsv info : allInstanceList) {
                 logger.info("  - ホスト名: {}, 装置タイプ: {}, グループ名: {}",
                         info.getHostname(), info.getMachineType(), info.getGroupName());
             }

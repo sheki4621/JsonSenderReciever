@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.AllInstance;
+import com.example.jsonreceiver.dto.AllInstanceCsv;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,10 +47,10 @@ class AllInstanceRepositoryTest {
     @Test
     void testSaveAll_createsFileWithHeaders() throws IOException {
         // テストデータを作成
-        List<AllInstance> allInstanceList = Arrays.asList(
-                new AllInstance("server01.example.com", "ECS", "GROUP-A"),
-                new AllInstance("server02.example.com", "EDB", "GROUP-B"),
-                new AllInstance("server03.example.com", "ECS", "GROUP-A"));
+        List<AllInstanceCsv> allInstanceList = Arrays.asList(
+                new AllInstanceCsv("server01.example.com", "ECS", "GROUP-A"),
+                new AllInstanceCsv("server02.example.com", "EDB", "GROUP-B"),
+                new AllInstanceCsv("server03.example.com", "ECS", "GROUP-A"));
 
         // saveAllメソッドを呼び出し
         repository.saveAll(allInstanceList);
@@ -78,14 +78,14 @@ class AllInstanceRepositoryTest {
     @Test
     void testSaveAll_overwritesExistingFile() throws IOException {
         // 最初のデータセットを保存
-        List<AllInstance> firstSet = Arrays.asList(
-                new AllInstance("server01.example.com", "ECS", "GROUP-A"),
-                new AllInstance("server02.example.com", "EDB", "GROUP-B"));
+        List<AllInstanceCsv> firstSet = Arrays.asList(
+                new AllInstanceCsv("server01.example.com", "ECS", "GROUP-A"),
+                new AllInstanceCsv("server02.example.com", "EDB", "GROUP-B"));
         repository.saveAll(firstSet);
 
         // 2回目のデータセットを保存（上書き）
-        List<AllInstance> secondSet = Arrays.asList(
-                new AllInstance("newserver.example.com", "ECS", "GROUP-C"));
+        List<AllInstanceCsv> secondSet = Arrays.asList(
+                new AllInstanceCsv("newserver.example.com", "ECS", "GROUP-C"));
         repository.saveAll(secondSet);
 
         // ファイルの内容を確認
@@ -107,7 +107,7 @@ class AllInstanceRepositoryTest {
     @Test
     void testSaveAll_withEmptyList() throws IOException {
         // 空のリストで保存
-        List<AllInstance> emptyList = Arrays.asList();
+        List<AllInstanceCsv> emptyList = Arrays.asList();
         repository.saveAll(emptyList);
 
         // ファイルが作成されることを確認
@@ -129,8 +129,8 @@ class AllInstanceRepositoryTest {
         }
 
         // データを保存
-        List<AllInstance> allInstanceList = Arrays.asList(
-                new AllInstance("server01.example.com", "ECS", "GROUP-A"));
+        List<AllInstanceCsv> allInstanceList = Arrays.asList(
+                new AllInstanceCsv("server01.example.com", "ECS", "GROUP-A"));
         repository.saveAll(allInstanceList);
 
         // ディレクトリとファイルが作成されたことを確認

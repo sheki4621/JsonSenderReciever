@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsonreceiver.dto.AllInstance;
-import com.example.jsonreceiver.dto.InstanceTypeInfo;
+import com.example.jsonreceiver.dto.AllInstanceCsv;
+import com.example.jsonreceiver.dto.InstanceTypeInfoCsv;
 import com.example.jsonreceiver.repository.AllInstanceRepository;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
 import com.example.jsonreceiver.util.ShellExecutor;
@@ -55,8 +55,8 @@ public class InformationCollectionService {
      * @return インスタンスタイプ情報のリスト
      * @throws RuntimeException すべてのリトライが失敗した場合
      */
-    public List<InstanceTypeInfo> collectInstanceTypes() {
-        List<InstanceTypeInfo> instanceTypes = executeWithRetry("インスタンスタイプ一覧", this::fetchInstanceTypes);
+    public List<InstanceTypeInfoCsv> collectInstanceTypes() {
+        List<InstanceTypeInfoCsv> instanceTypes = executeWithRetry("インスタンスタイプ一覧", this::fetchInstanceTypes);
 
         // CSV出力
         try {
@@ -78,8 +78,8 @@ public class InformationCollectionService {
      * @return システム情報のリスト
      * @throws RuntimeException すべてのリトライが失敗した場合
      */
-    public List<AllInstance> collectSystemInfo() {
-        List<AllInstance> allInstanceList = executeWithRetry("システム情報", this::fetchSystemInfo);
+    public List<AllInstanceCsv> collectSystemInfo() {
+        List<AllInstanceCsv> allInstanceList = executeWithRetry("システム情報", this::fetchSystemInfo);
 
         // CSV出力
         try {
@@ -143,7 +143,7 @@ public class InformationCollectionService {
      * 
      * @return インスタンスタイプ情報のリスト
      */
-    private List<InstanceTypeInfo> fetchInstanceTypes() {
+    private List<InstanceTypeInfoCsv> fetchInstanceTypes() {
         logger.debug("インスタンスタイプ一覧を取得中");
 
         try {
@@ -154,9 +154,9 @@ public class InformationCollectionService {
                     shellTimeoutSeconds);
 
             // JSON出力をパース
-            List<InstanceTypeInfo> instanceTypes = objectMapper.readValue(
+            List<InstanceTypeInfoCsv> instanceTypes = objectMapper.readValue(
                     output,
-                    new TypeReference<List<InstanceTypeInfo>>() {
+                    new TypeReference<List<InstanceTypeInfoCsv>>() {
                     });
 
             logger.info("インスタンスタイプ一覧を取得しました: {} 件", instanceTypes.size());
@@ -166,9 +166,9 @@ public class InformationCollectionService {
             logger.warn("外部シェルによるインスタンスタイプ取得に失敗しました。サンプルデータを返します", e);
 
             // フォールバック: サンプルデータを返す
-            List<InstanceTypeInfo> instanceTypes = new ArrayList<>();
-            instanceTypes.add(new InstanceTypeInfo("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
-            instanceTypes.add(new InstanceTypeInfo("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1));
+            List<InstanceTypeInfoCsv> instanceTypes = new ArrayList<>();
+            instanceTypes.add(new InstanceTypeInfoCsv("1", "t2.xlarge", 4, "t2.medium", 2, "t2.micro", 1));
+            instanceTypes.add(new InstanceTypeInfoCsv("2", "t3.xlarge", 4, "t3.medium", 2, "t3.micro", 1));
             return instanceTypes;
         }
     }
@@ -179,7 +179,7 @@ public class InformationCollectionService {
      * 
      * @return システム情報のリスト
      */
-    private List<AllInstance> fetchSystemInfo() {
+    private List<AllInstanceCsv> fetchSystemInfo() {
         logger.debug("システム情報を取得中");
 
         try {
@@ -190,9 +190,9 @@ public class InformationCollectionService {
                     shellTimeoutSeconds);
 
             // JSON出力をパース
-            List<AllInstance> allInstanceList = objectMapper.readValue(
+            List<AllInstanceCsv> allInstanceList = objectMapper.readValue(
                     output,
-                    new TypeReference<List<AllInstance>>() {
+                    new TypeReference<List<AllInstanceCsv>>() {
                     });
 
             logger.info("システム情報を取得しました: {} 件", allInstanceList.size());
@@ -202,16 +202,16 @@ public class InformationCollectionService {
             logger.warn("外部シェルによるシステム情報取得に失敗しました。サンプルデータを返します", e);
 
             // フォールバック: サンプルデータを返す
-            List<AllInstance> allInstanceList = new ArrayList<>();
-            allInstanceList.add(new AllInstance(
+            List<AllInstanceCsv> allInstanceList = new ArrayList<>();
+            allInstanceList.add(new AllInstanceCsv(
                     "server01.example.com",
                     "ECS",
                     "GROUP-A"));
-            allInstanceList.add(new AllInstance(
+            allInstanceList.add(new AllInstanceCsv(
                     "server02.example.com",
                     "EDB",
                     "GROUP-B"));
-            allInstanceList.add(new AllInstance(
+            allInstanceList.add(new AllInstanceCsv(
                     "server03.example.com",
                     "ECS",
                     "GROUP-A"));

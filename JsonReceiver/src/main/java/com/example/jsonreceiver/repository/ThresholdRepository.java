@@ -4,7 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.jsoncommon.dto.ConditionLogic;
 import com.example.jsoncommon.dto.ScalingMode;
-import com.example.jsoncommon.dto.ThresholdInfo;
+import com.example.jsoncommon.dto.ThresholdCsv;
 import com.example.jsoncommon.repository.CsvRepositoryBase;
 import com.example.jsoncommon.util.HostnameUtil;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public class ThresholdRepository extends CsvRepositoryBase {
 
-    public void save(ThresholdInfo thresholdInfo) throws IOException {
+    public void save(ThresholdCsv thresholdInfo) throws IOException {
         String[] header = {
                 "HOSTNAME",
                 "SCALING_MODE",
@@ -60,7 +60,7 @@ public class ThresholdRepository extends CsvRepositoryBase {
      * @return しきい値情報（存在しない場合はOptional.empty()）
      * @throws IOException IO例外
      */
-    public Optional<ThresholdInfo> findByHostname(String hostname) throws IOException {
+    public Optional<ThresholdCsv> findByHostname(String hostname) throws IOException {
         List<String> lines = readFromCsv(getFilePath());
 
         if (lines.isEmpty()) {
@@ -72,7 +72,7 @@ public class ThresholdRepository extends CsvRepositoryBase {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
             if (parts.length >= 16 && parts[0].equals(hostname)) {
-                ThresholdInfo threshold = new ThresholdInfo(
+                ThresholdCsv threshold = new ThresholdCsv(
                         parts[0], // hostname
                         (parts[1] == null || parts[1].equals("null") || parts[1].isEmpty()) ? null
                                 : ScalingMode.valueOf(parts[1]), // scalingMode

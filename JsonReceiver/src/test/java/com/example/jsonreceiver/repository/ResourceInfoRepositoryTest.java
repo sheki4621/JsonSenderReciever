@@ -4,7 +4,7 @@ import com.example.jsoncommon.dto.InstanceTypeChangeRequest;
 import com.example.jsoncommon.dto.Metrics;
 import com.example.jsoncommon.dto.MetricsJson;
 import com.example.jsoncommon.dto.NoticeType;
-import com.example.jsoncommon.dto.ResourceHistory;
+import com.example.jsoncommon.dto.ResourceHistoryCsv;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,7 +69,7 @@ public class ResourceInfoRepositoryTest {
                 new Metrics(50.0, 60.0, InstanceTypeChangeRequest.WITHIN)));
 
         // Act
-        List<ResourceHistory> result = repository.findLastNByHostname("host1", 5);
+        List<ResourceHistoryCsv> result = repository.findLastNByHostname("host1", 5);
 
         // Assert
         assertEquals(1, result.size());
@@ -108,7 +108,7 @@ public class ResourceInfoRepositoryTest {
                 new Metrics(75.0, 60.0, InstanceTypeChangeRequest.WITHIN)));
 
         // Act - 最新3件を取得
-        List<ResourceHistory> result = repository.findLastNByHostname("host1", 3);
+        List<ResourceHistoryCsv> result = repository.findLastNByHostname("host1", 3);
 
         // Assert
         assertEquals(3, result.size());
@@ -137,7 +137,7 @@ public class ResourceInfoRepositoryTest {
                 new Metrics(75.0, 60.0, InstanceTypeChangeRequest.WITHIN)));
 
         // Act - 5件要求するが2件しかない
-        List<ResourceHistory> result = repository.findLastNByHostname("host1", 5);
+        List<ResourceHistoryCsv> result = repository.findLastNByHostname("host1", 5);
 
         // Assert
         assertEquals(2, result.size());
@@ -155,7 +155,7 @@ public class ResourceInfoRepositoryTest {
                 new Metrics(75.0, 60.0, InstanceTypeChangeRequest.WITHIN)));
 
         // Act
-        List<ResourceHistory> result = repository.findLastNByHostname("non-existent", 5);
+        List<ResourceHistoryCsv> result = repository.findLastNByHostname("non-existent", 5);
 
         // Assert
         assertEquals(0, result.size());
@@ -164,7 +164,7 @@ public class ResourceInfoRepositoryTest {
     @Test
     public void testFindLastNByHostname_FileNotExists() throws IOException {
         // Act
-        List<ResourceHistory> result = repository.findLastNByHostname("host1", 5);
+        List<ResourceHistoryCsv> result = repository.findLastNByHostname("host1", 5);
 
         // Assert
         assertEquals(0, result.size());

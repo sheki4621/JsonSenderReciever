@@ -1,6 +1,6 @@
 package com.example.jsonreceiver.repository;
 
-import com.example.jsonreceiver.dto.AllInstance;
+import com.example.jsonreceiver.dto.AllInstanceCsv;
 import com.example.jsoncommon.repository.CsvRepositoryBase;
 import org.springframework.stereotype.Repository;
 
@@ -34,9 +34,9 @@ public class AllInstanceRepository extends CsvRepositoryBase {
      * @param allInstanceList インスタンス情報のリスト
      * @throws IOException IO例外
      */
-    public void saveAll(List<AllInstance> allInstanceList) throws IOException {
+    public void saveAll(List<AllInstanceCsv> allInstanceList) throws IOException {
         List<Object[]> values = new ArrayList<>();
-        for (AllInstance info : allInstanceList) {
+        for (AllInstanceCsv info : allInstanceList) {
             values.add(new Object[] {
                     info.getHostname(),
                     info.getMachineType(),
@@ -53,7 +53,7 @@ public class AllInstanceRepository extends CsvRepositoryBase {
      * @return インスタンス情報（存在しない場合はOptional.empty()）
      * @throws IOException IO例外
      */
-    public Optional<AllInstance> findByHostname(String hostname) throws IOException {
+    public Optional<AllInstanceCsv> findByHostname(String hostname) throws IOException {
         List<String> lines = readFromCsv(FILE_NAME);
 
         if (lines.isEmpty()) {
@@ -65,7 +65,7 @@ public class AllInstanceRepository extends CsvRepositoryBase {
             String line = lines.get(i);
             String[] parts = line.split(",", -1);
             if (parts.length >= 3 && parts[0].equals(hostname)) {
-                AllInstance info = new AllInstance(
+                AllInstanceCsv info = new AllInstanceCsv(
                         parts[0], // hostname
                         parts[1], // machineType
                         parts[2] // groupName

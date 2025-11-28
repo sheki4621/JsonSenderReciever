@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsonreceiver.dto.AllInstance;
-import com.example.jsonreceiver.dto.InstanceTypeInfo;
+import com.example.jsonreceiver.dto.AllInstanceCsv;
+import com.example.jsonreceiver.dto.InstanceTypeInfoCsv;
 import com.example.jsonreceiver.repository.AllInstanceRepository;
 import com.example.jsonreceiver.repository.InstanceTypeRepository;
 import com.example.jsonreceiver.util.ShellExecutor;
@@ -63,14 +63,14 @@ class InformationCollectionServiceTest {
         when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // インスタンスタイプ一覧の取得
-        List<InstanceTypeInfo> result = service.collectInstanceTypes();
+        List<InstanceTypeInfoCsv> result = service.collectInstanceTypes();
 
         // 結果が空でないことを確認
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
         // サンプルデータの構造を確認
-        InstanceTypeInfo first = result.get(0);
+        InstanceTypeInfoCsv first = result.get(0);
         assertNotNull(first);
         assertNotNull(first.getInstanceTypeId());
         assertFalse(first.getInstanceTypeId().isEmpty());
@@ -88,14 +88,14 @@ class InformationCollectionServiceTest {
         when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // システム情報の取得
-        List<AllInstance> result = service.collectSystemInfo();
+        List<AllInstanceCsv> result = service.collectSystemInfo();
 
         // 結果が空でないことを確認
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
         // サンプルデータの構造を確認
-        AllInstance first = result.get(0);
+        AllInstanceCsv first = result.get(0);
         assertNotNull(first);
         assertNotNull(first.getHostname());
         assertNotNull(first.getMachineType());
@@ -115,7 +115,7 @@ class InformationCollectionServiceTest {
         when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // インスタンスタイプ一覧の取得
-        List<InstanceTypeInfo> result = service.collectInstanceTypes();
+        List<InstanceTypeInfoCsv> result = service.collectInstanceTypes();
 
         // 期待されるサンプルデータが含まれることを確認
         assertTrue(result.stream()
@@ -132,7 +132,7 @@ class InformationCollectionServiceTest {
         when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // システム情報の取得
-        List<AllInstance> result = service.collectSystemInfo();
+        List<AllInstanceCsv> result = service.collectSystemInfo();
 
         // 期待されるサンプルデータが含まれることを確認
         assertTrue(result.stream()
@@ -153,7 +153,7 @@ class InformationCollectionServiceTest {
                 .when(instanceTypeRepository).saveAll(anyList());
 
         // データは正常に取得できることを確認（CSV出力のエラーは無視される）
-        List<InstanceTypeInfo> result = service.collectInstanceTypes();
+        List<InstanceTypeInfoCsv> result = service.collectInstanceTypes();
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
@@ -172,7 +172,7 @@ class InformationCollectionServiceTest {
                 .when(allInstanceRepository).saveAll(anyList());
 
         // データは正常に取得できることを確認（CSV出力のエラーは無視される）
-        List<AllInstance> result = service.collectSystemInfo();
+        List<AllInstanceCsv> result = service.collectSystemInfo();
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
@@ -187,7 +187,7 @@ class InformationCollectionServiceTest {
                 .thenThrow(new RuntimeException("シェル実行エラー"));
 
         // フォールバックでサンプルデータが返されることを確認
-        List<InstanceTypeInfo> result = service.collectInstanceTypes();
+        List<InstanceTypeInfoCsv> result = service.collectInstanceTypes();
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.stream()
@@ -204,7 +204,7 @@ class InformationCollectionServiceTest {
                 .thenThrow(new RuntimeException("シェル実行エラー"));
 
         // フォールバックでサンプルデータが返されることを確認
-        List<AllInstance> result = service.collectSystemInfo();
+        List<AllInstanceCsv> result = service.collectSystemInfo();
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.stream()

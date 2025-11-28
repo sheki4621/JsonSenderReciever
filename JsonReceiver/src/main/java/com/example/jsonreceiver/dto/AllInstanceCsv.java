@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AllInstance {
+public class AllInstanceCsv {
     /**
      * ホスト名
      */

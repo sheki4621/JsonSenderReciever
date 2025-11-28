@@ -1,10 +1,10 @@
 package com.example.jsonreceiver.service;
 
-import com.example.jsoncommon.dto.ThresholdConfig;
+import com.example.jsoncommon.dto.Threshold;
 import com.example.jsoncommon.dto.ThresholdJson;
 import com.example.jsoncommon.tcp.TcpClient;
 import com.example.jsoncommon.tcp.TcpConfig;
-import com.example.jsonreceiver.dto.InstanceStatus;
+import com.example.jsonreceiver.dto.InstanceStatusCsv;
 import com.example.jsonreceiver.repository.InstanceStatusRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,11 +40,11 @@ class ThresholdChangeServiceTest {
     @Test
     void sendThresholdUpdate_shouldSendCorrectMessage() throws Exception {
         String instanceName = "test-instance";
-        ThresholdConfig config = new ThresholdConfig();
+        Threshold config = new Threshold();
         config.setHostname("test-host");
         config.setUpperCpuThreshold(80.0);
 
-        InstanceStatus mockStatus = new InstanceStatus();
+        InstanceStatusCsv mockStatus = new InstanceStatusCsv();
         mockStatus.setAgentVersion("2.0");
         when(instanceStatusRepository.findByHostname(instanceName)).thenReturn(Optional.of(mockStatus));
 
@@ -63,7 +63,7 @@ class ThresholdChangeServiceTest {
     @Test
     void sendThresholdUpdate_shouldNotSend_whenNotFound() throws Exception {
         String instanceName = "unknown-instance";
-        ThresholdConfig config = new ThresholdConfig();
+        Threshold config = new Threshold();
         config.setHostname("test-host");
 
         when(instanceStatusRepository.findByHostname(instanceName)).thenReturn(Optional.empty());

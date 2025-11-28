@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstanceStatus {
+public class InstanceStatusCsv {
     private String hostname; // HOSTNAME
     private String machineType; // MACHINE_TYPE (SystemInfo.csvのElType)
     private String region; // REGION
     private String currentType; // CURRENT_TYPE (現在のインスタンスタイプ)
-    private String typeId; // TYPE_ID (InstanceTypeLink.csvのInstanceTypeId)
+    private String typeId; // TYPE_ID (InstanceTypeLinkCsv.csvのInstanceTypeId)
     private String typeHigh; // TYPE_HIGH (InstanceType.csvのHighInstanceType)
     private String typeSmallStandard; // TYPE_SMALL_STANDARD (InstanceType.csvのLowInstanceType)
     private String typeMicro; // TYPE_MICRO (InstanceType.csvのVeryLowInstanceType)
