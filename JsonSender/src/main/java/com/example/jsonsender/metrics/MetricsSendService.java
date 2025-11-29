@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,7 +91,7 @@ public class MetricsSendService {
 
             return new Metrics(cpuUsage, memoryUsage, null);
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             logger.error("メトリクス収集シェルの実行に失敗しました: {}", e.getMessage());
             return new Metrics(null, null, null);
         } catch (Exception e) {
