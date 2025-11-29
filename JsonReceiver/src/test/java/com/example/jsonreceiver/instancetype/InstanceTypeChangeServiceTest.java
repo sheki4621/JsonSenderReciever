@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.instancetype;
 
 import com.example.jsonreceiver.monitortarget.InstanceStatusRepository;
-import com.example.jsonreceiver.util.ShellExecutor;
+import com.example.jsoncommon.util.ShellExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

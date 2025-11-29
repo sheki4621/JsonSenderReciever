@@ -1,4 +1,4 @@
-package com.example.jsonreceiver.util;
+package com.example.jsoncommon.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

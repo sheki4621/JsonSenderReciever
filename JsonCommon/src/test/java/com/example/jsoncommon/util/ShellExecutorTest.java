@@ -1,4 +1,4 @@
-package com.example.jsonreceiver.util;
+package com.example.jsoncommon.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

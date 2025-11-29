@@ -3,6 +3,7 @@ package com.example.jsonsender.metrics;
 import com.example.jsoncommon.dto.InstanceTypeChangeRequest;
 import com.example.jsoncommon.dto.Metrics;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
+import com.example.jsoncommon.util.ShellExecutor;
 import com.example.jsonsender.repository.ThresholdRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,16 +25,23 @@ class MetricsServiceTest {
     @Mock
     private ResourceHistoryRepository resourceHistoryRepository;
 
+    @Mock
+    private ShellExecutor shellExecutor;
+
     private MetricsSendService metricsSendService;
 
     @BeforeEach
     void setUp() {
-        metricsSendService = spy(new MetricsSendService(thresholdRepository, resourceHistoryRepository));
+        metricsSendService = spy(new MetricsSendService(thresholdRepository, resourceHistoryRepository, shellExecutor));
     }
 
     @Test
     void testCollect_Success() throws Exception {
-        // Given: しきい値チェックが正常に動作
+        // Given: getCpuMemoryUsageがメトリクスを返す
+        Metrics mockMetrics = new Metrics(23.4, 34.5, null);
+        doReturn(mockMetrics).when(metricsSendService).getCpuMemoryUsage();
+
+        // しきい値チェックが正常に動作
         doReturn(InstanceTypeChangeRequest.UPPER).when(metricsSendService).getInstanceTypeChangeRequest(anyDouble(),
                 anyDouble());
 
@@ -52,7 +60,11 @@ class MetricsServiceTest {
 
     @Test
     void testCollect_ThresholdCheckFailure() throws Exception {
-        // Given: しきい値チェックが例外をスロー
+        // Given: getCpuMemoryUsageがメトリクスを返す
+        Metrics mockMetrics = new Metrics(23.4, 34.5, null);
+        doReturn(mockMetrics).when(metricsSendService).getCpuMemoryUsage();
+
+        // しきい値チェックが例外をスロー
         doThrow(new RuntimeException("しきい値チェックエラー")).when(metricsSendService).getInstanceTypeChangeRequest(anyDouble(),
                 anyDouble());
 
@@ -71,7 +83,11 @@ class MetricsServiceTest {
 
     @Test
     void testCollect_WithinThreshold() throws Exception {
-        // Given: しきい値内
+        // Given: getCpuMemoryUsageがメトリクスを返す
+        Metrics mockMetrics = new Metrics(23.4, 34.5, null);
+        doReturn(mockMetrics).when(metricsSendService).getCpuMemoryUsage();
+
+        // しきい値内
         doReturn(InstanceTypeChangeRequest.WITHIN).when(metricsSendService).getInstanceTypeChangeRequest(anyDouble(),
                 anyDouble());
 
@@ -85,7 +101,11 @@ class MetricsServiceTest {
 
     @Test
     void testCollect_LowerThreshold() throws Exception {
-        // Given: 下限しきい値
+        // Given: getCpuMemoryUsageがメトリクスを返す
+        Metrics mockMetrics = new Metrics(23.4, 34.5, null);
+        doReturn(mockMetrics).when(metricsSendService).getCpuMemoryUsage();
+
+        // 下限しきい値
         doReturn(InstanceTypeChangeRequest.LOWER).when(metricsSendService).getInstanceTypeChangeRequest(anyDouble(),
                 anyDouble());
 

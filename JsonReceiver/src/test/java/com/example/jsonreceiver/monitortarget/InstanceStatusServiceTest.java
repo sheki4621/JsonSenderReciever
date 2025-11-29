@@ -3,7 +3,7 @@ package com.example.jsonreceiver.monitortarget;
 import com.example.jsoncommon.dto.UpJson;
 import com.example.jsoncommon.dto.DownJson;
 import com.example.jsonreceiver.instancetype.*;
-import com.example.jsonreceiver.util.ShellExecutor;
+import com.example.jsoncommon.util.ShellExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

@@ -4,7 +4,7 @@ import com.example.jsonreceiver.instancetype.AllInstanceCsv;
 import com.example.jsonreceiver.instancetype.InstanceTypeInfoCsv;
 import com.example.jsonreceiver.instancetype.AllInstanceRepository;
 import com.example.jsonreceiver.instancetype.InstanceTypeRepository;
-import com.example.jsonreceiver.util.ShellExecutor;
+import com.example.jsoncommon.util.ShellExecutor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

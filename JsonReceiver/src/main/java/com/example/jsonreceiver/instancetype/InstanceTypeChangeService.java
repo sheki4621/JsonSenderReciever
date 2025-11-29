@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.instancetype;
 
 import com.example.jsonreceiver.monitortarget.InstanceStatusRepository;
-import com.example.jsonreceiver.util.ShellExecutor;
+import com.example.jsoncommon.util.ShellExecutor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -8,16 +8,21 @@ import com.example.jsoncommon.dto.ThresholdCsv;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
 import com.example.jsonsender.repository.ThresholdRepository;
 import com.example.jsoncommon.util.HostnameUtil;
+import com.example.jsoncommon.util.ShellExecutor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,30 +33,72 @@ public class MetricsSendService {
 
     private final ThresholdRepository thresholdRepository;
     private final ResourceHistoryRepository resourceHistoryRepository;
+    private final ShellExecutor shellExecutor;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${metrics.shell.path}")
+    private String metricsShellPath;
+
+    @Value("${metrics.shell.timeout}")
+    private int shellTimeoutSeconds;
 
     public Metrics collect() {
-        Double cpuUsage = getCpuUsage();
-        Double memoryUsage = getMemoryUsage();
+        Metrics metrics = getCpuMemoryUsage();
 
-        InstanceTypeChangeRequest instanceTypeChangeRequest;
-        try {
-            instanceTypeChangeRequest = getInstanceTypeChangeRequest(cpuUsage, memoryUsage);
-        } catch (Exception e) {
-            logger.error("しきい値チェック中にエラーが発生しました: " + e.getMessage());
-            instanceTypeChangeRequest = null;
+        // CPU/メモリ使用率がnullでない場合のみしきい値チェック
+        if (metrics.getCpuUsage() != null && metrics.getMemoryUsage() != null) {
+            try {
+                InstanceTypeChangeRequest instanceTypeChangeRequest = getInstanceTypeChangeRequest(
+                        metrics.getCpuUsage(), metrics.getMemoryUsage());
+                return new Metrics(metrics.getCpuUsage(), metrics.getMemoryUsage(), instanceTypeChangeRequest);
+            } catch (Exception e) {
+                logger.error("しきい値チェック中にエラーが発生しました: " + e.getMessage());
+            }
         }
 
-        return new Metrics(cpuUsage, memoryUsage, instanceTypeChangeRequest);
+        return metrics;
     }
 
-    protected Double getCpuUsage() {
-        // TODO: 提供されたら修正
-        return 23.4;
-    }
+    /**
+     * CPU使用率とメモリ使用率を外部シェルから取得します
+     * 
+     * @return メトリクス情報
+     */
+    protected Metrics getCpuMemoryUsage() {
+        try {
+            logger.debug("メトリクス収集シェルを実行します: {}", metricsShellPath);
 
-    protected Double getMemoryUsage() {
-        // TODO: 提供されたら修正
-        return 34.5;
+            // String output = shellExecutor.executeShell(metricsShellPath,
+            // Collections.emptyList(), shellTimeoutSeconds);
+
+            // 提供されるまで仮の値で処理
+            String output = "{\"CpuUsage\": 10.5,\"MemoryUsage\": 20.3}";
+
+            // JSONをパース
+            JsonNode jsonNode = objectMapper.readTree(output);
+
+            Double cpuUsage = null;
+            Double memoryUsage = null;
+
+            if (jsonNode.has("CpuUsage") && !jsonNode.get("CpuUsage").isNull()) {
+                cpuUsage = jsonNode.get("CpuUsage").asDouble();
+            }
+
+            if (jsonNode.has("MemoryUsage") && !jsonNode.get("MemoryUsage").isNull()) {
+                memoryUsage = jsonNode.get("MemoryUsage").asDouble();
+            }
+
+            logger.info("メトリクスを取得しました CPU使用率: {}, メモリ使用率: {}", cpuUsage, memoryUsage);
+
+            return new Metrics(cpuUsage, memoryUsage, null);
+
+        } catch (IOException | InterruptedException e) {
+            logger.error("メトリクス収集シェルの実行に失敗しました: {}", e.getMessage());
+            return new Metrics(null, null, null);
+        } catch (Exception e) {
+            logger.error("メトリクスのJSONパースに失敗しました: {}", e.getMessage());
+            return new Metrics(null, null, null);
+        }
     }
 
     /**
