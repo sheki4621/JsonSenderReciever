@@ -4,6 +4,7 @@ import com.example.jsoncommon.dto.InstanceTypeChangeRequest;
 import com.example.jsoncommon.dto.MetricsJson;
 import com.example.jsoncommon.dto.ResourceHistoryCsv;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -16,6 +17,27 @@ public class ResourceHistoryRepository extends CsvRepositoryBase {
     private static final String[] HEADERS = { "Hostname", "Timestamp", "CpuUsage", "MemoryUsage",
             "InstanceTypeChangeRequest" };
 
+    @Value("${resource.history.retention-days:30}")
+    private int retentionDays;
+
+    /**
+     * 保持期間を設定する（テスト用）
+     * 
+     * @param retentionDays 保持期間（日数）
+     */
+    public void setRetentionDays(int retentionDays) {
+        this.retentionDays = retentionDays;
+    }
+
+    /**
+     * 保持期間を取得する
+     * 
+     * @return 保持期間（日数）
+     */
+    public int getRetentionDays() {
+        return retentionDays;
+    }
+
     public void save(MetricsJson metricsJson) throws IOException {
         String filename = String.format("resource_history_%s.csv", metricsJson.getInstanceName());
         writeToCsv(filename, HEADERS,
@@ -24,6 +46,9 @@ public class ResourceHistoryRepository extends CsvRepositoryBase {
                 metricsJson.getMetrics().getCpuUsage(),
                 metricsJson.getMetrics().getMemoryUsage(),
                 metricsJson.getMetrics().getInstanceTypeChangeRequest());
+
+        // 保存後に古いデータを自動削除
+        deleteOldRecords(metricsJson.getInstanceName());
     }
 
     /**
@@ -81,10 +106,64 @@ public class ResourceHistoryRepository extends CsvRepositoryBase {
             }
         }
 
-        // タイムスタンプでソート（降順：最新が先頭）
+        // タイムスタンプでソート（降順:最新が先頭）
         allMatching.sort((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
 
         return allMatching;
+    }
+
+    /**
+     * 保持期間を過ぎた古いレコードを削除する
+     * 
+     * @param hostname ホスト名
+     * @throws IOException IO例外
+     */
+    public void deleteOldRecords(String hostname) throws IOException {
+        String filename = String.format("resource_history_%s.csv", hostname);
+
+        List<String> lines = readFromCsv(filename);
+
+        // ファイルが存在しない、または空の場合は何もしない
+        if (lines.isEmpty()) {
+            return;
+        }
+
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime thresholdTime = now.minusDays(retentionDays);
+
+        List<Object[]> recordsToKeep = new ArrayList<>();
+
+        for (String line : lines) {
+            String[] parts = line.split(",", -1);
+
+            // ヘッダー行はスキップ（上書き時に自動追加される）
+            if (parts[0].equals("Hostname")) {
+                continue;
+            }
+
+            if (parts.length >= 5) {
+                try {
+                    ZonedDateTime timestamp = ZonedDateTime.parse(parts[1]);
+
+                    // 保持期間内のデータのみを保持
+                    if (!timestamp.isBefore(thresholdTime)) {
+                        recordsToKeep.add(new Object[] {
+                                parts[0], // hostname
+                                parts[1], // timestamp
+                                parts[2], // cpuUsage
+                                parts[3], // memoryUsage
+                                parts[4] // instanceTypeChangeRequest
+                        });
+                    }
+                } catch (Exception e) {
+                    // パースエラー等は無視して次へ
+                    continue;
+                }
+            }
+        }
+
+        // 保持するレコードでCSVを上書き
+        overwriteToCsv(filename, HEADERS, recordsToKeep);
     }
 
 }

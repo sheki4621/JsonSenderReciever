@@ -34,6 +34,7 @@ public class ResourceInfoRepositoryTest {
 
         repository = new ResourceHistoryRepository();
         repository.setOutputDir(csvDir.toString());
+        repository.setRetentionDays(30);
     }
 
     @Test
