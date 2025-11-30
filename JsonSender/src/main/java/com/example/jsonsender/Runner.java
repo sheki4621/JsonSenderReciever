@@ -42,6 +42,7 @@ public class Runner implements CommandLineRunner {
 
         while (true) {
             try {
+                logger.debug("メトリクス収集ループを開始します");
                 Metrics metrics = metricsSendService.collect();
                 MetricsJson metricsJson = new MetricsJson(
                         IdUtils.getId(),
@@ -53,13 +54,14 @@ public class Runner implements CommandLineRunner {
 
                 tcpClient.sendJson(appConfig.getDist().getHostname(), appConfig.getDist().getPort(), metricsJson);
 
+                logger.debug("待機します: {}秒", appConfig.getNoticeIntervalSec());
                 Thread.sleep(appConfig.getNoticeIntervalSec() * 1000L);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
             } catch (Exception e) {
                 // Log error but continue loop
-                logger.error("Error in metrics collection loop, retrying in {} seconds",
+                logger.error("メトリクス収集ループでエラーが発生しました。{}秒後に再試行します",
                         appConfig.getErrorRetryIntervalSec(), e);
                 Thread.sleep(appConfig.getErrorRetryIntervalSec() * 1000L);
             }

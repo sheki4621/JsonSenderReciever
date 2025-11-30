@@ -48,6 +48,7 @@ public class TcpClient {
 
         for (int i = 0; i <= retryMax; i++) {
             try (Socket socket = new Socket()) {
+                logger.info("サーバー {}:{} への接続を試みます", host, port);
                 socket.connect(new java.net.InetSocketAddress(host, port), timeout * 1000);
                 try (PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
                     String json = objectMapper.writeValueAsString(data);

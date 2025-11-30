@@ -47,6 +47,8 @@ public class TcpServer implements Runnable {
                         BufferedReader in = new BufferedReader(
                                 new InputStreamReader(clientSocket.getInputStream()))) {
 
+                    logger.debug("クライアント接続を受け付けました: {}", clientSocket.getRemoteSocketAddress());
+
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {
                         logger.info("受信した生データ: {}", inputLine);
