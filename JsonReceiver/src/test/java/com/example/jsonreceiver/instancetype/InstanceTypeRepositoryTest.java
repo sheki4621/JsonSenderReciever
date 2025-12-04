@@ -59,7 +59,7 @@ class InstanceTypeRepositoryTest {
         assertTrue(Files.exists(filePath));
 
         // ファイルの内容を確認
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(filePath, java.nio.charset.Charset.forName("EUC-JP"));
         assertFalse(lines.isEmpty());
 
         // ヘッダーが存在することを確認
@@ -92,7 +92,7 @@ class InstanceTypeRepositoryTest {
 
         // ファイルの内容を確認
         Path filePath = Paths.get(TEST_OUTPUT_DIR, FILE_NAME);
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(filePath, java.nio.charset.Charset.forName("EUC-JP"));
 
         // 古いデータが存在しないことを確認（上書きされている）
         assertFalse(lines.contains("1,t2.xlarge,4,t2.medium,2,t2.micro,1"));
@@ -117,7 +117,7 @@ class InstanceTypeRepositoryTest {
         assertTrue(Files.exists(filePath));
 
         // ヘッダーのみが存在することを確認
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(filePath, java.nio.charset.Charset.forName("EUC-JP"));
         assertEquals(1, lines.size());
         assertEquals(
                 "InstanceTypeId,HighInstanceType,HighCpuCore,LowInstanceType,LowCpuCore,VeryLowInstanceType,VeryLowCpuCore",

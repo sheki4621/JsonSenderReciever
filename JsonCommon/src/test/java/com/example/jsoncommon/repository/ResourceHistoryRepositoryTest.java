@@ -47,7 +47,7 @@ public class ResourceHistoryRepositoryTest {
         // Assert
         Path csvFilePath = csvDir.resolve("resource_history_test-host.csv");
         assertTrue(Files.exists(csvFilePath));
-        List<String> lines = Files.readAllLines(csvFilePath);
+        List<String> lines = Files.readAllLines(csvFilePath, java.nio.charset.Charset.forName("EUC-JP"));
         assertTrue(lines.size() >= 2);
         assertEquals("Hostname,Timestamp,CpuUsage,MemoryUsage,InstanceTypeChangeRequest", lines.get(0));
         assertTrue(lines.get(1).startsWith("test-host,"));
@@ -92,7 +92,7 @@ public class ResourceHistoryRepositoryTest {
 
         // Assert: 12時間前のデータのみが残る
         Path csvFilePath = csvDir.resolve("resource_history_test-host.csv");
-        List<String> lines = Files.readAllLines(csvFilePath);
+        List<String> lines = Files.readAllLines(csvFilePath, java.nio.charset.Charset.forName("EUC-JP"));
 
         // ヘッダー + 1行のデータ
         assertEquals(2, lines.size());
@@ -118,7 +118,7 @@ public class ResourceHistoryRepositoryTest {
 
         // Assert: 全てのデータが残る
         Path csvFilePath = csvDir.resolve("resource_history_test-host.csv");
-        List<String> lines = Files.readAllLines(csvFilePath);
+        List<String> lines = Files.readAllLines(csvFilePath, java.nio.charset.Charset.forName("EUC-JP"));
 
         // ヘッダー + 3行のデータ
         assertEquals(4, lines.size());
@@ -141,7 +141,7 @@ public class ResourceHistoryRepositoryTest {
 
         // Assert: 古いデータは削除され、新しいデータのみが残る
         Path csvFilePath = csvDir.resolve("resource_history_test-host.csv");
-        List<String> lines = Files.readAllLines(csvFilePath);
+        List<String> lines = Files.readAllLines(csvFilePath, java.nio.charset.Charset.forName("EUC-JP"));
 
         // ヘッダー + 1行のデータ
         assertEquals(2, lines.size());

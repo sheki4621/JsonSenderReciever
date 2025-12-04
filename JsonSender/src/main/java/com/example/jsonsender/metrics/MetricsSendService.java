@@ -8,7 +8,7 @@ import com.example.jsoncommon.dto.ThresholdCsv;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
 import com.example.jsonsender.repository.ThresholdRepository;
 import com.example.jsoncommon.util.HostnameUtil;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -32,7 +32,7 @@ public class MetricsSendService {
 
     private final ThresholdRepository thresholdRepository;
     private final ResourceHistoryRepository resourceHistoryRepository;
-    private final ShellExecutor shellExecutor;
+    private final CommandExecutor shellExecutor;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${metrics.shell.path}")
@@ -67,7 +67,7 @@ public class MetricsSendService {
         try {
             logger.debug("メトリクス収集シェルを実行します: {}", metricsShellPath);
 
-            // String output = shellExecutor.executeShell(metricsShellPath,
+            // String output = shellExecutor.executeCommand(metricsShellPath,
             // Collections.emptyList(), shellTimeoutSeconds);
 
             // 提供されるまで仮の値で処理

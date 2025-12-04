@@ -4,11 +4,13 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 public abstract class CsvRepositoryBase {
@@ -47,7 +49,8 @@ public abstract class CsvRepositoryBase {
                 .setSkipHeaderRecord(fileExists)
                 .build();
 
-        try (FileWriter writer = new FileWriter(filePath.toFile(), true);
+        try (BufferedWriter writer = Files.newBufferedWriter(filePath, Charset.forName("EUC-JP"),
+                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
                 CSVPrinter printer = new CSVPrinter(writer, format)) {
             printer.printRecord(values);
         }
@@ -79,7 +82,8 @@ public abstract class CsvRepositoryBase {
                 .setHeader(headers)
                 .build();
 
-        try (FileWriter writer = new FileWriter(filePath.toFile(), false);
+        try (BufferedWriter writer = Files.newBufferedWriter(filePath, Charset.forName("EUC-JP"),
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
                 CSVPrinter printer = new CSVPrinter(writer, format)) {
             for (Object[] valueArray : values) {
                 printer.printRecord(valueArray);
@@ -102,6 +106,6 @@ public abstract class CsvRepositoryBase {
             return List.of();
         }
 
-        return Files.readAllLines(filePath);
+        return Files.readAllLines(filePath, Charset.forName("EUC-JP"));
     }
 }

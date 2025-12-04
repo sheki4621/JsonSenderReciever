@@ -3,7 +3,7 @@ package com.example.jsonsender.metrics;
 import com.example.jsoncommon.dto.InstanceTypeChangeRequest;
 import com.example.jsoncommon.dto.Metrics;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import com.example.jsonsender.repository.ThresholdRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,7 @@ class MetricsServiceTest {
     private ResourceHistoryRepository resourceHistoryRepository;
 
     @Mock
-    private ShellExecutor shellExecutor;
+    private CommandExecutor shellExecutor;
 
     private MetricsSendService metricsSendService;
 

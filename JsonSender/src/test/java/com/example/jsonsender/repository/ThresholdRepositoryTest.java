@@ -66,7 +66,7 @@ class ThresholdRepositoryTest {
         Path thresholdFile = tempDir.resolve(repository.getFilePath());
         assertTrue(Files.exists(thresholdFile), "しきい値ファイルが作成されていません");
 
-        String content = Files.readString(thresholdFile);
+        String content = Files.readString(thresholdFile, java.nio.charset.Charset.forName("EUC-JP"));
         assertTrue(content.contains("test-host"), "ホスト名が含まれていません");
         assertTrue(content.contains("80.0"), "CPU上限しきい値が含まれていません");
         assertTrue(content.contains("85.0"), "メモリ上限しきい値が含まれていません");

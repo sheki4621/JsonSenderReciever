@@ -3,7 +3,7 @@ package com.example.jsonreceiver.monitortarget;
 import com.example.jsoncommon.dto.UpJson;
 import com.example.jsoncommon.dto.DownJson;
 import com.example.jsonreceiver.instancetype.*;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class InstanceStatusService {
     private final AllInstanceRepository allInstanceRepository;
     private final InstanceTypeLinkRepository instanceTypeLinkRepository;
     private final InstanceTypeRepository instanceTypeRepository;
-    private final ShellExecutor shellExecutor;
+    private final CommandExecutor shellExecutor;
 
     @Value("${shell.agent.install.path:/path/to/install_agent.sh}")
     private String installAgentShellPath;
@@ -196,7 +196,7 @@ public class InstanceStatusService {
 
         try {
             // 外部シェルを実行 (引数:インスタンス名)
-            String output = shellExecutor.executeShell(
+            String output = shellExecutor.executeCommand(
                     installAgentShellPath,
                     List.of(instanceName),
                     shellTimeoutSeconds);
@@ -222,7 +222,7 @@ public class InstanceStatusService {
 
         try {
             // 外部シェルを実行 (引数:インスタンス名)
-            String output = shellExecutor.executeShell(
+            String output = shellExecutor.executeCommand(
                     uninstallAgentShellPath,
                     List.of(instanceName),
                     shellTimeoutSeconds);

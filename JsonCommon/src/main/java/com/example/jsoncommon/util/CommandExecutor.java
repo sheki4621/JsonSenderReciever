@@ -14,32 +14,32 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * 外部シェルスクリプトを実行するユーティリティクラス
+ * 外部コマンド・スクリプトを実行するユーティリティクラス
  */
 @Component
-public class ShellExecutor {
+public class CommandExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(ShellExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommandExecutor.class);
 
     /**
-     * 外部シェルスクリプトを実行し、標準出力を返します
+     * 外部コマンド・スクリプトを実行し、標準出力を返します
      *
-     * @param shellPath      シェルスクリプトのパス
-     * @param args           シェルスクリプトに渡す引数のリスト
+     * @param commandPath    コマンド・スクリプトのパス
+     * @param args           コマンドに渡す引数のリスト
      * @param timeoutSeconds タイムアウト時間（秒）
-     * @return シェルスクリプトの標準出力
-     * @throws IOException          シェル実行に失敗した場合、またはシェルが非ゼロで終了した場合
-     * @throws InterruptedException シェル実行中に中断された場合
+     * @return コマンドの標準出力
+     * @throws IOException          コマンド実行に失敗した場合、またはコマンドが非ゼロで終了した場合
+     * @throws InterruptedException コマンド実行中に中断された場合
      * @throws TimeoutException     タイムアウトした場合
      */
-    public String executeShell(String shellPath, List<String> args, int timeoutSeconds)
+    public String executeCommand(String commandPath, List<String> args, int timeoutSeconds)
             throws IOException, InterruptedException, TimeoutException {
 
-        logger.debug("シェルを実行します: {} (引数: {}, タイムアウト: {}秒)", shellPath, args, timeoutSeconds);
+        logger.debug("コマンドを実行します: {} (引数: {}, タイムアウト: {}秒)", commandPath, args, timeoutSeconds);
 
         // コマンドリストを構築
         List<String> command = new ArrayList<>();
-        command.add(shellPath);
+        command.add(commandPath);
         command.addAll(args);
 
         // ProcessBuilderを使用してプロセスを起動
@@ -50,8 +50,8 @@ public class ShellExecutor {
         try {
             process = processBuilder.start();
         } catch (IOException e) {
-            logger.error("シェルの起動に失敗しました: {}", shellPath, e);
-            throw new IOException("シェルの起動に失敗しました: " + shellPath, e);
+            logger.error("コマンドの起動に失敗しました: {}", commandPath, e);
+            throw new IOException("コマンドの起動に失敗しました: " + commandPath, e);
         }
 
         // 標準出力を読み取る
@@ -95,8 +95,8 @@ public class ShellExecutor {
             process.destroyForcibly();
             outputReader.interrupt();
             errorReader.interrupt();
-            logger.error("シェル実行がタイムアウトしました: {} ({}秒)", shellPath, timeoutSeconds);
-            throw new TimeoutException("シェル実行がタイムアウトしました: " + shellPath);
+            logger.error("コマンド実行がタイムアウトしました: {} ({}秒)", commandPath, timeoutSeconds);
+            throw new TimeoutException("コマンド実行がタイムアウトしました: " + commandPath);
         }
 
         // 出力読み取りスレッドの完了を待つ
@@ -107,20 +107,20 @@ public class ShellExecutor {
 
         // 標準エラーがあればログに記録
         if (errorOutput.length() > 0) {
-            logger.debug("シェルの標準エラー出力: {}", errorOutput.toString().trim());
+            logger.debug("コマンドの標準エラー出力: {}", errorOutput.toString().trim());
         }
 
         // 終了コードをチェック
         if (exitCode != 0) {
             String errorMessage = String.format(
-                    "シェルが非ゼロで終了しました: %s (終了コード: %d, エラー出力: %s)",
-                    shellPath, exitCode, errorOutput.toString().trim());
+                    "コマンドが非ゼロで終了しました: %s (終了コード: %d, エラー出力: %s)",
+                    commandPath, exitCode, errorOutput.toString().trim());
             logger.error(errorMessage);
             throw new IOException(errorMessage);
         }
 
         String result = output.toString();
-        logger.debug("シェル実行が成功しました: {} (出力サイズ: {} バイト)", shellPath, result.length());
+        logger.debug("コマンド実行が成功しました: {} (出力サイズ: {} バイト)", commandPath, result.length());
 
         return result;
     }

@@ -1,7 +1,7 @@
 package com.example.jsonsender.metrics;
 
 import com.example.jsoncommon.dto.Metrics;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import com.example.jsonsender.repository.ThresholdRepository;
 import com.example.jsoncommon.repository.ResourceHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ class MetricsSendServiceTest {
     private ResourceHistoryRepository resourceHistoryRepository;
 
     @Mock
-    private ShellExecutor shellExecutor;
+    private CommandExecutor shellExecutor;
 
     private MetricsSendService service;
 
@@ -54,7 +54,7 @@ class MetricsSendServiceTest {
     void testGetCpuMemoryUsage_正常系_シェル実行成功() throws Exception {
         // Arrange
         String shellOutput = "{\"CpuUsage\": 23.4, \"MemoryUsage\": 34.5}\n";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(shellOutput);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(shellOutput);
 
         // Act
         Metrics result = service.getCpuMemoryUsage();
@@ -70,7 +70,7 @@ class MetricsSendServiceTest {
     @Test
     void testGetCpuMemoryUsage_異常系_シェル実行失敗() throws Exception {
         // Arrange
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt()))
                 .thenThrow(new IOException("シェルが非ゼロで終了しました"));
 
         // Act
@@ -87,7 +87,7 @@ class MetricsSendServiceTest {
     @Test
     void testGetCpuMemoryUsage_異常系_タイムアウト() throws Exception {
         // Arrange
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt()))
                 .thenThrow(new TimeoutException("シェル実行がタイムアウトしました"));
 
         // Act
@@ -105,7 +105,7 @@ class MetricsSendServiceTest {
     void testGetCpuMemoryUsage_異常系_JSONパース失敗() throws Exception {
         // Arrange
         String invalidJson = "invalid json format";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(invalidJson);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(invalidJson);
 
         // Act
         Metrics result = service.getCpuMemoryUsage();
@@ -122,7 +122,7 @@ class MetricsSendServiceTest {
     void testGetCpuMemoryUsage_異常系_JSONフィールド不足() throws Exception {
         // Arrange
         String incompleteJson = "{\"CpuUsage\": 23.4}\n";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(incompleteJson);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(incompleteJson);
 
         // Act
         Metrics result = service.getCpuMemoryUsage();
@@ -138,7 +138,7 @@ class MetricsSendServiceTest {
     @Test
     void testGetCpuMemoryUsage_異常系_空の出力() throws Exception {
         // Arrange
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn("");
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn("");
 
         // Act
         Metrics result = service.getCpuMemoryUsage();
@@ -155,7 +155,7 @@ class MetricsSendServiceTest {
     void testGetCpuMemoryUsage_正常系_小数値() throws Exception {
         // Arrange
         String shellOutput = "{\"CpuUsage\": 99.9, \"MemoryUsage\": 0.1}\n";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(shellOutput);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(shellOutput);
 
         // Act
         Metrics result = service.getCpuMemoryUsage();

@@ -51,7 +51,7 @@ public class ResourceInfoRepositoryTest {
 
         // Assert
         assertTrue(Files.exists(csvFilePath));
-        List<String> lines = Files.readAllLines(csvFilePath);
+        List<String> lines = Files.readAllLines(csvFilePath, java.nio.charset.Charset.forName("EUC-JP"));
         assertTrue(lines.size() >= 2);
         assertEquals("Hostname,Timestamp,CpuUsage,MemoryUsage,InstanceTypeChangeRequest", lines.get(0));
         assertTrue(lines.get(1).startsWith("test-host,"));

@@ -3,7 +3,7 @@ package com.example.jsonreceiver.monitortarget;
 import com.example.jsoncommon.dto.UpJson;
 import com.example.jsoncommon.dto.DownJson;
 import com.example.jsonreceiver.instancetype.*;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +37,7 @@ public class InstanceStatusServiceTest {
         private InstanceTypeRepository instanceTypeRepository;
 
         @Mock
-        private ShellExecutor shellExecutor;
+        private CommandExecutor shellExecutor;
 
         private InstanceStatusService service;
 
@@ -62,7 +62,7 @@ public class InstanceStatusServiceTest {
                 when(instanceTypeRepository.findByInstanceTypeId(anyString())).thenReturn(Optional.empty());
 
                 // シェル実行をデフォルトで成功するようにモック
-                when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
+                when(shellExecutor.executeCommand(anyString(), anyList(), anyInt()))
                                 .thenReturn("Shell execution successful");
         }
 

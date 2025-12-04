@@ -4,7 +4,7 @@ import com.example.jsonreceiver.instancetype.AllInstanceCsv;
 import com.example.jsonreceiver.instancetype.InstanceTypeInfoCsv;
 import com.example.jsonreceiver.instancetype.AllInstanceRepository;
 import com.example.jsonreceiver.instancetype.InstanceTypeRepository;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class InformationCollectionServiceTest {
     private AllInstanceRepository allInstanceRepository;
 
     @Mock
-    private ShellExecutor shellExecutor;
+    private CommandExecutor shellExecutor;
 
     private ObjectMapper objectMapper;
 
@@ -60,7 +60,7 @@ class InformationCollectionServiceTest {
     void testCollectInstanceTypes_returnsNonEmptyList() throws Exception {
         // シェル実行時のJSONレスポンスをモック
         String jsonResponse = "[{\"instanceTypeId\":\"1\",\"highInstanceType\":\"t2.xlarge\",\"highCpuCore\":4,\"lowInstanceType\":\"t2.medium\",\"lowCpuCore\":2,\"veryLowInstanceType\":\"t2.micro\",\"veryLowCpuCore\":1}]";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // インスタンスタイプ一覧の取得
         List<InstanceTypeInfoCsv> result = service.collectInstanceTypes();
@@ -78,14 +78,14 @@ class InformationCollectionServiceTest {
         // CSV出力が呼ばれたことを確認
         verify(instanceTypeRepository, times(1)).saveAll(anyList());
         // シェルが実行されたことを確認
-        verify(shellExecutor, times(1)).executeShell(anyString(), anyList(), anyInt());
+        verify(shellExecutor, times(1)).executeCommand(anyString(), anyList(), anyInt());
     }
 
     @Test
     void testCollectSystemInfo_returnsNonEmptyList() throws Exception {
         // シェル実行時のJSONレスポンスをモック
         String jsonResponse = "[{\"hostname\":\"server01.example.com\",\"machineType\":\"ECS\",\"groupName\":\"GROUP-A\"}]";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // システム情報の取得
         List<AllInstanceCsv> result = service.collectSystemInfo();
@@ -105,14 +105,14 @@ class InformationCollectionServiceTest {
         // CSV出力が呼ばれたことを確認
         verify(allInstanceRepository, times(1)).saveAll(anyList());
         // シェルが実行されたことを確認
-        verify(shellExecutor, times(1)).executeShell(anyString(), anyList(), anyInt());
+        verify(shellExecutor, times(1)).executeCommand(anyString(), anyList(), anyInt());
     }
 
     @Test
     void testCollectInstanceTypes_containsExpectedTypes() throws Exception {
         // シェル実行時のJSONレスポンスをモック
         String jsonResponse = "[{\"instanceTypeId\":\"1\",\"highInstanceType\":\"t2.xlarge\",\"highCpuCore\":4,\"lowInstanceType\":\"t2.medium\",\"lowCpuCore\":2,\"veryLowInstanceType\":\"t2.micro\",\"veryLowCpuCore\":1}]";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // インスタンスタイプ一覧の取得
         List<InstanceTypeInfoCsv> result = service.collectInstanceTypes();
@@ -129,7 +129,7 @@ class InformationCollectionServiceTest {
     void testCollectSystemInfo_containsValidData() throws Exception {
         // シェル実行時のJSONレスポンスをモック
         String jsonResponse = "[{\"hostname\":\"server01.example.com\",\"machineType\":\"ECS\",\"groupName\":\"GROUP-A\"}]";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // システム情報の取得
         List<AllInstanceCsv> result = service.collectSystemInfo();
@@ -146,7 +146,7 @@ class InformationCollectionServiceTest {
     void testCollectInstanceTypes_continuesOnCsvError() throws Exception {
         // シェル実行時のJSONレスポンスをモック
         String jsonResponse = "[{\"instanceTypeId\":\"1\",\"highInstanceType\":\"t2.xlarge\",\"highCpuCore\":4,\"lowInstanceType\":\"t2.medium\",\"lowCpuCore\":2,\"veryLowInstanceType\":\"t2.micro\",\"veryLowCpuCore\":1}]";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // CSV出力時にエラーが発生するようモックを設定
         doThrow(new RuntimeException("CSV書き込みエラー"))
@@ -165,7 +165,7 @@ class InformationCollectionServiceTest {
     void testCollectSystemInfo_continuesOnCsvError() throws Exception {
         // シェル実行時のJSONレスポンスをモック
         String jsonResponse = "[{\"hostname\":\"server01.example.com\",\"machineType\":\"ECS\",\"groupName\":\"GROUP-A\"}]";
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt())).thenReturn(jsonResponse);
 
         // CSV出力時にエラーが発生するようモックを設定
         doThrow(new RuntimeException("CSV書き込みエラー"))
@@ -183,7 +183,7 @@ class InformationCollectionServiceTest {
     @Test
     void testCollectInstanceTypes_fallbackOnShellError() throws Exception {
         // シェル実行失敗時のモック
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt()))
                 .thenThrow(new RuntimeException("シェル実行エラー"));
 
         // フォールバックでサンプルデータが返されることを確認
@@ -200,7 +200,7 @@ class InformationCollectionServiceTest {
     @Test
     void testCollectSystemInfo_fallbackOnShellError() throws Exception {
         // シェル実行失敗時のモック
-        when(shellExecutor.executeShell(anyString(), anyList(), anyInt()))
+        when(shellExecutor.executeCommand(anyString(), anyList(), anyInt()))
                 .thenThrow(new RuntimeException("シェル実行エラー"));
 
         // フォールバックでサンプルデータが返されることを確認

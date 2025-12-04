@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.instancetype;
 
 import com.example.jsonreceiver.monitortarget.InstanceStatusRepository;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class InstanceTypeChangeService {
     private final AllInstanceRepository allInstanceRepository;
     private final InstanceTypeLinkRepository instanceTypeLinkRepository;
     private final InstanceTypeRepository instanceTypeRepository;
-    private final ShellExecutor shellExecutor;
+    private final CommandExecutor shellExecutor;
 
     private final ScheduledExecutorService monitoringExecutor = Executors.newScheduledThreadPool(5);
 
@@ -132,7 +132,7 @@ public class InstanceTypeChangeService {
 
         try {
             // 外部シェルを実行 (引数: ホスト名, インスタンスタイプ)
-            String output = shellExecutor.executeShell(
+            String output = shellExecutor.executeCommand(
                     executeInstanceTypeChangeShellPath,
                     List.of(hostname, instanceType),
                     shellTimeoutSeconds);
@@ -211,7 +211,7 @@ public class InstanceTypeChangeService {
 
         try {
             // 外部シェルを実行 (引数: ホスト名)
-            String output = shellExecutor.executeShell(
+            String output = shellExecutor.executeCommand(
                     checkInstanceTypeChangeShellPath,
                     List.of(hostname),
                     shellTimeoutSeconds);

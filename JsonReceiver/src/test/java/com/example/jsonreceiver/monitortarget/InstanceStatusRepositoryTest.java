@@ -51,7 +51,7 @@ public class InstanceStatusRepositoryTest {
 
                 // Assert
                 assertTrue(Files.exists(csvFilePath), "CSV file should exist");
-                List<String> lines = Files.readAllLines(csvFilePath);
+                List<String> lines = Files.readAllLines(csvFilePath, java.nio.charset.Charset.forName("EUC-JP"));
                 assertTrue(lines.size() >= 2, "CSV should have header and at least one data line");
                 assertEquals(
                                 "HOSTNAME,MACHINE_TYPE,REGION,CURRENT_TYPE,TYPE_ID,TYPE_HIGH,TYPE_SMALL_STANDARD,TYPE_MICRO,LASTUPDATE,AGENT_STATUS,AGENT_VERSION,AGENT_LAST_NOTICE_TIME",

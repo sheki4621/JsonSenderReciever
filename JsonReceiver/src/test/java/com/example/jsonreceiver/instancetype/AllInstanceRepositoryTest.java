@@ -59,7 +59,7 @@ class AllInstanceRepositoryTest {
         assertTrue(Files.exists(filePath));
 
         // ファイルの内容を確認
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(filePath, java.nio.charset.Charset.forName("EUC-JP"));
         assertFalse(lines.isEmpty());
 
         // ヘッダーが存在することを確認
@@ -89,7 +89,7 @@ class AllInstanceRepositoryTest {
 
         // ファイルの内容を確認
         Path filePath = Paths.get(TEST_OUTPUT_DIR, FILE_NAME);
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(filePath, java.nio.charset.Charset.forName("EUC-JP"));
 
         // 古いデータが存在しないことを確認（上書きされている）
         assertFalse(lines.stream().anyMatch(line -> line.contains("server01.example.com")));
@@ -114,7 +114,7 @@ class AllInstanceRepositoryTest {
         assertTrue(Files.exists(filePath));
 
         // ヘッダーのみが存在することを確認
-        List<String> lines = Files.readAllLines(filePath);
+        List<String> lines = Files.readAllLines(filePath, java.nio.charset.Charset.forName("EUC-JP"));
         assertEquals(1, lines.size());
         assertEquals("HOSTNAME,MACHINE_TYPE,GROUP_NAME", lines.get(0));
     }

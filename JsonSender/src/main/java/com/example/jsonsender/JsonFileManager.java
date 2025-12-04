@@ -11,10 +11,15 @@ import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -86,7 +91,12 @@ public class JsonFileManager {
             String filename = String.format("%s_%s.json", timestamp, noticeType);
             Path path = Paths.get(appConfig.getJson().getOutputDir(), filename);
 
-            objectMapper.writeValue(path.toFile(), node);
+            // Write JSON with EUC-JP encoding
+            try (BufferedWriter writer = Files.newBufferedWriter(path, Charset.forName("EUC-JP"),
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                String jsonString = objectMapper.writeValueAsString(node);
+                writer.write(jsonString);
+            }
             logger.warn("送信失敗したJSONをファイルに保存しました: {}", path);
         } catch (IOException e) {
             logger.error("JSONファイルの保存に失敗しました", e);
@@ -141,13 +151,11 @@ public class JsonFileManager {
 
             // Try to resend
             try {
-                // Read JSON to check validity/type if needed, but here we just read as Object
-                // or specific type if known.
-                // Since we don't know the exact type easily without metadata, we might need to
-                // read as Map or JsonNode.
-                // However, TcpClient.sendJson takes Object.
-                // Let's read as JsonNode to be generic.
-                com.fasterxml.jackson.databind.JsonNode jsonNode = objectMapper.readTree(file);
+                // Read JSON with EUC-JP encoding
+                com.fasterxml.jackson.databind.JsonNode jsonNode;
+                try (BufferedReader reader = Files.newBufferedReader(file.toPath(), Charset.forName("EUC-JP"))) {
+                    jsonNode = objectMapper.readTree(reader);
+                }
 
                 // We need to send it. We should use a method in TcpClient that DOES NOT save on
                 // failure,

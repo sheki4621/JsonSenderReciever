@@ -4,7 +4,7 @@ import com.example.jsonreceiver.instancetype.AllInstanceCsv;
 import com.example.jsonreceiver.instancetype.InstanceTypeInfoCsv;
 import com.example.jsonreceiver.instancetype.AllInstanceRepository;
 import com.example.jsonreceiver.instancetype.InstanceTypeRepository;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class InformationCollectionService {
 
     private final InstanceTypeRepository instanceTypeRepository;
     private final AllInstanceRepository allInstanceRepository;
-    private final ShellExecutor shellExecutor;
+    private final CommandExecutor shellExecutor;
     private final ObjectMapper objectMapper;
 
     @Value("${info.collection.retry.max-attempts:3}")
@@ -148,7 +148,7 @@ public class InformationCollectionService {
 
         try {
             // 外部シェルを実行
-            String output = shellExecutor.executeShell(
+            String output = shellExecutor.executeCommand(
                     instanceTypeShellPath,
                     List.of(),
                     shellTimeoutSeconds);
@@ -184,7 +184,7 @@ public class InformationCollectionService {
 
         try {
             // 外部シェルを実行
-            String output = shellExecutor.executeShell(
+            String output = shellExecutor.executeCommand(
                     systemInfoShellPath,
                     List.of(),
                     shellTimeoutSeconds);

@@ -1,7 +1,7 @@
 package com.example.jsonreceiver.instancetype;
 
 import com.example.jsonreceiver.monitortarget.InstanceStatusRepository;
-import com.example.jsoncommon.util.ShellExecutor;
+import com.example.jsoncommon.util.CommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -29,7 +29,7 @@ public class InstanceTypeChangeServiceTest {
     private InstanceTypeRepository instanceTypeRepository;
 
     @Mock
-    private ShellExecutor shellExecutor;
+    private CommandExecutor shellExecutor;
 
     private InstanceTypeChangeService service;
 
@@ -52,11 +52,11 @@ public class InstanceTypeChangeServiceTest {
 
         // シェル実行をデフォルトで成功するようにモック
         // インスタンスタイプ変更実行用のシェル
-        when(shellExecutor.executeShell(eq("/path/to/change.sh"), anyList(), anyInt()))
+        when(shellExecutor.executeCommand(eq("/path/to/change.sh"), anyList(), anyInt()))
                 .thenReturn("Success");
 
         // インスタンスタイプ変更完了確認用のシェル（"COMPLETED"を返す）
-        when(shellExecutor.executeShell(eq("/path/to/check.sh"), anyList(), anyInt()))
+        when(shellExecutor.executeCommand(eq("/path/to/check.sh"), anyList(), anyInt()))
                 .thenReturn("COMPLETED");
     }
 
